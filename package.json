@@ -1,0 +1,14 @@
+{
+  "name": "ygb-root",
+  "version": "1.0.0",
+  "description": "YGB — Your Gym Buddy (MERN)",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"cd backend && npx nodemon server.js\" \"cd frontend && npm start\"",
+    "start:backend": "cd backend && node server.js",
+    "start:frontend": "cd frontend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

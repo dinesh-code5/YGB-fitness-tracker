@@ -1,0 +1,49 @@
+# 🔐 Environment variables
+.env
+.env.*
+!.env.example
+
+# 📦 Node modules (all folders)
+node_modules/
+**/node_modules/
+
+# 🏗 Build outputs
+dist/
+build/
+frontend/build/
+frontend/dist/
+
+# 🧾 Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🧠 OS files
+.DS_Store
+Thumbs.db
+
+# 🧑‍💻 Editor settings
+.vscode/
+.idea/
+
+# 🐳 Docker
+docker-compose.override.yml
+
+# 🧪 Coverage
+coverage/
+
+# 🧰 Cache
+.cache/
+.parcel-cache/
+
+# ⚡ Vite / React
+frontend/.vite/
+
+# 🔑 Secrets & keys
+*.pem
+*.key
+
+# 🧬 Misc
+*.tsbuildinfo
