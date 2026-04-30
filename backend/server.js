@@ -10,6 +10,11 @@ dotenv.config();
 
 const app = express();
 
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || true, // true reflects the request origin
@@ -58,8 +63,6 @@ app.use((err, req, res, next) => {
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 });
-
-const PORT = process.env.PORT || 5000;
 
 // Sync database and start server
 sequelize.authenticate()
