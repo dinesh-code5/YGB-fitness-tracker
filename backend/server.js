@@ -12,9 +12,6 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || true, // true reflects the request origin
@@ -31,7 +28,6 @@ const csrfProtection = csrf({
     sameSite: 'lax'
   }
 });
-
 // Routes
 app.get('/api/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() });

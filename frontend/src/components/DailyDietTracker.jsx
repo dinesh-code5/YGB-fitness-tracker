@@ -39,8 +39,9 @@ export default function DailyDietTracker() {
   const total = entries.reduce((acc, curr) => ({
     calories: acc.calories + Number(curr.calories),
     protein: acc.protein + Number(curr.protein),
+    carbs: acc.carbs + Number(curr.carbs || 0),
     fats: acc.fats + Number(curr.fats)
-  }), { calories: 0, protein: 0, fats: 0 });
+  }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 
   return (
     <div className="card p-6 space-y-6 hover:border-brand/40 hover:shadow-glow-sm transition-all duration-300 group/diet">
@@ -52,17 +53,29 @@ export default function DailyDietTracker() {
       </div>
       
       {/* Totals Summary */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-2">
         {[ 
           {l:'Calories', v:Math.round(total.calories), u: 'kcal'}, 
           {l:'Protein', v:Math.round(total.protein), u: 'g'},
+          {l:'Carbs', v:Math.round(total.carbs), u: 'g'},
           {l:'Fats', v:Math.round(total.fats), u: 'g'} 
         ].map(s => (
-          <div key={s.l} className="card-elevated p-4 text-center border-brand/10">
-            <p className="text-brand font-black text-2xl">{s.v}</p>
-            <p className="text-[9px] uppercase font-bold text-muted">{s.l} ({s.u})</p>
+          <div key={s.l} className="card-elevated p-3 text-center border-brand/10">
+            <p className="text-brand font-black text-xl">{s.v}</p>
+            <p className="text-[8px] uppercase font-bold text-muted">{s.l}</p>
           </div>
         ))}
+      </div>
+
+      {/* Water Tip */}
+      <div className="bg-brand/5 border border-brand/20 rounded-xl p-3 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center text-brand flex-shrink-0">
+          <FiZap />
+        </div>
+        <div>
+          <p className="text-[10px] font-black uppercase text-brand tracking-widest">Hydration Goal</p>
+          <p className="text-[11px] text-[var(--text-primary)] font-medium">Drink at least 3-4L of water today for optimal recovery.</p>
+        </div>
       </div>
 
       {/* List */}
@@ -77,7 +90,9 @@ export default function DailyDietTracker() {
           <div key={e.id} className="flex items-center justify-between p-3 bg-[var(--surface-elevated)] rounded-xl border border-[var(--surface-border)]">
             <div>
               <p className="text-sm font-bold text-[var(--text-primary)]">{e.name}</p>
-              <p className="text-[10px] text-muted font-bold">{Math.round(e.calories)} kcal | P: {Math.round(e.protein)}g | F: {Math.round(e.fats)}g</p>
+              <p className="text-[10px] text-muted font-bold">
+                {Math.round(e.calories)} kcal | P: {Math.round(e.protein)}g | C: {Math.round(e.carbs || 0)}g | F: {Math.round(e.fats)}g
+              </p>
             </div>
             <button onClick={() => handleDelete(e.id)} className="text-muted hover:text-red-400 p-2 transition-colors"><FiTrash2 /></button>
           </div>

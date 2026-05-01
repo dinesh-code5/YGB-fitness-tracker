@@ -309,6 +309,20 @@ export default function DietCalculator() {
                 <MacroRing label="Fats" grams={result.macros.fats} pct={(result.macros.fats * 9 / result.targetCalories) * 100} color="var(--accent)" icon={FiDroplet} />
               </div>
 
+              {/* Water Recommendation Banner */}
+              <div className="bg-gradient-to-r from-blue-500/20 to-brand/5 border border-brand/20 rounded-[2rem] p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-glow-sm">
+                <div className="w-16 h-16 rounded-2xl bg-brand/20 flex items-center justify-center text-3xl text-brand flex-shrink-0 animate-pulse">
+                  <FiDroplet />
+                </div>
+                <div className="text-center sm:text-left">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">Optimize Your Hydration</h3>
+                  <p className="text-sm text-muted mt-1 leading-relaxed">
+                    Based on your activity level, aim for <span className="text-brand font-bold">{result.waterIntake} - {Math.round((result.waterIntake + 1) * 10) / 10} Liters</span> of water daily. 
+                    Proper hydration increases metabolism by up to 30% and significantly improves muscle recovery.
+                  </p>
+                </div>
+              </div>
+
               {/* Meal Plan Grid */}
               <div className="grid md:grid-cols-2 gap-4">
                 {Object.entries(result.mealPlan).map(([key, meal], i) => {

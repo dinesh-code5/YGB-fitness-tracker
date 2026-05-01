@@ -23,6 +23,7 @@ import DietCalculator from './pages/DietCalculator';
 import WorkoutPlan from './pages/WorkoutPlan';
 import Profile from './pages/Profile';
 import Social from './pages/Social';
+import UserProfile from './pages/UserProfile';
 import ProgressPhotos from './pages/ProgressPhotos';
 import FoodLibrary from './pages/FoodLibrary';
 
@@ -99,6 +100,9 @@ const AppRoutes = () => {
       } />
       <Route path="/social" element={
         <ProtectedRoute><AppShell><Social /></AppShell></ProtectedRoute>
+      } />
+      <Route path="/u/:username" element={
+        <ProtectedRoute><AppShell><UserProfile /></AppShell></ProtectedRoute>
       } />
 
       <Route path="*" element={<Navigate to="/" replace />} />
