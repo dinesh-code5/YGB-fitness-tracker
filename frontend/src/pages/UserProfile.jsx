@@ -101,13 +101,15 @@ const GymBarChart = ({ workouts }) => {
     if (weekObj) weekObj.count++;
   });
 
+  const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
+
   const data = {
     labels: last6Weeks.map(l => l.label),
     datasets: [
       {
         label: 'Sessions',
         data: last6Weeks.map(l => l.count),
-        backgroundColor: '#00D4FF',
+        backgroundColor: themeColor,
         borderRadius: 8,
         barThickness: 20,
       },
@@ -121,7 +123,7 @@ const GymBarChart = ({ workouts }) => {
       legend: { display: false },
       tooltip: {
         backgroundColor: '#1A1A24',
-        titleColor: '#00D4FF',
+        titleColor: themeColor,
         bodyColor: '#fff',
         padding: 12,
         cornerRadius: 12,
@@ -176,115 +178,158 @@ export default function UserProfile() {
   if (!profile) return null;
 
   return (
-    <div className="page-container max-w-xl pb-24">
-      {/* Back Button */}
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted hover:text-brand transition-colors mb-8 group">
-        <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-        <span className="text-sm font-medium">Back to Community</span>
-      </button>
-
-      {/* Profile Header */}
-      <div className="flex items-center gap-6 mb-12">
-        <div className="w-24 h-24 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-4xl font-light text-brand shadow-glow-sm">
-          {profile.name?.charAt(0)}
-        </div>
-        <div>
-          <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)] leading-none">{profile.name}</h1>
-             {profile.isCoach && <span className="badge-brand">Coach</span>}
+    <div className="pb-24 animate-fade-in space-y-8">
+      {/* ── Back Button ────────────────────────────────────────── */}
+      <div className="max-w-xl mx-auto px-4">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted hover:text-brand transition-all group">
+          <div className="w-8 h-8 rounded-lg bg-[var(--surface-elevated)] border border-[var(--surface-border)] flex items-center justify-center group-hover:border-brand/40">
+            <FiArrowLeft className="group-hover:-translate-x-0.5 transition-transform" />
           </div>
-          <p className="text-base text-brand font-mono font-medium mt-2">@{profile.username}</p>
-        </div>
+          <span className="text-[10px] font-black uppercase tracking-widest">Community</span>
+        </button>
       </div>
 
-      {/* Bio Section */}
-      {profile.bio && (
-        <div className="mb-12 px-1">
-          <p className="text-sm text-muted leading-relaxed font-light italic">"{profile.bio}"</p>
-        </div>
-      )}
+      {/* ── Profile Header ────────────────────────────────────────── */}
+      <div className="relative px-4">
+        <div className="max-w-xl mx-auto">
+          <div className="card p-8 relative overflow-hidden group border-brand/10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-16 -mt-16" />
+            
+            <div className="relative z-10 flex flex-col items-center text-center">
+              {/* Avatar Section */}
+              <div className="relative mb-6">
+                <div className="absolute inset-0 bg-brand/20 rounded-full blur-2xl" />
+                <div className="relative w-28 h-28 rounded-full flex items-center justify-center text-5xl font-black text-brand transition-all duration-500
+                  bg-[var(--surface-elevated)] border-2 border-brand shadow-xl">
+                  {profile.name?.charAt(0)}
+                </div>
+              </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-12">
-        {[
-          { label: 'Current Streak', value: `${profile.currentStreak || 0} Days`, sub: 'Active momentum' },
-          { label: 'Personal Best', value: `${profile.longestStreak || 0} Days`, sub: 'Longest streak' },
-          { label: 'Training Level', value: profile.experience || 'Beginner', sub: 'Experience' },
-          { label: 'Athlete Goal', value: profile.goal || 'Maintain', sub: 'Primary focus' },
-        ].map(s => (
-          <div key={s.label} className="p-5 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] hover:bg-brand/5 hover:border-brand/30 hover:shadow-glow-sm transition-all duration-300 group cursor-default">
-            <p className="text-[10px] font-semibold text-muted uppercase tracking-widest mb-1 group-hover:text-brand transition-colors">{s.label}</p>
-            <p className="text-lg font-medium text-[var(--text-primary)] tracking-tight capitalize">{s.value}</p>
-            <p className="text-[10px] text-muted/60 mt-1">{s.sub}</p>
-          </div>
-        ))}
-      </div>
+              {/* User Identity */}
+              <div className="space-y-1 mb-6">
+                 <div className="flex items-center justify-center gap-3">
+                   <h1 className="font-display text-4xl tracking-wider text-[var(--text-primary)] leading-tight">{profile.name}</h1>
+                   {profile.isCoach && (
+                     <span className="px-2 py-0.5 rounded bg-brand text-[#0A0A0F] text-[8px] font-black uppercase tracking-tighter">Coach</span>
+                   )}
+                 </div>
+                 <p className="text-xs text-brand font-black uppercase tracking-[0.25em]">@{profile.username}</p>
+              </div>
 
-      {/* Momentum Tracker */}
-      <div className="mb-12">
-        <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)] mb-6 px-1 uppercase flex items-center gap-2">
-          <div className="w-1 h-3 bg-brand rounded-full" />
-          Training Momentum
-        </h3>
-        <div className="p-6 rounded-3xl bg-[var(--surface-elevated)]/20 border border-[var(--surface-border)]">
-          <WeeklyBlocks workouts={profile.workoutHistory || []} />
-        </div>
-      </div>
-
-      {/* Weekly Attendance */}
-      <div className="mb-12">
-        <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)] mb-6 px-1 uppercase flex items-center gap-2">
-          <div className="w-1 h-3 bg-brand rounded-full" />
-          Recent Consistency
-        </h3>
-        <div className="p-8 rounded-3xl bg-[var(--surface-elevated)]/20 border border-[var(--surface-border)]">
-          <GymBarChart workouts={profile.workoutHistory || []} />
-        </div>
-      </div>
-
-      {/* Evolution / Progress Photos */}
-      {profile.progressPhotos && profile.progressPhotos.length > 0 && (
-        <div className="mb-12">
-          <h3 className="text-sm font-semibold tracking-tight text-[var(--text-primary)] mb-6 px-1 uppercase flex items-center gap-2">
-            <div className="w-1 h-3 bg-brand rounded-full" />
-            Evolution Journey
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            {profile.progressPhotos.slice(0, 9).reverse().map((photo, idx) => (
-              <div key={idx} 
-                onClick={() => setZoomPhoto(photo)}
-                className="aspect-[3/4] rounded-xl bg-[var(--surface-elevated)] overflow-hidden cursor-pointer hover:opacity-80 transition-all border border-[var(--surface-border)]">
-                {photo?.imageUrl && (
-                  <img src={photo.imageUrl} alt="Progress" className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-500" />
+              {/* Badges */}
+              <div className="flex flex-wrap justify-center gap-2">
+                <span className="px-3 py-1 rounded-lg bg-brand/10 border border-brand/20 text-[10px] font-black uppercase text-brand tracking-widest">{profile.goal}</span>
+                <span className="px-3 py-1 rounded-lg bg-[var(--surface-elevated)] border border-[var(--surface-border)] text-[10px] font-black uppercase text-muted tracking-widest">{profile.experience}</span>
+                {profile.currentStreak > 0 && (
+                  <span className="px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-1.5">
+                    <FiZap className="text-[10px]" /> {profile.currentStreak} Day Streak
+                  </span>
                 )}
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Joined Date */}
-      <div className="pt-10 border-t border-[var(--surface-border)] text-center">
-        <p className="text-[10px] text-muted font-medium uppercase tracking-widest">
-          Member Since {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'recently'}
-        </p>
       </div>
 
-      {/* Photo Zoom Modal */}
-      {zoomPhoto && (
-        <div className="fixed inset-0 bg-black/95 z-[110] flex items-center justify-center p-6 backdrop-blur-xl" onClick={() => setZoomPhoto(null)}>
-          <div className="relative max-w-lg w-full bg-[var(--surface-card)] rounded-3xl overflow-hidden border border-white/10 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <img src={zoomPhoto.imageUrl} alt="Zoomed" className="w-full h-auto" />
-            <div className="absolute top-6 right-6">
-              <button className="w-10 h-10 bg-black/50 hover:bg-black/80 rounded-2xl flex items-center justify-center text-white text-2xl transition-all" onClick={() => setZoomPhoto(null)}>×</button>
+      {/* ── Content Body ────────────────────────────────────────────────── */}
+      <div className="page-container max-w-xl pt-0">
+        
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-10">
+          {[
+            { label: 'Current Streak', value: `${profile.currentStreak || 0}d`, icon: '🔥' },
+            { label: 'All-Time Best', value: `${profile.longestStreak || 0}d`, icon: '🏆' },
+            { label: 'Training Level', value: profile.experience || 'Beginner', icon: '💪' },
+            { label: 'Primary Goal', value: profile.goal || 'Maintain', icon: '🎯' },
+          ].map(s => (
+            <div key={s.label} className="card p-5 group hover:border-brand/30 transition-all">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-lg">{s.icon}</span>
+                <span className="text-[9px] font-black uppercase text-muted tracking-widest">{s.label}</span>
+              </div>
+              <p className="text-xl font-black text-[var(--text-primary)] group-hover:text-brand transition-colors capitalize">{s.value}</p>
             </div>
-            {zoomPhoto.weight && (
-              <div className="p-6 bg-[var(--surface-card)]">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xl font-semibold text-brand">{zoomPhoto.weight} KG</p>
-                  <p className="text-[10px] font-medium text-muted uppercase tracking-widest">{new Date(zoomPhoto.date).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</p>
+          ))}
+        </div>
+
+        {/* Bio Section */}
+        {profile.bio && (
+          <div className="mb-10 card p-6 border-dashed bg-transparent">
+             <div className="flex items-center gap-2 mb-3 text-muted">
+               <FiUser className="text-xs" />
+               <span className="text-[10px] font-black uppercase tracking-widest">About Athlete</span>
+             </div>
+             <p className="text-lg text-[var(--text-secondary)] leading-relaxed italic">"{profile.bio}"</p>
+          </div>
+        )}
+
+        {/* Training Consistency */}
+        <div className="mb-10">
+          <h3 className="section-title mb-5 flex items-center gap-2">
+            <div className="heading-accent" />
+            Training Momentum
+          </h3>
+          <div className="card p-6 bg-gradient-to-b from-[var(--surface-elevated)]/20 to-transparent">
+            <WeeklyBlocks workouts={profile.workoutHistory || []} />
+          </div>
+        </div>
+
+        {/* Activity Chart */}
+        <div className="mb-10">
+          <h3 className="section-title mb-5 flex items-center gap-2">
+            <div className="heading-accent" />
+            Recent Consistency
+          </h3>
+          <div className="card p-6">
+            <GymBarChart workouts={profile.workoutHistory || []} />
+          </div>
+        </div>
+
+        {/* Evolution Journey */}
+        {profile.progressPhotos && profile.progressPhotos.length > 0 && (
+          <div className="mb-10">
+            <h3 className="section-title mb-5 flex items-center gap-2">
+              <div className="heading-accent" />
+              Evolution Journey
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              {profile.progressPhotos.slice(0, 9).reverse().map((photo, idx) => (
+                <div key={idx} 
+                  onClick={() => setZoomPhoto(photo)}
+                  className="aspect-[3/4] rounded-xl bg-[var(--surface-elevated)] overflow-hidden cursor-pointer hover:scale-[1.02] transition-all border border-[var(--surface-border)] group">
+                  {photo?.imageUrl && (
+                    <img src={photo.imageUrl} alt="Progress" className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-500" />
+                  )}
                 </div>
-                {zoomPhoto.note && <p className="text-sm text-[var(--text-primary)] font-light leading-relaxed">"{zoomPhoto.note}"</p>}
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Joined Date */}
+        <div className="pt-10 border-t border-[var(--surface-border)] text-center">
+          <p className="text-[9px] text-muted font-black uppercase tracking-[0.2em] opacity-40">
+            Member Since {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) : 'recently'}
+          </p>
+        </div>
+
+      </div>
+
+      {/* ── Photo Zoom Modal ────────────────────────────────────────── */}
+      {zoomPhoto && (
+        <div className="fixed inset-0 bg-[#0A0A0F]/95 z-[110] flex items-center justify-center p-6 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setZoomPhoto(null)}>
+          <div className="relative max-w-lg w-full bg-[var(--surface-card)] rounded-3xl overflow-hidden border border-white/5 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <img src={zoomPhoto.imageUrl} alt="Zoomed" className="w-full h-auto" />
+            <button className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/80 rounded-2xl flex items-center justify-center text-white text-xl transition-all" onClick={() => setZoomPhoto(null)}>
+              <FiX />
+            </button>
+            {zoomPhoto.weight && (
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-2xl font-black text-brand tracking-tighter">{zoomPhoto.weight} KG</p>
+                  <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">{new Date(zoomPhoto.date).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</p>
+                </div>
+                {zoomPhoto.note && <p className="text-lg text-[var(--text-primary)] font-light leading-relaxed italic opacity-80">"{zoomPhoto.note}"</p>}
               </div>
             )}
           </div>

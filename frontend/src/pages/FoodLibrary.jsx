@@ -91,7 +91,7 @@ export default function FoodLibrary() {
             <div key={f.id} className="card p-5 flex items-center justify-between hover:border-brand/40 transition-all group relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-brand/10 group-hover:bg-brand transition-all" />
               <div className="flex-1 min-w-0 pr-4">
-                <p className="font-black text-sm text-[var(--text-primary)] truncate uppercase tracking-tight">{f.name}</p>
+                <p className="font-black text-lg text-[var(--text-primary)] truncate uppercase tracking-tight">{f.name}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] text-brand font-black uppercase tracking-widest">{f.category}</span>
                   <span className="w-1 h-1 rounded-full bg-muted" />
@@ -127,7 +127,7 @@ export default function FoodLibrary() {
           ))}
           {filtered.length === 0 && (
             <div className="col-span-full py-20 text-center card border-dashed">
-              <p className="text-muted text-sm font-medium">No foods found matching your search</p>
+              <p className="text-muted text-lg font-medium">No foods found matching your search</p>
             </div>
           )}
         </div>

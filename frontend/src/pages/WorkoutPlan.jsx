@@ -65,7 +65,7 @@ const ExerciseGuide = ({ ex, onClose }) => (
           ))}
         </div>
 
-        {ex.description && <p className="text-sm text-muted">{ex.description}</p>}
+        {ex.description && <p className="text-lg text-muted">{ex.description}</p>}
 
         {ex.youtubeId && (
           <div className="rounded-xl overflow-hidden bg-[#0F0F14]" style={{ aspectRatio: '16/9' }}>
@@ -81,10 +81,10 @@ const ExerciseGuide = ({ ex, onClose }) => (
 
         {ex.cues?.length > 0 && (
           <div>
-            <p className="text-sm font-semibold text-[#F0F0F5] mb-2">✅ Key Cues</p>
+            <p className="text-lg font-semibold text-[#F0F0F5] mb-2">✅ Key Cues</p>
             <ul className="space-y-1.5">
               {ex.cues.map((c, i) => (
-                <li key={i} className="flex gap-2 text-sm text-muted">
+                <li key={i} className="flex gap-2 text-lg text-muted">
                   <span className="text-brand">→</span>
                   {c}
                 </li>
@@ -95,10 +95,10 @@ const ExerciseGuide = ({ ex, onClose }) => (
 
         {ex.mistakes?.length > 0 && (
           <div>
-            <p className="text-sm font-semibold text-[#F0F0F5] mb-2">⚠️ Common Mistakes</p>
+            <p className="text-lg font-semibold text-[#F0F0F5] mb-2">⚠️ Common Mistakes</p>
             <ul className="space-y-1.5">
               {ex.mistakes.map((m, i) => (
-                <li key={i} className="flex gap-2 text-sm text-muted">
+                <li key={i} className="flex gap-2 text-lg text-muted">
                   <span className="text-red-400">✗</span>
                   {m}
                 </li>
@@ -149,7 +149,7 @@ const TemplateCard = ({ template, isSystem, onUse, onEdit, onDelete }) => {
                 )}
               </div>
 
-              <h3 className="font-semibold text-[#F0F0F5] text-sm leading-tight">{template.name}</h3>
+              <h3 className="font-semibold text-[#F0F0F5] text-lg leading-tight">{template.name}</h3>
 
               {template.description && (
                 <p className="text-xs text-muted mt-1 leading-relaxed">{template.description}</p>
@@ -218,7 +218,7 @@ const TemplateCard = ({ template, isSystem, onUse, onEdit, onDelete }) => {
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#F0F0F5] group-hover:text-brand transition-colors truncate">
+                  <p className="text-lg font-medium text-[#F0F0F5] group-hover:text-brand transition-colors truncate">
                     {ex.name}
                   </p>
                   <p className="text-xs text-muted">
@@ -339,7 +339,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           <div>
             <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">Template Name</label>
             <input
-              className="input-field h-12 text-sm"
+              className="input-field h-12 text-lg"
               placeholder="e.g. My Push Day"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -351,7 +351,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
               Description <span className="text-[10px] normal-case opacity-60">(optional)</span>
             </label>
             <textarea
-              className="input-field text-sm h-20 pt-3 resize-none"
+              className="input-field text-lg h-20 pt-3 resize-none"
               placeholder="Brief description of the workout goals..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -361,7 +361,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">Focus Type</label>
-              <select className="input-field text-sm h-12" value={workoutType} onChange={(e) => setWorkoutType(e.target.value)}>
+              <select className="input-field text-lg h-12" value={workoutType} onChange={(e) => setWorkoutType(e.target.value)}>
                 {WORKOUT_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -374,7 +374,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
               <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">Est. Minutes</label>
               <input
                 type="number"
-                className="input-field text-sm h-12"
+                className="input-field text-lg h-12"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
               />
@@ -386,7 +386,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
             <div className="relative mb-3">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
-                className="input-field pl-10 text-sm h-11 border-brand/20 focus:border-brand/50"
+                className="input-field pl-10 text-lg h-11 border-brand/20 focus:border-brand/50"
                 placeholder="Search library..."
                 value={exSearch}
                 onChange={(e) => setExSearch(e.target.value)}
@@ -409,7 +409,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
                     {isSelected(ex.id) && <FiCheck className="text-[#0F0F14] text-xs font-bold" />}
                   </div>
                   <div className="flex-1 min-w-0" onClick={(e) => showGuide(e, ex)}>
-                    <p className="text-sm font-medium text-[#F0F0F5] truncate hover:text-brand transition-colors cursor-help">{ex.name}</p>
+                    <p className="text-lg font-medium text-[#F0F0F5] truncate hover:text-brand transition-colors cursor-help">{ex.name}</p>
                     <p className="text-[10px] text-muted font-bold uppercase tracking-tight opacity-70">{ex.muscleGroup}</p>
                   </div>
                 </button>
@@ -425,7 +425,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
                   <div key={i} className="bg-[var(--surface-elevated)]/40 border border-[#2A2A3A] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex-1 min-w-0 flex items-center gap-2 cursor-help" onClick={(e) => showGuide(e, ex)}>
                       <div className="w-1.5 h-1.5 rounded-full bg-brand" />
-                      <p className="text-sm font-medium text-[#F0F0F5] truncate hover:text-brand transition-colors">{ex.name}</p>
+                      <p className="text-lg font-medium text-[#F0F0F5] truncate hover:text-brand transition-colors">{ex.name}</p>
                     </div>
                     <div className="flex items-center gap-3 justify-end">
                       <div className="flex items-center gap-1.5">
@@ -449,7 +449,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
                         onClick={() => setSelectedExercises((prev) => prev.filter((_, j) => j !== i))}
                         className="w-9 h-9 rounded-lg flex items-center justify-center text-muted hover:text-red-400 hover:bg-red-400/10 transition-all"
                       >
-                        <FiTrash2 className="text-sm" />
+                        <FiTrash2 className="text-lg" />
                       </button>
                     </div>
                   </div>
@@ -460,7 +460,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
         </div>
 
         <div className="p-6 border-t border-[#2A2A3A] flex-shrink-0 bg-[#16161E] rounded-b-3xl">
-          <button onClick={handleSave} disabled={saving} className="btn-primary w-full h-14 text-sm font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-glow-sm">
+          <button onClick={handleSave} disabled={saving} className="btn-primary w-full h-14 text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-glow-sm">
             {saving ? <div className="w-5 h-5 border-3 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiSave className="text-lg" />}
             {template ? 'Update Template' : 'Establish Template'}
           </button>
@@ -500,7 +500,7 @@ const DayCard = ({ day, onUse }) => {
             {day.day}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[#F0F0F5] text-sm">{day.name}</p>
+            <p className="font-semibold text-[#F0F0F5] text-lg">{day.name}</p>
             <p className="text-xs text-muted">{day.exercises?.length} exercises · tap to expand</p>
           </div>
         </div>
@@ -531,10 +531,10 @@ const DayCard = ({ day, onUse }) => {
               className="w-full flex items-center gap-3 card-elevated px-4 py-3 rounded-xl hover:border-brand/30 hover:bg-brand/5 transition-all text-left group"
             >
               <div className="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 group-hover:bg-brand/20 transition-colors">
-                <GiMuscleUp className="text-brand text-sm" />
+                <GiMuscleUp className="text-brand text-lg" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#F0F0F5] group-hover:text-brand transition-colors">{ex.name}</p>
+                <p className="text-lg font-medium text-[#F0F0F5] group-hover:text-brand transition-colors">{ex.name}</p>
                 <p className="text-xs text-muted">
                   {ex.sets && `${ex.sets} sets`}
                   {ex.reps && ` × ${ex.reps} reps`}
@@ -698,7 +698,7 @@ export default function WorkoutPlan() {
             setEditingTemplate(null);
             setShowEditor(true);
           }}
-          className="btn-primary flex items-center gap-2 text-sm"
+          className="btn-primary flex items-center gap-2 text-lg"
         >
           <FiPlus />
           Create Template
@@ -725,7 +725,7 @@ export default function WorkoutPlan() {
       {loading ? (
         <div className="text-center py-16">
           <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-muted text-sm">Loading templates...</p>
+          <p className="text-muted text-lg">Loading templates...</p>
         </div>
       ) : (
         <>
@@ -736,7 +736,7 @@ export default function WorkoutPlan() {
                 <div className="animate-fade-in">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-1 h-5 bg-brand rounded-full" />
-                    <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]">Recommended: PPL Split</h2>
+                    <h2 className="text-lg font-black uppercase tracking-widest text-[var(--text-primary)]">Recommended: PPL Split</h2>
                   </div>
                   
                   <div className="card p-5 mb-4 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
@@ -765,7 +765,7 @@ export default function WorkoutPlan() {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-5 bg-[var(--surface-border)] rounded-full" />
-                  <h2 className="text-sm font-black uppercase tracking-widest text-muted">Other Training Templates</h2>
+                  <h2 className="text-lg font-black uppercase tracking-widest text-muted">Other Training Templates</h2>
                 </div>
 
                 <div className="flex gap-1.5 overflow-x-auto pb-2 mb-4 no-scrollbar">
@@ -811,7 +811,7 @@ export default function WorkoutPlan() {
                 <div className="card p-10 text-center">
                   <GiMuscleUp className="text-brand/20 text-5xl mx-auto mb-3" />
                   <p className="text-[#F0F0F5] font-medium mb-1">No custom templates yet</p>
-                  <p className="text-muted text-sm mb-4">Create your own workout templates to reuse them quickly.</p>
+                  <p className="text-muted text-lg mb-4">Create your own workout templates to reuse them quickly.</p>
                   <button
                     onClick={() => {
                       setEditingTemplate(null);

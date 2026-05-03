@@ -6,7 +6,10 @@ import { FiSearch, FiUser, FiLock, FiUnlock, FiChevronRight, FiTrendingUp } from
 import { GiMuscleUp } from 'react-icons/gi';
 import toast from 'react-hot-toast';
 
-const GOAL_EMOJI = { cut: '🔥', bulk: '💪', maintain: '⚖️' };
+const GOAL_EMOJI = { 
+  cut: '🔥', bulk: '💪', maintain: '⚖️',
+  lose_fat: '🔥', build_muscle: '💪', improve_endurance: '🏃', get_stronger: '🦍'
+};
 
 const UserCard = ({ user, onClick }) => (
   <button onClick={onClick}
@@ -21,7 +24,7 @@ const UserCard = ({ user, onClick }) => (
         </p>
         {user.isCoach && <span className="badge-brand text-[9px]">Coach</span>}
       </div>
-      <p className="text-sm text-muted">@{user.username || 'no-username'}</p>
+      <p className="text-lg text-muted">@{user.username || 'no-username'}</p>
       {(user.goal || user.currentStreak > 0) && (
         <div className="flex items-center gap-3 mt-2">
           {user.goal && <span className="text-xs text-muted capitalize font-medium">{GOAL_EMOJI[user.goal]} {user.goal}</span>}
@@ -78,7 +81,7 @@ export default function Social() {
         <div className="card border-yellow-500/20 bg-yellow-500/5 p-5 mb-6 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top-4">
           <span className="text-2xl flex-shrink-0">⚠️</span>
           <div>
-            <p className="text-sm font-bold text-yellow-400 uppercase tracking-wide">Set your username</p>
+            <p className="text-lg font-bold text-yellow-400 uppercase tracking-wide">Set your username</p>
             <p className="text-xs text-muted mt-1 leading-relaxed">Others can't find you or see your progress without a unique username.</p>
             <button onClick={() => navigate('/profile')} className="btn-secondary text-xs py-2 px-4 mt-3">
               Go to Profile →
@@ -134,7 +137,7 @@ export default function Social() {
             <div className="absolute inset-0 bg-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             <GiMuscleUp className="text-brand/20 text-6xl mx-auto mb-4 relative z-10" />
             <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2 relative z-10">Expand Your Circle</h3>
-            <p className="text-muted text-sm max-w-xs mx-auto relative z-10 leading-relaxed">Search for your gym partners and stay motivated by tracking their consistency.</p>
+            <p className="text-muted text-lg max-w-xs mx-auto relative z-10 leading-relaxed">Search for your gym partners and stay motivated by tracking their consistency.</p>
             <div className="mt-8 bg-black/20 rounded-xl p-4 border border-white/5 relative z-10">
               <p className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-2">Pro Tip</p>
               <p className="text-xs text-muted">Share your ID <span className="text-brand font-mono font-bold">@{user?.username}</span> to get discovered faster.</p>

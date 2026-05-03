@@ -1,0 +1,38 @@
+export const ARCHETYPES = [
+  {
+    id: 'lean',
+    label: 'The Blade',
+    subtitle: 'Lean & Shredded',
+    description: 'Low body fat, visible muscle separation, endurance-focused.',
+    color: '#00D4FF',
+    glyph: '◈',
+    bgGradient: 'from-cyan-500/20 via-sky-500/10 to-transparent',
+    borderColor: 'border-cyan-500/40',
+    tagColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+    traits: ['Cardio King', 'Calorie Cutter', 'Vascular'],
+  },
+  {
+    id: 'fit',
+    label: 'The Forge',
+    subtitle: 'Athletic & Balanced',
+    description: 'Performance-driven physique. Strong, mobile, and functional.',
+    color: '#F59E0B',
+    glyph: '◆',
+    bgGradient: 'from-amber-500/20 via-orange-500/10 to-transparent',
+    borderColor: 'border-amber-500/40',
+    tagColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    traits: ['All-Rounder', 'Explosive Power', 'Adaptive'],
+  },
+  {
+    id: 'bulk',
+    label: 'The Titan',
+    subtitle: 'Mass & Power',
+    description: 'Maximum muscle mass. Heavy lifting, high volume, serious size.',
+    color: '#FEFEFE', // User requested #FEFEFE for Titan
+    glyph: '⬡',
+    bgGradient: 'from-white/20 via-white/10 to-transparent',
+    borderColor: 'border-white/40',
+    tagColor: 'bg-white/10 text-white/90 border-white/30',
+    traits: ['Iron Veteran', 'Volume Master', 'Powerlifter'],
+  },
+];

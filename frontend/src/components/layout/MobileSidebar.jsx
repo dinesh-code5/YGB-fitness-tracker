@@ -42,14 +42,15 @@ export default function MobileSidebar({ isOpen, onClose }) {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-[var(--surface-border)]">
-            <Link to="/dashboard" onClick={onClose} className="flex items-center gap-2">
-              <GiMuscleUp className="text-brand text-2xl" />
-              <span className="font-display text-2xl tracking-wider text-brand">YGB</span>
+            <Link to="/dashboard" onClick={onClose} className="flex flex-col">
+              <span className="font-display text-3xl tracking-widest text-gradient leading-none">YGB</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 mt-1">Your Gym Buddy</span>
             </Link>
             <button onClick={onClose} className="text-muted p-1 hover:text-brand transition-colors">
               <FiX className="text-2xl" />
             </button>
           </div>
+
 
           {/* User Info */}
           {user && (
@@ -59,7 +60,7 @@ export default function MobileSidebar({ isOpen, onClose }) {
                   {user.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-black text-[var(--text-primary)]">{user.name}</p>
+                  <p className="text-lg font-black text-[var(--text-primary)]">{user.name}</p>
                   <p className="text-[10px] text-muted uppercase font-bold tracking-widest">{user.goal}</p>
                 </div>
               </div>
