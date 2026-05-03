@@ -42,9 +42,14 @@ export default function MobileSidebar({ isOpen, onClose }) {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-[var(--surface-border)]">
-            <Link to="/dashboard" onClick={onClose} className="flex flex-col">
-              <span className="font-display text-3xl tracking-widest text-gradient leading-none">YGB</span>
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 mt-1">Your Gym Buddy</span>
+            <Link to="/dashboard" onClick={onClose} className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <GiMuscleUp className="text-brand text-2xl" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-display text-2xl tracking-widest text-gradient leading-none">YGB</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 mt-1">Your Gym Buddy</span>
+              </div>
             </Link>
             <button onClick={onClose} className="text-muted p-1 hover:text-brand transition-colors">
               <FiX className="text-2xl" />

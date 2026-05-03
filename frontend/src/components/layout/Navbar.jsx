@@ -57,9 +57,17 @@ export default function Navbar({ onMenuClick }) {
         </button>
 
         {/* Logo */}
-        <Link to="/dashboard" className="flex flex-col group flex-shrink-0">
-          <span className="font-display text-4xl leading-none tracking-widest text-gradient group-hover:brightness-110 transition-all duration-300">YGB</span>
-          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 leading-none mt-1">Your Gym Buddy</span>
+        <Link to="/dashboard" className="flex items-center gap-3 group flex-shrink-0">
+          <div className="relative">
+            <div className="absolute inset-0 bg-brand/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-all duration-300" />
+            <div className="relative w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center group-hover:border-brand/40 transition-all duration-300">
+              <GiMuscleUp className="text-brand text-2xl" />
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display text-3xl leading-none tracking-widest text-gradient group-hover:brightness-110 transition-all duration-300">YGB</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 leading-none mt-1">Your Gym Buddy</span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}

@@ -117,10 +117,18 @@ const GymBarChart = ({ workouts, accentColor }) => {
 
 // ── GitHub-Style Activity Heatmap ────────────────────────────────────────
 const ActivityHeatmap = ({ workouts, accentColor }) => {
+  const [dateView, setDateView] = useState(new Date());
   const workoutDates = new Set(workouts.map(w => new Date(w.date).toDateString()));
-  const days = [...Array(56)].map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (55 - i));
+  
+  const month = dateView.getMonth();
+  const year = dateView.getFullYear();
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+
+  const days = [...Array(daysInMonth)].map((_, i) => {
+    const d = new Date(year, month, i + 1);
     return {
       date: d.toDateString(),
       active: workoutDates.has(d.toDateString()),
@@ -130,9 +138,20 @@ const ActivityHeatmap = ({ workouts, accentColor }) => {
 
   const themeColor = accentColor || getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
 
+  const changeMonth = (offset) => {
+    setDateView(new Date(year, month + offset, 1));
+  };
+
   return (
     <div className="w-full">
-      <div className="grid gap-[3px]" style={{ gridTemplateColumns: 'repeat(8, minmax(0, 1fr))' }}>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => changeMonth(-1)} className="text-white/40 hover:text-white">◀</button>
+        <span className="text-lg font-bold uppercase tracking-widest" style={{ color: themeColor }}>
+          {dateView.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </span>
+        <button onClick={() => changeMonth(1)} disabled={month === new Date().getMonth() && year === new Date().getFullYear()} className="text-white/40 hover:text-white disabled:opacity-20">▶</button>
+      </div>
+      <div className="grid gap-[3px]" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
         {days.map((day, i) => (
           <div key={i} title={day.date}
             className={`aspect-square rounded-[3px] transition-all duration-300 ${
@@ -145,10 +164,6 @@ const ActivityHeatmap = ({ workouts, accentColor }) => {
             style={day.active ? { backgroundColor: themeColor, boxShadow: `0 0 6px ${themeColor}40` } : {}}
           />
         ))}
-      </div>
-      <div className="flex justify-between mt-2 px-0.5">
-        <span className="text-lg font-bold text-white/20 uppercase tracking-widest">8 wks ago</span>
-        <span className="text-lg font-bold uppercase tracking-widest" style={{ color: themeColor }}>Today</span>
       </div>
     </div>
   );

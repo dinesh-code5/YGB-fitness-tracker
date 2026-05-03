@@ -139,10 +139,18 @@ export default function Login() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="relative"
+          className="relative flex items-center gap-4"
         >
-          <span className="font-display text-5xl tracking-widest text-gradient block leading-none mb-1">YGB</span>
-          <span className="text-xs font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="w-14 h-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center shadow-glow-sm"
+          >
+            <GiMuscleUp className="text-brand text-3xl" />
+          </motion.div>
+          <div className="flex flex-col">
+            <span className="font-display text-5xl tracking-widest text-gradient leading-none mb-1">YGB</span>
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+          </div>
         </motion.div>
 
         {/* Main copy */}
@@ -228,9 +236,14 @@ export default function Login() {
         >
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
-            <Link to="/" className="inline-block">
-              <span className="font-display text-5xl tracking-widest text-gradient block leading-none mb-1">YGB</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+            <Link to="/" className="inline-flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <GiMuscleUp className="text-brand text-2xl" />
+              </div>
+              <div className="text-left">
+                <span className="font-display text-4xl tracking-widest text-gradient block leading-none">YGB</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+              </div>
             </Link>
           </div>
 

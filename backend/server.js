@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
-const csrf = require('csurf');
+// const csrf = require('csurf');
 const sequelize = require('./config/database');
 const { User, Workout, DietPlan, WorkoutTemplate, DietLog } = require('./models');
 
@@ -14,34 +14,37 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || true, // true reflects the request origin
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
-  exposedHeaders: ['X-CSRF-Token']
+  // origin: process.env.CLIENT_URL || true// , // true reflects the request origin
+  origin: "*",
+  // credentials: true,
+  // allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  // exposedHeaders: ['X-CSRF-Token']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET || 'ygb-gym-buddy-secret'));
 
 // CSRF Protection
-const csrfProtection = csrf({ 
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
-  }
-});
+// const csrfProtection = csrf({ 
+//   cookie: {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === 'production',
+//     sameSite: 'lax'
+//   }
+// });
 // Routes
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
+// app.get('/api/csrf-token', csrfProtection, (req, res) => {
+//   res.json({ csrfToken: req.csrfToken() });
+// });
+app.get("/", (req, res) => {
+  res.send("YGB API running 🚀");
 });
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/workouts', require('./routes/workouts'));
+app.use('/api/diet', require('./routes/diet'));
+app.use('/api/plans', require('./routes/plans'));
+app.use('/api/templates', require('./routes/templates'));
 
-app.use('/api/auth', csrfProtection, require('./routes/auth'));
-app.use('/api/user', csrfProtection, require('./routes/user'));
-app.use('/api/workouts', csrfProtection, require('./routes/workouts'));
-app.use('/api/diet', csrfProtection, require('./routes/diet'));
-app.use('/api/plans', csrfProtection, require('./routes/plans'));
-app.use('/api/templates', csrfProtection, require('./routes/templates'));
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'YGB API Running 💪', timestamp: new Date() });
 });
@@ -67,7 +70,7 @@ sequelize.authenticate()
   .then(async () => {
     console.log('✅ PostgreSQL connected');
     // Sync all models (use { alter: true } for production-safe changes)
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ });
     console.log('✅ Database synced');
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })

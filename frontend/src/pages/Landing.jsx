@@ -76,9 +76,14 @@ export default function Landing() {
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <header className="relative flex items-center justify-between px-6 py-4 border-b border-[#222232]/80 backdrop-blur-md bg-[#0A0A0F]/60 sticky top-0 z-50">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand/50 to-transparent" />
-        <Link to="/" className="flex flex-col group">
-          <span className="font-display text-4xl leading-none tracking-widest text-gradient group-hover:brightness-110 transition-all duration-300">YGB</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 leading-none mt-1">Your Gym Buddy</span>
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+            <GiMuscleUp className="text-brand text-2xl" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display text-3xl leading-none tracking-widest text-gradient group-hover:brightness-110 transition-all duration-300">YGB</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 leading-none mt-1">Your Gym Buddy</span>
+          </div>
         </Link>
         <div className="flex items-center gap-3">
           <Link to="/login" className="btn-secondary text-lg py-2 px-4">Login</Link>
