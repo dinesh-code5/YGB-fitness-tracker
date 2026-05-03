@@ -198,10 +198,7 @@ const AppRoutes = () => {
 };
 
 export default function App() {
-  useEffect(() => {
-    initCsrf();
-  }, []);
-
+  
   return (
     <ThemeProvider>
       <AuthProvider>
