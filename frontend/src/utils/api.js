@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '/api',
+  baseURL: `${process.env.REACT_APP_API_URL/api}`,
   timeout: 15000,
-  withCredentials: true // Required for CSRF cookies
+  withCredentials: false // Required for CSRF cookies
 });
 
 // Attach JWT to every request
@@ -16,14 +16,14 @@ API.interceptors.request.use((config) => {
 });
 
 // Helper to fetch and set CSRF token
-export const initCsrf = async () => {
-  try {
-    const { data } = await API.get('csrf-token');
-    API.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
-  } catch (err) {
-    console.error('Failed to initialize CSRF:', err);
-  }
-};
+// export const initCsrf = async () => {
+//   try {
+//     const { data } = await API.get('csrf-token');
+//     API.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
+//   } catch (err) {
+//     console.error('Failed to initialize CSRF:', err);
+//   }
+// };
 
 // Handle global errors
 API.interceptors.response.use(
