@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { initCsrf } from './utils/api';
+import { ARCHETYPES } from './utils/archetypes';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -38,6 +40,22 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
+// Component to synchronize theme with user archetype
+const ThemeSynchronizer = () => {
+  const { user } = useAuth();
+  const { setThemeColor } = useTheme();
+  useEffect(() => {
+    if (user?.archetype) {
+      const arch = ARCHETYPES.find(a => a.id === user.archetype);
+      if (arch) {
+        setThemeColor(arch.color);
+      }
+    }
+  }, [user?.archetype, setThemeColor]);
+
+  return null;
+};
+
 // App shell with responsive navigation
 const AppShell = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -47,7 +65,7 @@ const AppShell = ({ children }) => {
       <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
       <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <main className="flex-1 transition-all duration-300 pt-20 pb-10 md:pb-0 overflow-x-hidden flex flex-col">
+      <main className="flex-1 transition-all duration-300 pt-24 pb-10 md:pb-0 overflow-x-hidden flex flex-col">
         <div className="flex-1">
           {children}
         </div>
@@ -57,56 +75,125 @@ const AppShell = ({ children }) => {
   );
 };
 
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.3, ease: "easeInOut" }}
+    className="min-h-full"
+  >
+    {children}
+  </motion.div>
+);
+
 const AppRoutes = () => {
   const { user } = useAuth();
+  const location = useLocation();
 
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-      <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public routes */}
+        <Route path="/" element={
+          <PageWrapper>{user ? <Navigate to="/dashboard" /> : <Landing />}</PageWrapper>
+        } />
+        <Route path="/login" element={
+          <PageWrapper>{user ? <Navigate to="/dashboard" /> : <Login />}</PageWrapper>
+        } />
+        <Route path="/register" element={
+          <PageWrapper>{user ? <Navigate to="/dashboard" /> : <Register />}</PageWrapper>
+        } />
 
-      {/* Protected routes */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute><AppShell><Dashboard /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/workout/log/:id?" element={
-        <ProtectedRoute><AppShell><WorkoutLogger /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/workout/history" element={
-        <ProtectedRoute><AppShell><WorkoutHistory /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/workout/:id" element={
-        <ProtectedRoute><AppShell><WorkoutDetail /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/progress" element={
-        <ProtectedRoute><AppShell><Progress /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/progress/photos" element={
-        <ProtectedRoute><AppShell><ProgressPhotos /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/diet" element={
-        <ProtectedRoute><AppShell><DietCalculator /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/food-library" element={
-        <ProtectedRoute><AppShell><FoodLibrary /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/plan" element={
-        <ProtectedRoute><AppShell><WorkoutPlan /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/profile" element={
-        <ProtectedRoute><AppShell><Profile /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/social" element={
-        <ProtectedRoute><AppShell><Social /></AppShell></ProtectedRoute>
-      } />
-      <Route path="/u/:username" element={
-        <ProtectedRoute><AppShell><UserProfile /></AppShell></ProtectedRoute>
-      } />
+        {/* Protected routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><Dashboard /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/workout/log/:id?" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><WorkoutLogger /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/workout/history" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><WorkoutHistory /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/workout/:id" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><WorkoutDetail /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/progress" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><Progress /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/progress/photos" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><ProgressPhotos /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/diet" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><DietCalculator /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/food-library" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><FoodLibrary /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/plan" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><WorkoutPlan /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><Profile /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/social" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><Social /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
+        <Route path="/u/:username" element={
+          <ProtectedRoute>
+            <AppShell>
+              <PageWrapper><UserProfile /></PageWrapper>
+            </AppShell>
+          </ProtectedRoute>
+        } />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
   );
 };
 
@@ -118,6 +205,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <ThemeSynchronizer />
         <div className="bg-glow" />
         <BrowserRouter>
           <AppRoutes />

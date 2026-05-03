@@ -68,7 +68,7 @@ export default function ProgressPhotos() {
 
       {/* Upload Card */}
       <div className="card p-5 mb-6">
-        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <FiPlus className="text-brand" /> Add New Photo
         </h3>
         <div className="space-y-4">
@@ -77,7 +77,7 @@ export default function ProgressPhotos() {
               <label className="label text-[10px] uppercase tracking-wider">Weight (kg)</label>
               <input 
                 type="number" 
-                className="input-field text-sm" 
+                className="input-field text-lg" 
                 placeholder="e.g. 75"
                 value={weight} 
                 onChange={e => setWeight(e.target.value)} 
@@ -86,7 +86,7 @@ export default function ProgressPhotos() {
             <div>
               <label className="label text-[10px] uppercase tracking-wider">Note (optional)</label>
               <input 
-                className="input-field text-sm" 
+                className="input-field text-lg" 
                 placeholder="Feeling stronger..."
                 value={note} 
                 onChange={e => setNote(e.target.value)} 
@@ -119,7 +119,7 @@ export default function ProgressPhotos() {
         ) : photos.length === 0 ? (
           <div className="col-span-3 py-20 text-center text-muted">
             <FiCamera className="text-4xl mx-auto mb-3 opacity-20" />
-            <p className="text-sm">No progress photos yet.</p>
+            <p className="text-lg">No progress photos yet.</p>
             <p className="text-xs mt-1">Consistency is key! Start tracking your physical changes.</p>
           </div>
         ) : (
@@ -165,7 +165,7 @@ export default function ProgressPhotos() {
             />
             <div className="mt-6 text-center">
               <p className="text-brand font-bold text-xl">{selectedPhoto.weight ? `${selectedPhoto.weight} kg` : 'Weight not logged'}</p>
-              <p className="text-muted text-sm mt-1">
+              <p className="text-muted text-lg mt-1">
                 {new Date(selectedPhoto.date).toLocaleDateString('en-IN', { 
                   day: 'numeric', 
                   month: 'long', 

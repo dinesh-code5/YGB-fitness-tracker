@@ -76,17 +76,19 @@ export default function Progress() {
     } catch { toast.error('Failed to log weight'); }
   };
 
+  const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
+
   const volumeChart = {
     labels: stats?.volumeData?.map(d => d.date) || [],
     datasets: [{
       label: 'Volume (kg)',
       data: stats?.volumeData?.map(d => d.volume) || [],
-      borderColor: '#00D4FF',
-      backgroundColor: 'rgba(0,212,255,0.08)',
+      borderColor: themeColor,
+      backgroundColor: `${themeColor}15`,
       borderWidth: 2,
       fill: true,
       tension: 0.4,
-      pointBackgroundColor: '#00D4FF',
+      pointBackgroundColor: themeColor,
     }]
   };
 
@@ -95,7 +97,7 @@ export default function Progress() {
     datasets: [{
       label: 'Max Weight (kg)',
       data: stats.strengthProgress[selectedExercise].map(d => d.weight),
-      borderColor: '#FF6B35',
+      borderColor: '#FF6B35', // Keep accent orange for PRs
       backgroundColor: 'rgba(255,107,53,0.08)',
       borderWidth: 2,
       fill: true,
@@ -109,12 +111,12 @@ export default function Progress() {
     datasets: [{
       label: 'Weight (kg)',
       data: weightHistory.slice(-30).map(w => w.weight),
-      borderColor: '#22C55E',
-      backgroundColor: 'rgba(34,197,94,0.05)',
+      borderColor: themeColor, // Use theme color for weight
+      backgroundColor: `${themeColor}15`,
       borderWidth: 3,
       fill: true,
       tension: 0.3,
-      pointBackgroundColor: '#22C55E',
+      pointBackgroundColor: themeColor,
     }]
   } : null;
 
@@ -167,7 +169,7 @@ export default function Progress() {
             <div className="card p-6">
               <div className="flex items-center gap-3 mb-6">
                 <FiZap className="text-brand text-xl" />
-                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Training Volume</h2>
+                <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-widest">Training Volume</h2>
               </div>
               <div className="h-64"><Line data={volumeChart} options={CHART_OPTS} /></div>
             </div>
@@ -175,7 +177,7 @@ export default function Progress() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <FiTrendingUp className="text-accent text-xl" />
-                  <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Strength PRs</h2>
+                  <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-widest">Strength PRs</h2>
                 </div>
                 <select className="input-field text-[10px] py-1 w-24 font-black uppercase"
                   value={selectedExercise} onChange={e => setSelectedExercise(e.target.value)}>
@@ -188,12 +190,12 @@ export default function Progress() {
 
           <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-widest">Weight Journey</h2>
+              <h2 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-widest">Weight Journey</h2>
               <button onClick={() => setLogWeightOpen(!logWeightOpen)} className="btn-primary py-1.5 text-[10px] uppercase font-black">Log Weight</button>
             </div>
             {logWeightOpen && (
               <div className="flex gap-2 mb-6 animate-slide-up">
-                <input type="number" className="input-field text-sm font-bold" placeholder="72.5"
+                <input type="number" className="input-field text-lg font-bold" placeholder="72.5"
                   value={weightForm} onChange={e => setWeightForm(e.target.value)} autoFocus />
                 <button onClick={handleLogWeight} className="btn-primary px-6">SAVE</button>
               </div>

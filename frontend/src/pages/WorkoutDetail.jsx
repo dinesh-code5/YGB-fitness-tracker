@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { workoutAPI, plansAPI } from '../utils/api';
 import {
   FiArrowLeft, FiShare2, FiDownload, FiClock, FiZap,
@@ -20,7 +21,7 @@ const SET_TYPE_INFO = {
 };
 
 // ── Polished Share Card matching reference image ───────────
-const ShareCard = ({ workout }) => {
+const ShareCard = ({ workout, themeColor }) => {
   const duration = workout.duration || 0;
   const h = Math.floor(duration / 60), m = duration % 60;
   const durationStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
@@ -39,21 +40,21 @@ const ShareCard = ({ workout }) => {
       width: '360px',
       background: 'rgba(12,12,20,0.88)',
       borderRadius: '20px',
-      border: '1px solid rgba(0,212,255,0.2)',
+      border: `1px solid ${themeColor}33`,
       overflow: 'hidden',
       fontFamily: "'DM Sans', system-ui, sans-serif",
       color: '#F0F0F5',
       position: 'relative',
     }}>
       {/* Top accent line */}
-      <div style={{ height: 3, background: 'linear-gradient(90deg, #00D4FF, #0066FF)' }} />
+      <div style={{ height: 3, background: `linear-gradient(90deg, ${themeColor}, #0066FF)` }} />
 
       {/* Header */}
       <div style={{ padding: '18px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 6 }}>
           <div style={{ display:'flex', alignItems:'center', gap: 6 }}>
-            <span style={{ fontSize: 14, color: '#00D4FF' }}>💪</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#00D4FF', letterSpacing: 2 }}>YGB</span>
+            <span style={{ fontSize: 14, color: themeColor }}>💪</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: themeColor, letterSpacing: 2 }}>YGB</span>
           </div>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
             {new Date(workout.date).toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
@@ -79,7 +80,7 @@ const ShareCard = ({ workout }) => {
             textAlign: 'center',
           }}>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>{s.label}</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#00D4FF' }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: themeColor }}>
               {s.icon && <span style={{ marginRight: 3, fontSize: 12 }}>{s.icon}</span>}
               {s.value}
             </div>
@@ -127,14 +128,14 @@ const ShareCard = ({ workout }) => {
               <div style={{
                 display:'flex', alignItems:'center', justifyContent:'space-between',
                 padding: '8px 12px',
-                background: 'rgba(0,212,255,0.05)',
+                background: `${themeColor}0D`,
                 borderBottom: doneSets.length > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none'
               }}>
                 <span style={{ fontSize: 13, fontWeight: 600 }}>{ex.name}</span>
                 <span style={{
                   fontSize: 11, fontWeight: 700,
-                  background: 'rgba(0,212,255,0.15)',
-                  color: '#00D4FF',
+                  background: `${themeColor}26`,
+                  color: themeColor,
                   padding: '2px 8px', borderRadius: 99
                 }}>
                   {doneSets.length}/{(ex.sets||[]).length}
@@ -148,7 +149,7 @@ const ShareCard = ({ workout }) => {
                   <div key={si} style={{
                     display:'flex', alignItems:'center', justifyContent:'space-between',
                     padding: '6px 12px',
-                    background: si % 2 === 0 ? 'rgba(0,212,255,0.04)' : 'transparent',
+                    background: si % 2 === 0 ? `${themeColor}0A` : 'transparent',
                     borderBottom: si < doneSets.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none'
                   }}>
                     <div style={{ display:'flex', alignItems:'center', gap: 10 }}>
@@ -160,7 +161,7 @@ const ShareCard = ({ workout }) => {
                         {set.weight > 0 ? `${set.weight}kg` : 'BW'} × {set.reps}reps
                       </span>
                     </div>
-                    <span style={{ fontSize: 13, color: '#00D4FF' }}>✓</span>
+                    <span style={{ fontSize: 13, color: themeColor }}>✓</span>
                   </div>
                 );
               })}
@@ -172,8 +173,8 @@ const ShareCard = ({ workout }) => {
         {workout.notes && (
           <div style={{
             marginTop: 8, padding: '10px 12px',
-            background: 'rgba(0,212,255,0.05)',
-            border: '1px solid rgba(0,212,255,0.15)',
+            background: `${themeColor}0D`,
+            border: `1px solid ${themeColor}26`,
             borderRadius: 10
           }}>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 3 }}>Notes</div>
@@ -229,7 +230,7 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
         <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center text-xs font-bold text-brand flex-shrink-0">
           {idx + 1}
         </div>
-        <p className="flex-1 font-semibold text-[#F0F0F5] text-sm truncate">{exercise.name}</p>
+        <p className="flex-1 font-semibold text-[#F0F0F5] text-lg truncate">{exercise.name}</p>
         <button onClick={() => onRemove(idx)} className="text-muted hover:text-red-400 p-1">
           <FiTrash2 className="text-xs" />
         </button>
@@ -247,14 +248,14 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
             <span className="col-span-1 text-xs text-muted text-center">{si + 1}</span>
             <div className="col-span-4">
               <input type="number" min="0" step="2.5"
-                className="input-field text-center text-sm py-1.5 px-1 w-full"
+                className="input-field text-center text-lg py-1.5 px-1 w-full"
                 value={set.weight}
                 onFocus={e => e.target.select()}
                 onChange={e => updateSet(si, 'weight', Number(e.target.value))} />
             </div>
             <div className="col-span-4">
               <input type="number" min="1"
-                className="input-field text-center text-sm py-1.5 px-1 w-full"
+                className="input-field text-center text-lg py-1.5 px-1 w-full"
                 value={set.reps}
                 onFocus={e => e.target.select()}
                 onChange={e => updateSet(si, 'reps', Number(e.target.value))} />
@@ -304,7 +305,7 @@ const QuickExercisePicker = ({ onSelect, onClose }) => {
           <button onClick={onClose} className="text-muted"><FiX /></button>
         </div>
         <div className="px-4 pt-3 pb-2 flex-shrink-0">
-          <input className="input-field text-sm" placeholder="Search..." autoFocus
+          <input className="input-field text-lg" placeholder="Search..." autoFocus
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-1 min-h-0">
@@ -313,9 +314,9 @@ const QuickExercisePicker = ({ onSelect, onClose }) => {
           ) : filtered.map(ex => (
             <button key={ex.id} onClick={() => { onSelect(ex); onClose(); }}
               className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#1E1E2A] transition-colors text-left">
-              <GiMuscleUp className="text-brand text-sm flex-shrink-0" />
+              <GiMuscleUp className="text-brand text-lg flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#F0F0F5] truncate">{ex.name}</p>
+                <p className="text-lg font-medium text-[#F0F0F5] truncate">{ex.name}</p>
                 <p className="text-xs text-muted">{ex.muscleGroup}</p>
               </div>
             </button>
@@ -330,6 +331,7 @@ const QuickExercisePicker = ({ onSelect, onClose }) => {
 export default function WorkoutDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { themeColor } = useTheme();
   const [workout, setWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -462,24 +464,24 @@ export default function WorkoutDetail() {
         <div className="flex gap-2">
           {editing ? (
             <>
-              <button onClick={() => setEditing(false)} className="btn-secondary text-sm py-2 px-3 flex items-center gap-1">
+              <button onClick={() => setEditing(false)} className="btn-secondary text-lg py-2 px-3 flex items-center gap-1">
                 <FiX className="text-xs" /> Cancel
               </button>
-              <button onClick={handleSave} disabled={saving} className="btn-primary text-sm flex items-center gap-1.5">
+              <button onClick={handleSave} disabled={saving} className="btn-primary text-lg flex items-center gap-1.5">
                 {saving ? <span className="w-3.5 h-3.5 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiSave className="text-xs" />}
                 Save
               </button>
             </>
           ) : (
             <>
-              <button onClick={() => setShowShare(true)} className="btn-secondary flex items-center gap-1.5 text-sm">
+              <button onClick={() => setShowShare(true)} className="btn-secondary flex items-center gap-1.5 text-lg">
                 <FiShare2 className="text-xs" /> Share
               </button>
-              <button onClick={() => setEditing(true)} className="btn-secondary flex items-center gap-1.5 text-sm">
+              <button onClick={() => setEditing(true)} className="btn-secondary flex items-center gap-1.5 text-lg">
                 <FiEdit2 className="text-xs" /> Edit
               </button>
               <button onClick={handleDelete} className="btn-danger p-2.5">
-                <FiTrash2 className="text-sm" />
+                <FiTrash2 className="text-lg" />
               </button>
             </>
           )}
@@ -491,7 +493,7 @@ export default function WorkoutDetail() {
         <>
           <div className="card p-5 mb-4">
             <h1 className="text-2xl font-bold text-[#F0F0F5] mb-1">{workout.name}</h1>
-            <p className="text-sm text-muted mb-4">
+            <p className="text-lg text-muted mb-4">
               {new Date(workout.date).toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
               {workout.startTime && (
                 <span className="ml-2">
@@ -525,7 +527,7 @@ export default function WorkoutDetail() {
                 { label:'Time', value: workout.startTime ? new Date(workout.startTime).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}) : '—' },
               ].map(s => (
                 <div key={s.label} className="card-elevated rounded-xl py-2.5">
-                  <p className="font-semibold text-[#F0F0F5] text-sm">{s.value}</p>
+                  <p className="font-semibold text-[#F0F0F5] text-lg">{s.value}</p>
                   <p className="text-[10px] text-muted">{s.label}</p>
                 </div>
               ))}
@@ -551,7 +553,7 @@ export default function WorkoutDetail() {
                   <div key={ei} className="card rounded-xl overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 bg-[#1E1E2A]">
                       <div>
-                        <p className="font-semibold text-[#F0F0F5] text-sm">{ex.name}</p>
+                        <p className="font-semibold text-[#F0F0F5] text-lg">{ex.name}</p>
                         <p className="text-xs text-muted">{ex.muscles?.join(', ') || ex.muscleGroup}</p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -573,7 +575,7 @@ export default function WorkoutDetail() {
                         const setVol = set.weight * set.reps;
                         const setRM = set.reps > 0 && set.weight > 0 ? Math.round(set.weight*(1+set.reps/30)) : 0;
                         return (
-                          <div key={si} className={`grid grid-cols-12 gap-1 items-center px-1 py-2 rounded-lg text-sm ${
+                          <div key={si} className={`grid grid-cols-12 gap-1 items-center px-1 py-2 rounded-lg text-lg ${
                             set.completed ? (si%2===0?'bg-brand/5':'') : 'opacity-35'
                           }`}>
                             <div className="col-span-1">
@@ -610,7 +612,7 @@ export default function WorkoutDetail() {
           {workout.notes && (
             <div className="card p-4 mt-3 border-brand/20 bg-brand/5">
               <p className="text-xs text-muted mb-1">Notes</p>
-              <p className="text-sm text-[#F0F0F5] italic">"{workout.notes}"</p>
+              <p className="text-lg text-[#F0F0F5] italic">"{workout.notes}"</p>
             </div>
           )}
         </>
@@ -623,24 +625,24 @@ export default function WorkoutDetail() {
             <h3 className="section-title">Edit Workout</h3>
             <div>
               <label className="label text-xs">Workout Name</label>
-              <input className="input-field text-sm" value={editName} onChange={e => setEditName(e.target.value)} />
+              <input className="input-field text-lg" value={editName} onChange={e => setEditName(e.target.value)} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="label text-xs">Start Time</label>
-                <input type="datetime-local" className="input-field text-sm"
+                <input type="datetime-local" className="input-field text-lg"
                   value={editStartTime} onChange={e => setEditStartTime(e.target.value)} />
               </div>
               <div>
                 <label className="label text-xs">End Time</label>
-                <input type="datetime-local" className="input-field text-sm"
+                <input type="datetime-local" className="input-field text-lg"
                   value={editEndTime} onChange={e => setEditEndTime(e.target.value)} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="label text-xs">Type</label>
-                <select className="input-field text-sm" value={editType} onChange={e => setEditType(e.target.value)}>
+                <select className="input-field text-lg" value={editType} onChange={e => setEditType(e.target.value)}>
                   {WORKOUT_TYPES.map(t => (
                     <option key={t} value={t}>{t.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}</option>
                   ))}
@@ -660,7 +662,7 @@ export default function WorkoutDetail() {
             </div>
             <div>
               <label className="label text-xs">Notes</label>
-              <textarea className="input-field text-sm h-16 resize-none"
+              <textarea className="input-field text-lg h-16 resize-none"
                 value={editNotes} onChange={e => setEditNotes(e.target.value)} />
             </div>
           </div>
@@ -701,7 +703,7 @@ export default function WorkoutDetail() {
               {/* Card preview on dark bg like Strava */}
               <div className="rounded-xl overflow-hidden mb-5 flex justify-center"
                 style={{ background: 'linear-gradient(135deg, #0a0a12 0%, #0d1a2e 100%)', padding: 24 }}>
-                <ShareCard workout={workout} />
+                <ShareCard workout={workout} themeColor={themeColor} />
               </div>
 
               <div className="flex gap-3">

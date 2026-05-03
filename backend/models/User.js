@@ -2,6 +2,45 @@ const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const sequelize = require('../config/database');
 
+const ARCHETYPES = [
+  {
+    id: 'lean',
+    label: 'The Blade',
+    subtitle: 'Lean & Shredded',
+    description: 'Low body fat, visible muscle separation, endurance-focused.',
+    color: '#00D4FF',
+    glyph: '◈',
+    bgGradient: 'from-cyan-500/20 via-sky-500/10 to-transparent',
+    borderColor: 'border-cyan-500/40',
+    tagColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+    traits: ['Cardio King', 'Calorie Cutter', 'Vascular'],
+  },
+  {
+    id: 'fit',
+    label: 'The Forge',
+    subtitle: 'Athletic & Balanced',
+    description: 'Performance-driven physique. Strong, mobile, and functional.',
+    color: '#F59E0B',
+    glyph: '◆',
+    bgGradient: 'from-amber-500/20 via-orange-500/10 to-transparent',
+    borderColor: 'border-amber-500/40',
+    tagColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    traits: ['All-Rounder', 'Explosive Power', 'Adaptive'],
+  },
+  {
+    id: 'bulk',
+    label: 'The Titan',
+    subtitle: 'Mass & Power',
+    description: 'Maximum muscle mass. Heavy lifting, high volume, serious size.',
+    color: '#A78BFA',
+    glyph: '⬡',
+    bgGradient: 'from-purple-500/20 via-violet-500/10 to-transparent',
+    borderColor: 'border-purple-500/40',
+    tagColor: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    traits: ['Iron Veteran', 'Volume Master', 'Powerlifter'],
+  },
+];
+
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.UUID,
@@ -28,11 +67,15 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(20),
     unique: true,
     allowNull: true,
-    validate: { is: /^[a-z0-9_.]{3,20}$/ },
+    validate: { is: /^[a-z0-9_.]{1,20}$/ },
     set(val) { if (val) this.setDataValue('username', val.toLowerCase()); }
   },
   avatar: { type: DataTypes.TEXT, defaultValue: '' },
   bio: { type: DataTypes.STRING(200) },
+  archetype: { 
+    type: DataTypes.STRING,
+    defaultValue: 'fit' 
+  },
   // Physical stats
   age: { type: DataTypes.INTEGER, validate: { min: 10, max: 100 } },
   weight: { type: DataTypes.FLOAT },
@@ -40,7 +83,7 @@ const User = sequelize.define('User', {
   gender: { type: DataTypes.ENUM('male', 'female', 'other') },
   // Fitness profile
   goal: {
-    type: DataTypes.ENUM('cut', 'bulk', 'maintain'),
+    type: DataTypes.ENUM('cut', 'bulk', 'maintain', 'lose_fat', 'build_muscle', 'improve_endurance', 'get_stronger'),
     defaultValue: 'maintain'
   },
   experience: {

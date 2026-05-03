@@ -33,7 +33,7 @@ export default function LockedFeature({ title, feature }) {
         </div>
 
         <h2 className="font-display text-3xl tracking-wider mb-2">PREMIUM FEATURE</h2>
-        <p className="text-muted text-sm mb-8 leading-relaxed font-medium">
+        <p className="text-muted text-lg mb-8 leading-relaxed font-medium">
           The <span className="text-[var(--text-primary)] font-bold">{title}</span> is part of our Elite toolkit. 
           Unlock it to take your fitness to the next level.
         </p>
@@ -45,7 +45,7 @@ export default function LockedFeature({ title, feature }) {
             'Exclusive Training Templates',
             'Custom Exercise Database'
           ].map(f => (
-            <div key={f} className="flex items-center gap-3 text-left text-sm font-bold text-[var(--text-primary)]">
+            <div key={f} className="flex items-center gap-3 text-left text-lg font-bold text-[var(--text-primary)]">
               <div className="w-5 h-5 rounded-full bg-brand/20 flex items-center justify-center flex-shrink-0">
                 <FiCheck className="text-brand text-xs" />
               </div>

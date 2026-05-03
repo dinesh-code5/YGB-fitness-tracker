@@ -79,7 +79,7 @@ export default function WorkoutHistory() {
                 <div className="flex items-stretch h-full">
                   {/* Mood side bar */}
                   <div className={`w-1 ${
-                    w.mood === 'great' ? 'bg-brand shadow-[0_0_10px_rgba(0,212,255,0.5)]' : 
+                    w.mood === 'great' ? 'bg-brand shadow-glow-sm' : 
                     w.mood === 'good' ? 'bg-green-500' : 
                     w.mood === 'okay' ? 'bg-yellow-500' : 'bg-red-500'
                   }`} />
@@ -123,10 +123,10 @@ export default function WorkoutHistory() {
           {pagination && pagination.pages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-6">
               <button onClick={() => setPage(p => p - 1)} disabled={page === 1}
-                className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40">Prev</button>
-              <span className="text-sm text-muted">{page} / {pagination.pages}</span>
+                className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Prev</button>
+              <span className="text-lg text-muted">{page} / {pagination.pages}</span>
               <button onClick={() => setPage(p => p + 1)} disabled={page === pagination.pages}
-                className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40">Next</button>
+                className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Next</button>
             </div>
           )}
         </>
@@ -176,7 +176,7 @@ export default function WorkoutHistory() {
 //       <div className="flex items-center justify-between mb-6">
 //         <h1 className="font-display text-3xl tracking-wider">WORKOUT HISTORY</h1>
 //         {pagination && (
-//           <span className="text-sm text-muted">{pagination.total} total</span>
+//           <span className="text-lg text-muted">{pagination.total} total</span>
 //         )}
 //       </div>
 
@@ -209,7 +209,7 @@ export default function WorkoutHistory() {
 //                 <div className="flex items-start justify-between gap-3">
 //                   <div className="flex-1 min-w-0">
 //                     <div className="flex items-center gap-2 flex-wrap mb-1">
-//                       <h3 className="font-semibold text-[#F0F0F5] text-sm">{w.name}</h3>
+//                       <h3 className="font-semibold text-[#F0F0F5] text-lg">{w.name}</h3>
 //                       <span className={TYPE_COLORS[w.workoutType] || TYPE_COLORS.custom + ' badge text-xs'}>
 //                         {w.workoutType?.replace('_', ' ')}
 //                       </span>
@@ -232,7 +232,7 @@ export default function WorkoutHistory() {
 //                     {w.notes && <p className="text-xs text-muted mt-2 italic">"{w.notes}"</p>}
 //                   </div>
 //                   <button onClick={() => handleDelete(w._id)} className="text-muted hover:text-red-400 p-1 flex-shrink-0">
-//                     <FiTrash2 className="text-sm" />
+//                     <FiTrash2 className="text-lg" />
 //                   </button>
 //                 </div>
 //               </div>
@@ -243,10 +243,10 @@ export default function WorkoutHistory() {
 //           {pagination && pagination.pages > 1 && (
 //             <div className="flex items-center justify-center gap-2 mt-6">
 //               <button onClick={() => setPage(p => p - 1)} disabled={page === 1}
-//                 className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40">Prev</button>
-//               <span className="text-sm text-muted">{page} / {pagination.pages}</span>
+//                 className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Prev</button>
+//               <span className="text-lg text-muted">{page} / {pagination.pages}</span>
 //               <button onClick={() => setPage(p => p + 1)} disabled={page === pagination.pages}
-//                 className="btn-secondary text-sm py-1.5 px-3 disabled:opacity-40">Next</button>
+//                 className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Next</button>
 //             </div>
 //           )}
 //         </>

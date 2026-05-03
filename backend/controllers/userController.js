@@ -21,7 +21,8 @@ const updateProfile = async (req, res) => {
     const { 
       name, age, weight, height, gender, goal, 
       experience, activityLevel, notifications,
-      weightUnit, heightUnit, restTimerDuration, bio
+      weightUnit, heightUnit, restTimerDuration, bio,
+      archetype
     } = req.body;
 
     const user = await User.findByPk(req.user.id);
@@ -38,6 +39,7 @@ const updateProfile = async (req, res) => {
     if (heightUnit) user.heightUnit = heightUnit;
     if (restTimerDuration) user.restTimerDuration = restTimerDuration;
     if (notifications) user.notifications = { ...user.notifications, ...notifications };
+    if (archetype) user.archetype = archetype;
 
     // Track weight history if weight changed
     if (weight && weight !== user.weight) {

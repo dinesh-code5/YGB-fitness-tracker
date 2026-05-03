@@ -3,35 +3,56 @@ import { FiPause, FiPlay, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 // ── Audio Alarm ────────────────────────────────────────────
+let sharedAudioCtx = null;
+
+function getAudioContext() {
+  if (!sharedAudioCtx) {
+    sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return sharedAudioCtx;
+}
+
 function playAlarm() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    
     [[880,0,0.15],[880,0.18,0.15],[1100,0.36,0.3]].forEach(([f,s,d]) => {
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
       o.frequency.value = f; o.type = 'sine';
-      g.gain.setValueAtTime(0.4, ctx.currentTime + s);
+      g.gain.setValueAtTime(0, ctx.currentTime + s);
+      g.gain.linearRampToValueAtTime(0.4, ctx.currentTime + s + 0.05);
       g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + s + d);
       o.start(ctx.currentTime + s);
       o.stop(ctx.currentTime + s + d + 0.1);
     });
-  } catch {}
+  } catch (e) {
+    console.error('Audio alarm failed:', e);
+  }
 }
 
 export default function LiquidRestTimer({ duration, isActive, startTime, onComplete, onClose }) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isPaused, setIsPaused] = useState(false);
-  const [pauseOffset, setPauseOffset] = useState(0);
-  const [lastPauseTime, setLastPauseTime] = useState(null);
   
   const timerRef = useRef(null);
 
   // Sync with prop changes
   useEffect(() => {
-    setTimeLeft(duration);
-    setIsPaused(false);
-    setPauseOffset(0);
-    setLastPauseTime(null);
+    if (isActive) {
+      setTimeLeft(duration);
+      setIsPaused(false);
+      
+      // Try to "prime" audio context when timer becomes active
+      // This is often within a user gesture call stack (e.g. clicking "Done")
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+    }
   }, [duration, startTime, isActive]);
 
   useEffect(() => {
@@ -56,10 +77,12 @@ export default function LiquidRestTimer({ duration, isActive, startTime, onCompl
   }, [isActive, isPaused]);
 
   const togglePause = () => {
+    getAudioContext().resume().catch(() => {});
     setIsPaused(!isPaused);
   };
 
   const adjustTime = (s) => {
+    getAudioContext().resume().catch(() => {});
     setTimeLeft(prev => Math.max(0, prev + s));
   };
 
@@ -75,7 +98,7 @@ export default function LiquidRestTimer({ duration, isActive, startTime, onCompl
 
   return (
     <div className="sticky top-0 z-[40] w-full py-2 pointer-events-none mb-6">
-      <div className="relative w-full h-20 bg-[var(--surface-card)] border border-brand shadow-[0_0_30px_rgba(0,212,255,0.15)] rounded-2xl overflow-hidden flex items-center px-6 pointer-events-auto backdrop-blur-md">
+      <div className="relative w-full h-20 bg-[var(--surface-card)] border border-brand shadow-glow rounded-2xl overflow-hidden flex items-center px-6 pointer-events-auto backdrop-blur-md">
         {/* Horizontal Fill Animation (Left to Right) */}
         <div 
           className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-linear ${getColor()} opacity-20`}

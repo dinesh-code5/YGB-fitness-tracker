@@ -53,48 +53,48 @@ export default function DailyDietTracker() {
       </div>
       
       {/* Totals Summary */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-3">
         {[ 
           {l:'Calories', v:Math.round(total.calories), u: 'kcal'}, 
           {l:'Protein', v:Math.round(total.protein), u: 'g'},
           {l:'Carbs', v:Math.round(total.carbs), u: 'g'},
           {l:'Fats', v:Math.round(total.fats), u: 'g'} 
         ].map(s => (
-          <div key={s.l} className="card-elevated p-3 text-center border-brand/10">
-            <p className="text-brand font-black text-xl">{s.v}</p>
-            <p className="text-[8px] uppercase font-bold text-muted">{s.l}</p>
+          <div key={s.l} className="card-elevated p-4 text-center border-brand/20">
+            <p className="text-brand font-black text-2xl">{s.v}</p>
+            <p className="text-[10px] uppercase font-bold text-muted mt-1">{s.l}</p>
           </div>
         ))}
       </div>
 
       {/* Water Tip */}
-      <div className="bg-brand/5 border border-brand/20 rounded-xl p-3 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center text-brand flex-shrink-0">
+      <div className="bg-brand/5 border border-brand/20 rounded-2xl p-5 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-brand/20 flex items-center justify-center text-brand flex-shrink-0 text-xl">
           <FiZap />
         </div>
         <div>
-          <p className="text-[10px] font-black uppercase text-brand tracking-widest">Hydration Goal</p>
-          <p className="text-[11px] text-[var(--text-primary)] font-medium">Drink at least 3-4L of water today for optimal recovery.</p>
+          <p className="text-xs font-black uppercase text-brand tracking-widest mb-1">Hydration Goal</p>
+          <p className="text-lg text-[var(--text-primary)] font-medium leading-relaxed">Drink at least 3-4L of water today for optimal recovery.</p>
         </div>
       </div>
 
       {/* List */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {loading ? (
-          <div className="py-8 text-center"><div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto"/></div>
+          <div className="py-10 text-center"><div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto"/></div>
         ) : entries.length === 0 ? (
-          <div className="py-8 text-center border border-dashed border-[var(--surface-border)] rounded-2xl">
-            <p className="text-xs text-muted">No meals logged today</p>
+          <div className="py-12 text-center border border-dashed border-[var(--surface-border)] rounded-2xl">
+            <p className="text-lg text-muted">No meals logged today</p>
           </div>
         ) : entries.map(e => (
-          <div key={e.id} className="flex items-center justify-between p-3 bg-[var(--surface-elevated)] rounded-xl border border-[var(--surface-border)]">
+          <div key={e.id} className="flex items-center justify-between p-4 bg-[var(--surface-elevated)] rounded-2xl border border-[var(--surface-border)]">
             <div>
-              <p className="text-sm font-bold text-[var(--text-primary)]">{e.name}</p>
-              <p className="text-[10px] text-muted font-bold">
+              <p className="text-base font-bold text-[var(--text-primary)]">{e.name}</p>
+              <p className="text-xs text-muted font-bold mt-1">
                 {Math.round(e.calories)} kcal | P: {Math.round(e.protein)}g | C: {Math.round(e.carbs || 0)}g | F: {Math.round(e.fats)}g
               </p>
             </div>
-            <button onClick={() => handleDelete(e.id)} className="text-muted hover:text-red-400 p-2 transition-colors"><FiTrash2 /></button>
+            <button onClick={() => handleDelete(e.id)} className="text-muted hover:text-red-400 p-3 transition-colors"><FiTrash2 className="text-lg" /></button>
           </div>
         ))}
       </div>

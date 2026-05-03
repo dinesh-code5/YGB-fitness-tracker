@@ -15,10 +15,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || true, // true reflects the request origin
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  exposedHeaders: ['X-CSRF-Token']
 }));
 app.use(express.json({ limit: '10mb' }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET || 'ygb-gym-buddy-secret'));
 
 // CSRF Protection
 const csrfProtection = csrf({ 

@@ -39,9 +39,9 @@ const MacroRing = ({ label, grams, pct, color, icon: Icon }) => (
       </div>
     </div>
     <div className="text-center">
-      <p className="text-[10px] font-black uppercase tracking-tighter text-muted">{label}</p>
-      <p className="text-sm font-bold text-[var(--text-primary)]">{grams}g</p>
-      <p className="text-[9px] font-bold text-muted">{Math.round(pct)}%</p>
+      <p className="text-l font-black uppercase tracking-tighter text-muted">{label}</p>
+      <p className="text-l font-bold text-[var(--text-primary)]">{grams}g</p>
+      <p className="text-l font-bold text-muted">{Math.round(pct)}%</p>
     </div>
   </div>
 );
@@ -176,19 +176,19 @@ export default function DietCalculator() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
           <h1 className="font-display text-5xl tracking-widest text-brand">DIET MASTER</h1>
-          <p className="text-muted text-sm font-medium mt-1">Smart nutritional planning for your fitness journey</p>
+          <p className="text-muted text-xl font-medium mt-1">Smart nutritional planning for your fitness journey</p>
         </div>
         {result && (
           <div className="flex flex-col gap-2">
             <div className="bg-brand/10 border border-brand/20 p-4 rounded-2xl flex items-center gap-6 px-8 backdrop-blur-sm shadow-glow-sm">
               <div className="text-center">
-                <p className="text-[10px] font-black text-brand uppercase tracking-widest">Daily Goal</p>
-                <p className="text-3xl font-display text-[var(--text-primary)]">{result.targetCalories} <span className="text-sm font-body text-muted uppercase">kcal</span></p>
+                <p className="text-l font-black text-brand uppercase tracking-widest">Daily Goal</p>
+                <p className="text-3xl font-display text-[var(--text-primary)]">{result.targetCalories} <span className="text-lg font-body text-muted uppercase">kcal</span></p>
               </div>
               <div className="w-px h-10 bg-brand/20" />
               <div className="text-center">
-                <p className="text-[10px] font-black text-brand uppercase tracking-widest">Water</p>
-                <p className="text-3xl font-display text-[var(--text-primary)]">{result.waterIntake}<span className="text-sm font-body text-muted uppercase ml-1">L</span></p>
+                <p className="text-l font-black text-brand uppercase tracking-widest">Water</p>
+                <p className="text-3xl font-display text-[var(--text-primary)]">{result.waterIntake}<span className="text-lg font-body text-muted uppercase ml-1">L</span></p>
               </div>
             </div>
           </div>
@@ -200,23 +200,23 @@ export default function DietCalculator() {
         <div className="xl:col-span-1 space-y-6 xl:sticky xl:top-6">
           {remaining && (
              <div className="card p-6 bg-gradient-to-br from-brand/10 to-transparent border-brand/30 shadow-glow-sm animate-fade-in">
-                <h3 className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-4">Remaining Today</h3>
+                <h3 className="text-l font-black text-brand uppercase tracking-[0.2em] mb-4">Remaining Today</h3>
                 <div className="grid grid-cols-2 gap-4">
                    <div className="flex flex-col">
                       <span className="text-2xl font-display text-[var(--text-primary)]">{Math.round(remaining.calories)}</span>
-                      <span className="text-[10px] font-bold text-muted uppercase">Calories (kcal)</span>
+                      <span className="text-m font-bold text-muted uppercase">Calories (kcal)</span>
                    </div>
                    <div className="flex flex-col">
                       <span className="text-2xl font-display text-[var(--text-primary)]">{Math.round(remaining.protein)}g</span>
-                      <span className="text-[10px] font-bold text-muted uppercase">Protein</span>
+                      <span className="text-m font-bold text-muted uppercase">Protein</span>
                    </div>
                    <div className="flex flex-col">
                       <span className="text-2xl font-display text-[var(--text-primary)]">{Math.round(remaining.carbs)}g</span>
-                      <span className="text-[10px] font-bold text-muted uppercase">Carbs</span>
+                      <span className="text-m font-bold text-muted uppercase">Carbs</span>
                    </div>
                    <div className="flex flex-col">
                       <span className="text-2xl font-display text-[var(--text-primary)]">{Math.round(remaining.fats)}g</span>
-                      <span className="text-[10px] font-bold text-muted uppercase">Fats</span>
+                      <span className="text-m font-bold text-muted uppercase">Fats</span>
                    </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-brand/10">
@@ -226,7 +226,7 @@ export default function DietCalculator() {
                          style={{ width: `${Math.min(100, (todaysTotal.calories / result.targetCalories) * 100)}%` }}
                       />
                    </div>
-                   <p className="text-[9px] font-bold text-muted mt-2 uppercase tracking-widest">
+                   <p className="text-m font-bold text-muted mt-2 uppercase tracking-widest">
                       {Math.round((todaysTotal.calories / result.targetCalories) * 100)}% Consumed
                    </p>
                 </div>
@@ -246,16 +246,16 @@ export default function DietCalculator() {
                   { l: 'Age', k: 'age', i: null },
                 ].map(f => (
                   <div key={f.k} className={f.k === 'age' ? '' : ''}>
-                    <label className="label text-[10px]">{f.l}</label>
+                    <label className="label text-l">{f.l}</label>
                     <div className="relative">
-                      {f.i && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">{f.i}</span>}
-                      <input type="number" className={`input-field text-sm ${f.i ? 'pl-9' : ''}`} value={form[f.k]} onChange={e => set(f.k, e.target.value)} />
+                      {f.i && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-l">{f.i}</span>}
+                      <input type="number" className={`input-field text-l ${f.i ? 'pl-9' : ''}`} value={form[f.k]} onChange={e => set(f.k, e.target.value)} />
                     </div>
                   </div>
                 ))}
                 <div>
-                  <label className="label text-[10px]">Gender</label>
-                  <select className="input-field text-sm" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                  <label className="label text-l">Gender</label>
+                  <select className="input-field text-l" value={form.gender} onChange={e => set('gender', e.target.value)}>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </select>
@@ -263,14 +263,14 @@ export default function DietCalculator() {
               </div>
 
               <div>
-                <label className="label text-[10px]">Lifestyle</label>
-                <select className="input-field text-sm" value={form.activityLevel} onChange={e => set('activityLevel', e.target.value)}>
+                <label className="label text-l">Lifestyle</label>
+                <select className="input-field text-l" value={form.activityLevel} onChange={e => set('activityLevel', e.target.value)}>
                   {ACTIVITY_OPTS.map(a => <option key={a.v} value={a.v}>{a.l}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="label text-[10px] mb-3">Dietary Preference</label>
+                <label className="label text-l mb-3">Dietary Preference</label>
                 <div className="grid grid-cols-2 gap-2">
                   {DIET_TYPES.map(d => (
                     <button key={d.v} onClick={() => set('dietType', d.v)}
@@ -278,7 +278,7 @@ export default function DietCalculator() {
                         form.dietType === d.v ? 'border-brand bg-brand/5 ring-1 ring-brand/20' : 'border-[var(--surface-border)] bg-[var(--surface-card)]'
                       }`}>
                       <span className="text-xl block mb-1">{d.e}</span>
-                      <p className="text-[10px] font-bold uppercase truncate">{d.l}</p>
+                      <p className="text-l font-bold uppercase truncate">{d.l}</p>
                     </button>
                   ))}
                 </div>
@@ -305,7 +305,7 @@ export default function DietCalculator() {
               {/* Macros Ring Stats */}
               <div className="flex flex-wrap gap-4">
                 <MacroRing label="Protein" grams={result.macros.protein} pct={(result.macros.protein * 4 / result.targetCalories) * 100} color="var(--brand)" icon={FiZap} />
-                <MacroRing label="Carbs" grams={result.macros.carbs} pct={(result.macros.carbs * 4 / result.targetCalories) * 100} color="#F59E0B" icon={GiBowlOfRice} />
+                <MacroRing label="Carbs" grams={result.macros.carbs} pct={(result.macros.carbs * 4 / result.targetCalories) * 100} color="var(--brand)" icon={GiBowlOfRice} />
                 <MacroRing label="Fats" grams={result.macros.fats} pct={(result.macros.fats * 9 / result.targetCalories) * 100} color="var(--accent)" icon={FiDroplet} />
               </div>
 
@@ -316,7 +316,7 @@ export default function DietCalculator() {
                 </div>
                 <div className="text-center sm:text-left">
                   <h3 className="text-lg font-bold text-[var(--text-primary)]">Optimize Your Hydration</h3>
-                  <p className="text-sm text-muted mt-1 leading-relaxed">
+                  <p className="text-l text-muted mt-1 leading-relaxed">
                     Based on your activity level, aim for <span className="text-brand font-bold">{result.waterIntake} - {Math.round((result.waterIntake + 1) * 10) / 10} Liters</span> of water daily. 
                     Proper hydration increases metabolism by up to 30% and significantly improves muscle recovery.
                   </p>
@@ -326,7 +326,7 @@ export default function DietCalculator() {
               {/* Meal Plan Grid */}
               <div className="grid md:grid-cols-2 gap-4">
                 {Object.entries(result.mealPlan).map(([key, meal], i) => {
-                  const mealName = meal.label?.split('(')[0]?.trim() || key;
+                  const mealName = meal.label?.split('(')?.[0]?.trim() || key;
                   return (
                     <div key={key} className="card overflow-hidden hover:border-brand/30 transition-all group">
                       <div className="p-4 bg-[var(--surface-elevated)] border-b border-[var(--surface-border)] flex items-center justify-between">
@@ -334,14 +334,14 @@ export default function DietCalculator() {
                           <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center text-brand">
                             {MEAL_ICONS[mealName] || <GiMeal />}
                           </div>
-                          <h4 className="font-bold text-xs uppercase tracking-widest">{mealName}</h4>
+                          <h4 className="font-bold text-l uppercase tracking-widest">{mealName}</h4>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-black text-muted group-hover:text-brand transition-colors">{meal.macros?.cal} KCAL</span>
+                          <span className="text-l font-black text-muted group-hover:text-brand transition-colors">{meal.macros?.cal} KCAL</span>
                         </div>
                       </div>
                       <div className="p-4 space-y-3">
-                        <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Suggested Options:</p>
+                        <p className="text-l font-bold text-muted uppercase tracking-wider mb-1">Suggested Options:</p>
                         {meal.options?.slice(0, 3).map((opt, j) => {
                           const logKey = `${key}-${opt}`;
                           const isLogging = loggingMeal === logKey;
@@ -355,7 +355,7 @@ export default function DietCalculator() {
                             >
                               <div className="flex gap-3">
                                 <div className={`mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-brand' : 'bg-muted'}`} />
-                                <p className={`text-xs leading-relaxed ${isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-muted'}`}>{opt}</p>
+                                <p className={`text-l leading-relaxed ${isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-muted'}`}>{opt}</p>
                               </div>
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleLogOption(key, meal, opt, j); }}
@@ -370,7 +370,7 @@ export default function DietCalculator() {
                                 {isLogging ? (
                                   <div className="w-3 h-3 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" />
                                 ) : (
-                                  <FiPlus className="text-sm" />
+                                  <FiPlus className="text-l" />
                                 )}
                               </button>
                             </div>
@@ -391,9 +391,9 @@ export default function DietCalculator() {
                   { l: 'WATER', v: `${result.waterIntake}L`, s: 'Optimal Hydration' }
                 ].map(s => (
                   <div key={s.l} className="card p-4 text-center">
-                    <p className="text-[10px] font-black text-brand tracking-widest">{s.l}</p>
+                    <p className="text-l font-black text-brand tracking-widest">{s.l}</p>
                     <p className="text-xl font-display my-1">{s.v}</p>
-                    <p className="text-[8px] text-muted uppercase font-bold">{s.s}</p>
+                    <p className="text-[14px] text-muted uppercase font-bold">{s.s}</p>
                   </div>
                 ))}
               </div>

@@ -16,7 +16,7 @@ const register = async (req, res) => {
     const { 
       name, email, password, age, weight, height, gender, 
       goal, experience, activityLevel, username,
-      weightUnit, heightUnit, referralCode
+      weightUnit, heightUnit, referralCode, archetype
     } = req.body;
 
     // Check if user exists
@@ -55,7 +55,8 @@ const register = async (req, res) => {
       weightHistory: weight ? [{ weight, date: new Date().toISOString() }] : [],
       referralCode: referralCode || null,
       promoCode: isPremium ? referralCode.toUpperCase() : null,
-      isPremium: !!isPremium
+      isPremium: !!isPremium,
+      archetype: archetype || 'fit'
     });
 
     const token = generateToken(user.id);
@@ -79,7 +80,9 @@ const register = async (req, res) => {
         restTimerDuration: user.restTimerDuration,
         weightUnit: user.weightUnit,
         heightUnit: user.heightUnit,
-        isPremium: user.isPremium
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+        bio: user.bio
       }
     });
   } catch (error) {
@@ -144,7 +147,9 @@ const login = async (req, res) => {
         currentStreak: user.currentStreak,
         longestStreak: user.longestStreak,
         restTimerDuration: user.restTimerDuration,
-        isPremium: user.isPremium
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+        bio: user.bio
       }
     });
   } catch (error) {
