@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    await initCsrf();
+    // await initCsrf();
     const { data } = await authAPI.login({ email, password });
     localStorage.setItem('ygb_token', data.token);
     localStorage.setItem('ygb_user', JSON.stringify(data.user));
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const register = useCallback(async (formData) => {
-    await initCsrf();
+    // await initCsrf();
     const { data } = await authAPI.register(formData);
     localStorage.setItem('ygb_token', data.token);
     localStorage.setItem('ygb_user', JSON.stringify(data.user));
