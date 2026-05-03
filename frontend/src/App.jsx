@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { initCsrf } from './utils/api';
+// import { initCsrf } from './utils/api';
 import { ARCHETYPES } from './utils/archetypes';
 import { motion, AnimatePresence } from 'framer-motion';
 
