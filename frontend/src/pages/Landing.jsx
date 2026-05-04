@@ -61,9 +61,9 @@ const STATS = [
 ];
 
 const TESTIMONIALS = [
-  { name: 'Arjun M.', goal: 'Muscle Gain', text: 'Lost 6kg and gained strength in 3 months. The PPL split is 🔥', avatar: 'A' },
-  { name: 'Priya S.', goal: 'Fat Loss',    text: 'Finally a diet tracker with actual Indian food. Total game changer!', avatar: 'P' },
-  { name: 'Rahul K.', goal: 'Recomp',      text: 'The streak system keeps me consistent. 45 days straight 💪', avatar: 'R' },
+  { name: 'Dinesh Nawani.', goal: 'Muscle Gain', text: 'Lost 6kg and gained strength in 3 months. The PPL split is 🔥', avatar: 'D' },
+  { name: 'Harshit Gupta', goal: 'Fat Loss',    text: 'Finally a diet tracker with actual Indian food. Total game changer!', avatar: 'H' },
+  { name: 'Rahul Chandak', goal: 'Recomp',      text: 'The streak system keeps me consistent. 45 days straight 💪', avatar: 'R' },
 ];
 
 export default function Landing() {
@@ -74,7 +74,7 @@ export default function Landing() {
       <div className="bg-glow-extra" />
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header className="relative flex items-center justify-between px-6 py-4 border-b border-[#222232]/80 backdrop-blur-md bg-[#0A0A0F]/60 sticky top-0 z-50">
+      <header className="relative flex items-center justify-between px-6 py-4 border-b border-[#222232]/80 backdrop-blur-md bg-[#0A0A0F]/60  top-0 z-50">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand/50 to-transparent" />
         <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
