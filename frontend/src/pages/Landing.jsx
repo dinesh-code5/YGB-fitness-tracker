@@ -236,7 +236,7 @@ export default function Landing() {
               READY TO <span className="text-gradient">GRIND?</span>
             </h2>
             <p className="text-[var(--text-secondary)] mb-8 text-lg max-w-sm mx-auto leading-relaxed">
-              Set up your profile in 2 minutes and get your personalized PPL workout plan instantly.
+              Set up your profile in 2 minutes and get your personalized workout plan instantly.
             </p>
             <Link to="/register" className="btn-primary inline-flex items-center gap-2 text-base py-4 px-10 shimmer">
               Create Free Account <FiArrowRight />

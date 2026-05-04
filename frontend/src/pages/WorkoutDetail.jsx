@@ -236,7 +236,7 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
         </button>
       </div>
       <div className="p-3 space-y-1.5">
-        <div className="grid grid-cols-12 gap-1 text-xs text-muted px-1 mb-1">
+        <div className="grid grid-cols-12 gap-1 text-base text-muted px-1 mb-1">
           <span className="col-span-1">#</span>
           <span className="col-span-4 text-center">kg</span>
           <span className="col-span-4 text-center">Reps</span>
@@ -245,7 +245,7 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
         </div>
         {exercise.sets.map((set, si) => (
           <div key={si} className="grid grid-cols-12 gap-1 items-center">
-            <span className="col-span-1 text-xs text-muted text-center">{si + 1}</span>
+            <span className="col-span-1 text-base text-muted text-center">{si + 1}</span>
             <div className="col-span-4">
               <input type="number" min="0" step="2.5"
                 className="input-field text-center text-lg py-1.5 px-1 w-full"

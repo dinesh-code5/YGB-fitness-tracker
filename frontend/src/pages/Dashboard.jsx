@@ -105,7 +105,6 @@ export default function Dashboard() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-end justify-between mb-10">
         <div>
-          <p className="text-muted text-base mb-2 font-medium animate-slide-in-left">{greeting} 👋</p>
           {/* Animated letter-by-letter name — dramatic pop */}
           <h1 className="font-display text-6xl md:text-7xl tracking-wider leading-none flex">
             {(user?.name?.split(' ')?.[0]?.toUpperCase() || '').split('').map((letter, i) => (
@@ -138,16 +137,16 @@ export default function Dashboard() {
       </div>
 
       {/* ── Stat Cards ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {STAT_ITEMS.map((s, i) => (
           <div
             key={s.label}
-            className={`stat-card p-6 ${s.border} animate-slide-up`}
+            className={`stat-card p-4 sm:p-6 ${s.border} animate-slide-up`}
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <span className="text-3xl">{s.icon}</span>
-            <p className={`text-3xl font-black mt-2 ${s.color === 'text-brand' ? 'text-brand' : s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-muted font-bold uppercase tracking-widest mt-1">{s.label}</p>
+            <span className="text-2xl sm:text-3xl">{s.icon}</span>
+            <p className={`text-2xl sm:text-3xl font-black mt-2 ${s.color === 'text-brand' ? 'text-brand' : s.color}`}>{s.value}</p>
+            <p className="text-[10px] sm:text-[11px] text-muted font-bold uppercase tracking-widest mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -159,11 +158,11 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-3xl font-display tracking-wider mb-5 flex items-center gap-3">
+            <h2 className="text-2xl md:text-3xl font-display tracking-wider mb-5 flex items-center gap-3">
               <div className="w-1.5 h-6 bg-brand rounded-full" />
               Quick Actions
             </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {QUICK_ACTIONS.map((a, i) => (
                 <div key={a.to} className="text-xl animate-slide-up " style={{ animationDelay: `${i * 60}ms` }}>
                   <QuickCard {...a} />

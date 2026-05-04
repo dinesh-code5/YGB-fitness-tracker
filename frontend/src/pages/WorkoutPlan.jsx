@@ -713,7 +713,7 @@ export default function WorkoutPlan() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
+            className={`flex-1 py-2 rounded-lg text-base font-medium transition-all ${
               activeTab === tab.id ? 'bg-brand text-[#0F0F14]' : 'bg-[#1E1E2A] text-muted'
             }`}
           >

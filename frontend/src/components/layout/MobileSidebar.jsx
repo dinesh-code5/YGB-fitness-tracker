@@ -86,7 +86,7 @@ export default function MobileSidebar({ isOpen, onClose }) {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                       isActive
-                        ? 'bg-brand text-[#0F0F14] font-black'
+                        ? 'bg-brand text-muted font-black'
                         : hasActive
                           ? 'text-brand bg-brand/5'
                           : 'text-muted hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]'

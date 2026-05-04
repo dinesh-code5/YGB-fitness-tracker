@@ -6,6 +6,7 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { initCsrf } from './utils/api';
 import { ARCHETYPES } from './utils/archetypes';
 import { motion, AnimatePresence } from 'framer-motion';
+import ScrollToTop from './components/ScrollToTop';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -208,6 +209,7 @@ export default function App() {
         <ThemeSynchronizer />
         <div className="bg-glow" />
         <BrowserRouter>
+          <ScrollToTop />
           <AppRoutes />
           <Toaster
             position="top-right"
