@@ -149,7 +149,7 @@ const TemplateCard = ({ template, isSystem, onUse, onEdit, onDelete }) => {
                 )}
               </div>
 
-              <h3 className="font-semibold text-[#F0F0F5] text-lg leading-tight">{template.name}</h3>
+              <h3 className="font-black text-[#F0F0F5] text-xl leading-tight uppercase tracking-tight">{template.name}</h3>
 
               {template.description && (
                 <p className="text-xs text-muted mt-1 leading-relaxed">{template.description}</p>
@@ -264,11 +264,9 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
 
   const showGuide = async (e, ex) => {
     e.stopPropagation();
-    // If we already have full details (description, etc.), use it
     if (ex.description) {
       setGuideEx(ex);
     } else {
-      // Fetch full details
       try {
         const id = ex.exerciseId || ex.id || ex._id;
         const res = await plansAPI.getExercise(id);
@@ -328,53 +326,60 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex justify-center p-4 overflow-y-auto pt-20 md:pt-12">
       <div className="bg-[#16161E] border border-[#2A2A3A] rounded-3xl w-full max-w-xl flex flex-col shadow-2xl h-fit mb-20">
-        <div className="flex items-center justify-between p-6 border-b border-[#2A2A3A] flex-shrink-0">
-          <h3 className="text-xl font-semibold tracking-tight text-[#F0F0F5]">{template ? 'Edit Template' : 'Create Template'}</h3>
+        <div className="flex items-center justify-between p-7 border-b border-[#2A2A3A] flex-shrink-0">
+          <h3 className="text-xl font-black tracking-tight text-[#F0F0F5] uppercase tracking-widest">Template Editor</h3>
           <button onClick={onClose} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1E1E2A] transition-colors text-muted text-2xl">
             <FiX />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-7 space-y-7">
           <div>
-            <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">Template Name</label>
+            <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">Template Name</label>
             <input
-              className="input-field h-12 text-lg"
-              placeholder="e.g. My Push Day"
+              className="input-field h-14 text-xl font-black"
+              placeholder="e.g. MONSTER PUSH DAY"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">
-              Description <span className="text-[10px] normal-case opacity-60">(optional)</span>
+            <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">
+              Description <span className="text-[10px] font-medium normal-case opacity-40 italic ml-2">(How do we crush this?)</span>
             </label>
             <textarea
-              className="input-field text-lg h-20 pt-3 resize-none"
-              placeholder="Brief description of the workout goals..."
+              className="input-field text-lg h-24 pt-3.5 resize-none font-medium"
+              placeholder="Primary focus, intensity techniques, etc..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             <div>
-              <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">Focus Type</label>
-              <select className="input-field text-lg h-12" value={workoutType} onChange={(e) => setWorkoutType(e.target.value)}>
-                {WORKOUT_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                  </option>
-                ))}
-              </select>
+              <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">Focus Type</label>
+              <div className="relative">
+                <select 
+                  className="input-field h-14 text-lg bg-[#1E1E2A] text-white cursor-pointer appearance-none font-black uppercase tracking-widest w-full px-5" 
+                  value={workoutType} 
+                  onChange={(e) => setWorkoutType(e.target.value)}
+                >
+                  {WORKOUT_TYPES.map((t) => (
+                    <option key={t} value={t} className="bg-[#16161E] text-white py-3 text-base">
+                      {t.replace('_', ' ').toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-brand text-xl pointer-events-none" />
+              </div>
             </div>
 
             <div>
-              <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block">Est. Minutes</label>
+              <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">Est. Time (min)</label>
               <input
                 type="number"
-                className="input-field text-lg h-12"
+                className="input-field text-xl h-14 font-black text-center"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
               />
@@ -382,35 +387,31 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-2 block text-brand">Add Exercises</label>
-            <div className="relative mb-3">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-3 block">Select Exercises</label>
+            <div className="relative mb-3.5">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-brand text-lg" />
               <input
-                className="input-field pl-10 text-lg h-11 border-brand/20 focus:border-brand/50"
-                placeholder="Search library..."
+                className="input-field pl-11 text-lg h-12 border-brand/20 focus:border-brand/50 font-medium"
+                placeholder="Search the arsenal..."
                 value={exSearch}
                 onChange={(e) => setExSearch(e.target.value)}
               />
             </div>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
               {filteredEx.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => toggleEx(ex)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-all border ${
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all border-2 ${
                     isSelected(ex.id) ? 'border-brand bg-brand/10 shadow-glow-sm' : 'border-[#2A2A3A] hover:bg-[#1E1E2A]'
                   }`}
                 >
-                  <div
-                    className={`w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0 ${
-                      isSelected(ex.id) ? 'bg-brand' : 'bg-[#2A2A3A]'
-                    }`}
-                  >
-                    {isSelected(ex.id) && <FiCheck className="text-[#0F0F14] text-xs font-bold" />}
+                  <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isSelected(ex.id) ? 'bg-brand' : 'bg-[#2A2A3A]'}`}>
+                    {isSelected(ex.id) && <FiCheck className="text-[#0A0A0F] text-xs font-black" />}
                   </div>
                   <div className="flex-1 min-w-0" onClick={(e) => showGuide(e, ex)}>
-                    <p className="text-lg font-medium text-[#F0F0F5] truncate hover:text-brand transition-colors cursor-help">{ex.name}</p>
-                    <p className="text-[10px] text-muted font-bold uppercase tracking-tight opacity-70">{ex.muscleGroup}</p>
+                    <p className="text-lg font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
+                    <p className="text-[10px] text-brand font-black uppercase tracking-widest opacity-60">{ex.muscleGroup}</p>
                   </div>
                 </button>
               ))}
@@ -418,36 +419,36 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           </div>
 
           {selectedExercises.length > 0 && (
-            <div className="pt-4 border-t border-[#2A2A3A]">
-              <label className="text-[11px] font-semibold text-muted uppercase tracking-widest mb-4 block">Configuration ({selectedExercises.length})</label>
-              <div className="space-y-3">
+            <div className="pt-6 border-t border-[#2A2A3A]">
+              <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-5 block">Workout Flow ({selectedExercises.length})</label>
+              <div className="space-y-3.5">
                 {selectedExercises.map((ex, i) => (
-                  <div key={i} className="bg-[var(--surface-elevated)]/40 border border-[#2A2A3A] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex-1 min-w-0 flex items-center gap-2 cursor-help" onClick={(e) => showGuide(e, ex)}>
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand" />
-                      <p className="text-lg font-medium text-[#F0F0F5] truncate hover:text-brand transition-colors">{ex.name}</p>
+                  <div key={i} className="bg-[var(--surface-elevated)] border-2 border-[#2A2A3A] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex-1 min-w-0 flex items-center gap-3 cursor-help" onClick={(e) => showGuide(e, ex)}>
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand shadow-glow-sm" />
+                      <p className="text-lg font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
                     </div>
-                    <div className="flex items-center gap-3 justify-end">
-                      <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-4 justify-end">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Sets</span>
                         <input
                           type="number" min="1" max="10"
-                          className="w-12 h-9 bg-[#1E1E2A] border border-[#2A2A3A] rounded-lg text-xs text-center font-bold text-brand focus:border-brand/50 outline-none"
+                          className="w-14 h-10 bg-[#1E1E2A] border-2 border-[#2A2A3A] rounded-lg text-base text-center font-black text-brand focus:border-brand/50 outline-none"
                           value={ex.defaultSets}
                           onChange={(e) => updateEx(i, 'defaultSets', Number(e.target.value))}
                         />
-                        <span className="text-muted text-[10px] font-black uppercase">Sets</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Reps</span>
                         <input
-                          className="w-16 h-9 bg-[#1E1E2A] border border-[#2A2A3A] rounded-lg text-xs text-center font-bold text-brand focus:border-brand/50 outline-none"
+                          className="w-18 h-10 bg-[#1E1E2A] border-2 border-[#2A2A3A] rounded-lg text-base text-center font-black text-brand focus:border-brand/50 outline-none"
                           value={ex.defaultReps}
                           onChange={(e) => updateEx(i, 'defaultReps', e.target.value)}
                         />
-                        <span className="text-muted text-[10px] font-black uppercase">Reps</span>
                       </div>
                       <button
                         onClick={() => setSelectedExercises((prev) => prev.filter((_, j) => j !== i))}
-                        className="w-9 h-9 rounded-lg flex items-center justify-center text-muted hover:text-red-400 hover:bg-red-400/10 transition-all"
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-muted hover:text-red-400 hover:bg-red-400/10 transition-all border border-transparent hover:border-red-400/20"
                       >
                         <FiTrash2 className="text-lg" />
                       </button>
@@ -459,10 +460,10 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           )}
         </div>
 
-        <div className="p-6 border-t border-[#2A2A3A] flex-shrink-0 bg-[#16161E] rounded-b-3xl">
-          <button onClick={handleSave} disabled={saving} className="btn-primary w-full h-14 text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 shadow-glow-sm">
-            {saving ? <div className="w-5 h-5 border-3 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiSave className="text-lg" />}
-            {template ? 'Update Template' : 'Establish Template'}
+        <div className="p-7 border-t border-[#2A2A3A] flex-shrink-0 bg-[#16161E] rounded-b-3xl">
+          <button onClick={handleSave} disabled={saving} className="btn-primary w-full h-14 text-lg font-black uppercase tracking-[0.15em] flex items-center justify-center gap-4 shadow-glow">
+            {saving ? <div className="w-5 h-5 border-4 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiSave className="text-xl" />}
+            {template ? 'Update Plan' : 'Establish Plan'}
           </button>
         </div>
       </div>
@@ -500,7 +501,7 @@ const DayCard = ({ day, onUse }) => {
             {day.day}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[#F0F0F5] text-lg">{day.name}</p>
+            <p className="font-black text-xl text-[#F0F0F5] tracking-tight">{day.name}</p>
             <p className="text-xs text-muted">{day.exercises?.length} exercises · tap to expand</p>
           </div>
         </div>
@@ -572,7 +573,7 @@ export default function WorkoutPlan() {
     ])
       .then(([pRes, exRes, tRes]) => {
         setPlan(pRes.data.plan);
-        setSystemTemplates(pRes.data.templates || []); // Use recommended templates from plansAPI
+        setSystemTemplates(pRes.data.templates || []);
         setExercises(exRes.data.exercises || []);
         setUserTemplates(tRes.data.userTemplates || []);
       })
@@ -582,7 +583,6 @@ export default function WorkoutPlan() {
 
   const handleUseTemplate = async (template) => {
     try {
-      // Unify with handleUsePPLPlan logic for reliability
       const workoutData = {
         name: template.name,
         exercises: template.exercises?.map(ex => {
@@ -619,7 +619,6 @@ export default function WorkoutPlan() {
 
   const handleUsePPLPlan = async (day) => {
     try {
-      // Create a workout from the PPL plan day
       const workoutData = {
         name: day.name,
         exercises: day.exercises?.map(ex => {
@@ -692,7 +691,7 @@ export default function WorkoutPlan() {
   return (
     <div className="page-container max-w-2xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl tracking-wider">MY PLAN</h1>
+        <h1 className="text-3xl font-black uppercase tracking-tight">My Plan</h1>
         <button
           onClick={() => {
             setEditingTemplate(null);
@@ -708,13 +707,15 @@ export default function WorkoutPlan() {
       <div className="flex gap-2 mb-5">
         {[
           { id: 'recommendations', label: 'YGB Recommendations' },
-          { id: 'mine', label: `My Templates (${userTemplates.length})` },
+          { id: 'mine', label: `My Templates (${userTemplates?.length || 0})` },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all ${
-              activeTab === tab.id ? 'bg-brand text-[#0F0F14]' : 'bg-[#1E1E2A] text-muted'
+            className={`flex-1 py-3 rounded-xl text-base font-black uppercase tracking-widest transition-all ${
+              activeTab === tab.id 
+                ? 'bg-brand text-white shadow-glow-sm' 
+                : 'bg-[#1E1E2A] text-[var(--text-secondary)] hover:text-white border border-transparent hover:border-white/10'
             }`}
           >
             {tab.label}
@@ -728,53 +729,55 @@ export default function WorkoutPlan() {
           <p className="text-muted text-lg">Loading templates...</p>
         </div>
       ) : (
-        <>
-          {activeTab === 'recommendations' && (
-            <div className="space-y-6">
+        <div className="relative min-h-[400px]">
+          {activeTab === 'recommendations' ? (
+            <div className="space-y-6 animate-fade-in">
               {/* Featured PPL Split */}
-              {plan && (
-                <div className="animate-fade-in">
+              {plan ? (
+                <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-5 bg-brand rounded-full" />
-                    <h2 className="text-lg font-black uppercase tracking-widest text-[var(--text-primary)]">Recommended: PPL Split</h2>
+                    <div className="w-1.5 h-6 bg-brand rounded-full" />
+                    <h2 className="text-xl font-black uppercase tracking-widest text-brand">Recommended Split</h2>
                   </div>
                   
-                  <div className="card p-5 mb-4 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
-                    <div className="flex items-center justify-between gap-3">
+                  <div className="card p-6 mb-4 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
+                    <div className="flex items-center justify-between gap-4">
                       <div>
-                        <h2 className="font-display text-xl text-brand">{plan.split}</h2>
-                        <p className="text-muted text-xs font-bold uppercase tracking-widest mt-1">
+                        <h2 className="text-2xl font-black text-brand uppercase tracking-tight">{plan.split}</h2>
+                        <p className="text-muted text-sm font-black uppercase tracking-widest mt-1 opacity-60">
                           {plan.frequency}× per week · Progressive overload
                         </p>
                       </div>
-                      <div className="w-12 h-12 rounded-2xl bg-brand/10 flex items-center justify-center">
-                        <GiMuscleUp className="text-brand text-2xl" />
+                      <div className="w-14 h-14 rounded-2xl bg-brand/10 border-2 border-brand/20 flex items-center justify-center">
+                        <GiMuscleUp className="text-brand text-3xl" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3 mb-8">
+                  <div className="space-y-4 mb-8">
                     {plan.schedule?.map((day, i) => (
                       <DayCard key={i} day={day} onUse={handleUsePPLPlan} />
                     ))}
                   </div>
                 </div>
+              ) : (
+                <div className="text-center py-10 text-muted italic">No personalized split available.</div>
               )}
 
               {/* Other Pre-built templates */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-1 h-5 bg-[var(--surface-border)] rounded-full" />
-                  <h2 className="text-lg font-black uppercase tracking-widest text-muted">Other Training Templates</h2>
+                  <div className="w-1.5 h-6 bg-[var(--surface-border)] rounded-full" />
+                  <h2 className="text-xl font-black uppercase tracking-widest text-muted">Library Templates</h2>
                 </div>
 
-                <div className="flex gap-1.5 overflow-x-auto pb-2 mb-4 no-scrollbar">
+                <div className="flex gap-2 overflow-x-auto pb-2 mb-4 no-scrollbar">
                   {FILTER_TYPES.map((f) => (
                     <button
                       key={f}
                       onClick={() => setFilterType(f)}
-                      className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
-                        filterType === f ? 'bg-brand text-[#0F0F14] border-brand' : 'border-[#2A2A3A] text-muted'
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border-2 ${
+                        filterType === f ? 'bg-brand text-[#b4b4c0] border-brand' : 'border-[#2A2A3A] text-muted'
                       }`}
                     >
                       {f.replace('_', ' ')}
@@ -782,9 +785,9 @@ export default function WorkoutPlan() {
                   ))}
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {filteredSystem.length === 0 ? (
-                    <div className="card p-8 text-center text-muted">No templates for this filter</div>
+                    <div className="card p-10 text-center text-muted text-lg font-medium">No templates found in this category.</div>
                   ) : (
                     filteredSystem.map((t) => (
                       <TemplateCard
@@ -803,28 +806,10 @@ export default function WorkoutPlan() {
                 </div>
               </div>
             </div>
-          )}
-
-          {activeTab === 'mine' && (
-            <div>
-              {userTemplates.length === 0 ? (
-                <div className="card p-10 text-center">
-                  <GiMuscleUp className="text-brand/20 text-5xl mx-auto mb-3" />
-                  <p className="text-[#F0F0F5] font-medium mb-1">No custom templates yet</p>
-                  <p className="text-muted text-lg mb-4">Create your own workout templates to reuse them quickly.</p>
-                  <button
-                    onClick={() => {
-                      setEditingTemplate(null);
-                      setShowEditor(true);
-                    }}
-                    className="btn-primary flex items-center gap-2 mx-auto"
-                  >
-                    <FiPlus />
-                    Create First Template
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3">
+          ) : (
+            <div className="animate-fade-in">
+              {userTemplates && userTemplates.length > 0 ? (
+                <div className="space-y-4">
                   {userTemplates.map((t) => (
                     <TemplateCard
                       key={t.id || t._id}
@@ -839,10 +824,26 @@ export default function WorkoutPlan() {
                     />
                   ))}
                 </div>
+              ) : (
+                <div className="card p-12 text-center border-dashed border-2">
+                  <GiMuscleUp className="text-brand/20 text-6xl mx-auto mb-4" />
+                  <p className="text-[#F0F0F5] text-xl font-black uppercase mb-2">Build Your Arsenal</p>
+                  <p className="text-muted text-lg mb-6 max-w-xs mx-auto">Create custom workout templates to track your unique training style.</p>
+                  <button
+                    onClick={() => {
+                      setEditingTemplate(null);
+                      setShowEditor(true);
+                    }}
+                    className="btn-primary flex items-center gap-3 mx-auto px-8 py-4 text-xl"
+                  >
+                    <FiPlus />
+                    Create First Template
+                  </button>
+                </div>
               )}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {showEditor && (

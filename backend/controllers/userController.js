@@ -298,7 +298,7 @@ const deleteProgressPhoto = async (req, res) => {
 const verifyPromo = async (req, res) => {
   try {
     const { code } = req.body;
-    const VALID_CODES = ['YGBFREE', 'PROMO100', 'FITNESS2024'];
+    const VALID_CODES = ['YGBFREE', 'PROMO100', 'FITNESS2024', 'YGBLINKEDIN'];
     
     if (VALID_CODES.includes(code.toUpperCase())) {
       const user = await User.findByPk(req.user.id);

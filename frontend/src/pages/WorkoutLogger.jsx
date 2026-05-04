@@ -490,7 +490,7 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
         {!collapsed && (
           <div className="p-5 space-y-4">
             {/* Column headers */}
-            <div className="grid grid-cols-12 gap-3 text-xs font-bold text-muted uppercase tracking-tighter px-2 mb-2">
+            <div className="grid grid-cols-12 gap-3 text-sm font-black text-muted uppercase tracking-widest px-2 mb-2">
               <span className="col-span-1 text-center">#</span>
               <span className="col-span-3">Type</span>
               <span className="col-span-2">Prev</span>
@@ -513,9 +513,9 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
               return (
                 <div
                   key={si}
-                  className={`grid grid-cols-12 gap-3 items-center rounded-xl px-2 py-3 transition-colors ${set.completed ? 'bg-brand/10' : ''}`}
+                  className={`grid grid-cols-12 gap-3 items-center rounded-xl px-2 py-4 transition-colors ${set.completed ? 'bg-brand/10' : ''}`}
                 >
-                  <span className="col-span-1 text-xs text-muted font-mono text-center">{si + 1}</span>
+                  <span className="col-span-1 text-sm text-muted font-black text-center">{si + 1}</span>
 
                   <div className="col-span-3">
                     <SetTypeBadge
@@ -524,12 +524,12 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
                     />
                   </div>
 
-                  <span className="col-span-2 text-xs text-muted font-mono truncate">{prevStr}</span>
+                  <span className="col-span-2 text-sm text-muted font-black font-mono truncate">{prevStr}</span>
 
                   <div className="col-span-2">
                     <input
                       type="number" min="0" step="0.5"
-                      className="input-field text-center text-lg py-2 w-full font-black"
+                      className="input-field text-center text-2xl py-3 w-full font-black border-brand/20 focus:border-brand/50"
                       value={set.weight}
                       onFocus={e => e.target.select()}
                       onChange={e => updateSet(si, 'weight', Number(e.target.value))}
@@ -539,30 +539,30 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
                   <div className="col-span-2">
                     <input
                       type="number" min="1"
-                      className="input-field text-center text-lg py-2 w-full font-black"
+                      className="input-field text-center text-2xl py-3 w-full font-black border-brand/20 focus:border-brand/50"
                       value={set.reps}
                       onFocus={e => e.target.select()}
                       onChange={e => updateSet(si, 'reps', Number(e.target.value))}
                     />
                   </div>
 
-                  <div className="col-span-2 flex items-center justify-center gap-1">
+                  <div className="col-span-2 flex items-center justify-center gap-2">
                     <button
                       onClick={() => completeSet(si)}
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                         set.completed
-                          ? 'bg-brand text-[#0F0F14] shadow-glow-sm scale-105'
+                          ? 'bg-brand text-[#0F0F14] shadow-glow-sm scale-110'
                           : 'bg-[#2A2A3A] text-muted hover:bg-[#3A3A4A]'
                       }`}
                     >
-                      <FiCheck className="text-base" />
+                      <FiCheck className="text-xl" />
                     </button>
                     {exercise.sets.length > 1 && (
                       <button
                         onClick={() => removeSet(si)}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-red-400 transition-colors"
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-muted hover:text-red-400 transition-colors"
                       >
-                        <FiX className="text-lg" />
+                        <FiX className="text-xl" />
                       </button>
                     )}
                   </div>
@@ -570,13 +570,13 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
               );
             })}
 
-            <div className="flex items-center gap-3 mt-4">
-              <button onClick={addSet} className="btn-secondary text-xs py-3 px-5 flex items-center gap-2 flex-1 justify-center">
-                <FiPlus /> Add Set
+            <div className="flex items-center gap-3 mt-6">
+              <button onClick={addSet} className="btn-secondary text-sm py-4 px-6 flex items-center gap-2 flex-1 justify-center font-black uppercase tracking-widest">
+                <FiPlus className="text-lg" /> Add Set
               </button>
               <div className="relative flex-[2]">
                 <input
-                  className="input-field text-lg py-3 pl-4"
+                  className="input-field text-xl py-4 pl-5 font-medium"
                   placeholder="Note for this exercise..."
                   value={exercise.notes || ''}
                   onChange={e => onChange({ ...exercise, notes: e.target.value })}
@@ -888,51 +888,51 @@ export default function WorkoutLogger() {
             <h1 className="font-display text-5xl tracking-wider leading-none mb-2">IN PROGRESS</h1>
             <div className="flex items-center gap-5 mt-2 flex-wrap">
               {startTimeRef.current && (
-                <span className="text-lg text-muted flex items-center gap-2 font-bold">
-                  <FiClock className="text-lg text-brand" />
-                  {new Date(startTimeRef.current).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                <span className="text-xl text-muted flex items-center gap-2 font-bold">
+                  <FiClock className="text-xl text-brand" />
+                  START: {new Date(startTimeRef.current).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               )}
-              <span className="text-lg text-brand font-black animate-pulse bg-brand/10 px-3 py-1 rounded-lg flex items-center gap-2">
-                <FiZap className="text-xs" />
-                STARTED: {formatTime(elapsed)}
+              <span className="text-xl text-brand font-black animate-pulse bg-brand/10 px-4 py-1.5 rounded-lg flex items-center gap-2">
+                <FiZap className="text-lg" />
+                ELAPSED: {formatTime(elapsed)}
               </span>
             </div>
           </div>
         </div>
         <div className="flex gap-3 flex-shrink-0">
-          <button onClick={handleDiscard} className="btn-secondary !text-red-400 !border-red-500/20 hover:!bg-red-500/10 text-lg py-3 px-5">
+          <button onClick={handleDiscard} className="btn-secondary !text-red-400 !border-red-500/20 hover:!bg-red-500/10 text-xl py-3 px-6 font-black uppercase tracking-widest">
             Discard
           </button>
-          <button onClick={handleFinish} disabled={saving} className="btn-primary flex items-center gap-2 text-base py-3 px-6 shadow-glow-sm">
+          <button onClick={handleFinish} disabled={saving} className="btn-primary flex items-center gap-3 text-xl py-3 px-8 shadow-glow-sm font-black uppercase tracking-widest">
             {saving
-              ? <span className="w-5 h-5 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" />
-              : <FiCheck className="text-lg" />}
+              ? <span className="w-6 h-6 border-3 border-[#0F0F14] border-t-transparent rounded-full animate-spin" />
+              : <FiCheck className="text-2xl" />}
             Finish
           </button>
         </div>
       </div>
 
       {/* Workout Meta */}
-      <div className="card p-7 mb-8 space-y-6 relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1.5 h-full bg-brand group-hover:w-2 transition-all" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="card p-8 mb-8 space-y-8 relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-2 h-full bg-brand group-hover:w-3 transition-all" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <label className="label text-lg">Workout Session Name</label>
+            <label className="text-xs font-black uppercase tracking-[0.2em] text-muted mb-3 block">Workout Session Name</label>
             <input
-              className="input-field text-lg font-black tracking-tight"
+              className="input-field text-2xl font-black tracking-tight h-14"
               value={name}
               onChange={e => setName(e.target.value)}
             />
           </div>
           <div>
-            <label className="label text-lg">Current Vibe / Mood</label>
-            <div className="flex gap-2">
+            <label className="text-xs font-black uppercase tracking-[0.2em] text-muted mb-3 block">Current Session Vibe</label>
+            <div className="flex gap-2.5">
               {MOODS.map(m => (
                 <button
                   key={m.v}
                   onClick={() => setMood(m.v)}
-                  className={`flex-1 py-4 rounded-2xl border transition-all text-3xl flex items-center justify-center ${
+                  className={`flex-1 py-4 rounded-2xl border transition-all text-4xl flex items-center justify-center ${
                     mood === m.v
                       ? 'border-brand bg-brand/10 shadow-glow-sm'
                       : 'border-[var(--surface-border)] bg-[var(--surface-card)] grayscale opacity-60 hover:grayscale-0 hover:opacity-100'

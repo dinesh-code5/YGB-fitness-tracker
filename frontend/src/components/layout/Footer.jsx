@@ -12,8 +12,25 @@ const QUICK_LINKS = [
   { to: '/social',          label: 'Community' },
 ];
 
+/* ... inside the Footer component ... */
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [quoteIndex, setQuoteIndex] = React.useState(0);
+
+  const QUOTES = [
+    { text: "The secret to getting ahead is getting started.", author: "Mark Twain" },
+    { text: "Pain is temporary. Pride is forever.", author: "Unknown" },
+    { text: "Discipline is doing what needs to be done, even if you don't want to do it.", author: "Unknown" },
+    { text: "Don't stop when you're tired. Stop when you're done.", author: "David Goggins" },
+    { text: "Your body can stand almost anything. It’s your mind that you have to convince.", author: "Unknown" },
+  ];
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
+    }, 10000); // Slower rotation: 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <footer className="relative border-t border-[var(--surface-border)] pt-16 pb-8 px-4 mt-auto overflow-hidden">
@@ -38,13 +55,15 @@ export default function Footer() {
             <p className="text-[var(--text-secondary)] text-m leading-relaxed mb-6 max-w-xs">
               The ultimate toolkit for the modern Indian lifter. Track progress, optimize nutrition, and crush your goals.
             </p>
-            {/* Quote */}
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-brand/5 border border-brand/15">
-              <FiZap className="text-brand mt-0.5 flex-shrink-0" />
-              <p className="text-l text-[var(--text-secondary)] italic leading-relaxed">
-                "The secret to getting ahead is getting started."
-                <span className="text-[var(--text-secondary)]/60 block mt-1 not-italic">— Mark Twain</span>
-              </p>
+            {/* Static Border, Animated Inner Quote */}
+            <div className="p-4 rounded-xl bg-brand/5 border border-brand/15 min-h-[90px] relative">
+              <div key={quoteIndex} className="flex items-start gap-3 animate-fade-in">
+                <FiZap className="text-brand mt-0.5 flex-shrink-0" />
+                <p className="text-l text-[var(--text-secondary)] italic leading-relaxed">
+                  "{QUOTES[quoteIndex].text}"
+                  <span className="text-[var(--text-secondary)]/60 block mt-1 not-italic">— {QUOTES[quoteIndex].author}</span>
+                </p>
+              </div>
             </div>
           </div>
 

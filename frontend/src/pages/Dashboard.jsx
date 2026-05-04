@@ -27,10 +27,10 @@ const QuickCard = ({ to, icon: Icon, label, sub, color = 'text-brand', bg = 'bg-
 /* ── Motivational banner copy ─────────────────────────────────────────── */
 const getMotivation = (hour, streak) => {
   if (streak > 7)   return { emoji: '🔥', line: `${streak}-day streak. You're on fire!` };
-  if (hour < 7)     return { emoji: '🌅', line: 'Early bird gets the gains.' };
-  if (hour < 12)    return { emoji: '💪', line: 'Morning grind hits different.' };
-  if (hour < 17)    return { emoji: '⚡', line: 'Afternoon power session?' };
-  if (hour < 21)    return { emoji: '🌙', line: 'Evening gains are still gains.' };
+  if (hour >= 4 && hour < 7)   return { emoji: '🌅', line: 'Early bird gets the gains.' };
+  if (hour >= 7 && hour < 12)  return { emoji: '💪', line: 'Morning grind hits different.' };
+  if (hour >= 12 && hour < 17) return { emoji: '⚡', line: 'Afternoon power session?' };
+  if (hour >= 17 && hour < 22) return { emoji: '🌙', line: 'Evening gains are still gains.' };
   return { emoji: '🦉', line: 'Night owl mode. Respect.' };
 };
 
@@ -59,7 +59,7 @@ export default function Dashboard() {
   }, []);
 
   const hour = new Date().getHours();
-  const greeting = hour >= 4 && hour < 12 ? 'Good Morning' : hour >= 12 && hour < 16 ? 'Good Afternoon' : hour >= 16 && hour < 22 ? 'Good Evening' : 'Good Night';
+  const greeting = hour >= 4 && hour < 12 ? 'Good Morning' : hour >= 12 && hour < 17 ? 'Good Afternoon' : hour >= 17 && hour < 22 ? 'Good Evening' : 'Good Night';
   const { emoji, line } = getMotivation(hour, user?.currentStreak || 0);
 
   const bmi = user?.weight && user?.height
@@ -105,7 +105,6 @@ export default function Dashboard() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-end justify-between mb-10">
         <div>
-          <p className="text-muted text-base mb-2 font-medium animate-slide-in-left">{greeting} 👋</p>
           {/* Animated letter-by-letter name — dramatic pop */}
           <h1 className="font-display text-6xl md:text-7xl tracking-wider leading-none flex">
             {(user?.name?.split(' ')?.[0]?.toUpperCase() || '').split('').map((letter, i) => (
@@ -138,16 +137,16 @@ export default function Dashboard() {
       </div>
 
       {/* ── Stat Cards ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {STAT_ITEMS.map((s, i) => (
           <div
             key={s.label}
-            className={`stat-card p-6 ${s.border} animate-slide-up`}
+            className={`stat-card p-4 sm:p-6 ${s.border} animate-slide-up`}
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <span className="text-3xl">{s.icon}</span>
-            <p className={`text-3xl font-black mt-2 ${s.color === 'text-brand' ? 'text-brand' : s.color}`}>{s.value}</p>
-            <p className="text-[11px] text-muted font-bold uppercase tracking-widest mt-1">{s.label}</p>
+            <span className="text-2xl sm:text-3xl">{s.icon}</span>
+            <p className={`text-2xl sm:text-3xl font-black mt-2 ${s.color === 'text-brand' ? 'text-brand' : s.color}`}>{s.value}</p>
+            <p className="text-[10px] sm:text-[11px] text-muted font-bold uppercase tracking-widest mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -159,11 +158,11 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-3xl font-display tracking-wider mb-5 flex items-center gap-3">
+            <h2 className="text-2xl md:text-3xl font-display tracking-wider mb-5 flex items-center gap-3">
               <div className="w-1.5 h-6 bg-brand rounded-full" />
               Quick Actions
             </h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {QUICK_ACTIONS.map((a, i) => (
                 <div key={a.to} className="text-xl animate-slide-up " style={{ animationDelay: `${i * 60}ms` }}>
                   <QuickCard {...a} />
@@ -258,53 +257,58 @@ export default function Dashboard() {
           {/* ── Activity Heatmap ─────────────────────────────────────────────── */}
           <div className="card p-5 relative overflow-hidden hover:border-brand/30 hover:shadow-glow-sm transition-all duration-300">
             <div className="absolute top-0 right-0 w-24 h-24 bg-brand/4 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[19px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] flex items-center gap-2">
-                <FiCalendar className="text-brand" />
-                Activity Heatmap
-              </h2>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-sm bg-[var(--surface-elevated)]" />
-                <div className="w-2 h-2 rounded-sm bg-brand/40" />
-                <div className="w-2 h-2 rounded-sm bg-brand" />
-              </div>
-            </div>
+            
+            {(() => {
+              const [dateView, setDateView] = useState(new Date());
+              const month = dateView.getMonth();
+              const year = dateView.getFullYear();
+              
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              const days = [...Array(daysInMonth)].map((_, i) => new Date(year, month, i + 1));
+              
+              const changeMonth = (offset) => setDateView(new Date(year, month + offset, 1));
 
-            <div className="w-full">
-              {/* Weekday headers */}
-              <div className="grid grid-cols-7 gap-1.5 mb-1.5">
-                {['M','T','W','T','F','S','S'].map((d, i) => (
-                  <div key={i} className="text-center text-[16px] font-black text-muted tracking-tighter opacity-50">{d}</div>
-                ))}
-              </div>
-              {/* 4 rows × 7 columns = 28 days */}
-              <div className="grid grid-cols-7 gap-1.5">
-                {[...Array(28)].map((_, i) => {
-                  const date = new Date();
-                  date.setDate(date.getDate() - (27 - i));
-                  const hasWorkout = recentWorkouts.some(w =>
-                    new Date(w.date).toDateString() === date.toDateString()
-                  );
-                  const isToday = date.toDateString() === new Date().toDateString();
-                  return (
-                    <div
-                      key={i}
-                      title={date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
-                      className={`aspect-square rounded-lg transition-all duration-300 flex items-center justify-center text-[17px] font-bold cursor-default
-                        ${hasWorkout
-                          ? 'bg-brand text-[#f5e4e4] shadow-glow-sm'
-                          : isToday
-                            ? 'bg-[var(--surface-elevated)] border border-brand/50 text-brand'
-                            : 'bg-[var(--surface-elevated)] text-muted hover:bg-brand/20 hover:text-brand'
-                        } animate-scale-in`}
-                      style={{ animationDelay: `${i * 18}ms` }}
-                    >
-                      {date.getDate()}
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-[19px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] flex items-center gap-2">
+                      <FiCalendar className="text-brand" />
+                      Activity Heatmap
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => changeMonth(-1)} className="text-white/40 hover:text-white">◀</button>
+                      <span className="text-sm font-bold text-white/50 w-24 text-center">
+                        {dateView.toLocaleString('default', { month: 'short', year: 'numeric' })}
+                      </span>
+                      <button onClick={() => changeMonth(1)} disabled={month === new Date().getMonth() && year === new Date().getFullYear()} className="text-white/40 hover:text-white disabled:opacity-20">▶</button>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  </div>
+
+                  <div className="w-full grid grid-cols-7 gap-1.5">
+                    {days.map((d, i) => {
+                      const hasWorkout = recentWorkouts.some(w => new Date(w.date).toDateString() === d.toDateString());
+                      const isToday = d.toDateString() === new Date().toDateString();
+                      return (
+                        <div
+                          key={i}
+                          title={d.toDateString()}
+                          className={`aspect-square rounded-lg transition-all duration-300 flex items-center justify-center text-xs font-bold cursor-default
+                            ${hasWorkout
+                              ? 'bg-brand text-[#f5e4e4] shadow-glow-sm'
+                              : isToday
+                                ? 'bg-[var(--surface-elevated)] border border-brand/50 text-brand'
+                                : 'bg-[var(--surface-elevated)] text-muted hover:bg-brand/20 hover:text-brand'
+                            } animate-scale-in`}
+                          style={{ animationDelay: `${i * 18}ms` }}
+                        >
+                          {d.getDate()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <DailyDietTracker />

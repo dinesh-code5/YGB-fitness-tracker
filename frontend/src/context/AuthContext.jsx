@@ -50,11 +50,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
+    // Clear all session data
     localStorage.removeItem('ygb_token');
     localStorage.removeItem('ygb_user');
     localStorage.removeItem('ygb_active_workout');
+    
+    // Reset local state
     setUser(null);
     setActiveWorkout(null);
+
+    // Hard redirect to ensure clean break from SPA state
+    // This prevents "stuck" animations or router sync issues during logout
+    window.location.href = '/';
   }, []);
 
   const updateUser = useCallback((updates) => {

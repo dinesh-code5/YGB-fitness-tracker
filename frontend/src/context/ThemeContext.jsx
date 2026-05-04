@@ -11,10 +11,11 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.classList.add('dark');
     document.documentElement.style.colorScheme = 'dark';
     
-    // Set initial theme color if stored
-    const storedColor = localStorage.getItem('ygb_theme_color');
-    if (storedColor) {
-      document.documentElement.style.setProperty('--theme-color', storedColor);
+    // Set initial theme color
+    const storedColor = localStorage.getItem('ygb_theme_color') || '#00D4FF';
+    document.documentElement.style.setProperty('--theme-color', storedColor);
+    if (!localStorage.getItem('ygb_theme_color')) {
+      localStorage.setItem('ygb_theme_color', '#00D4FF');
     }
   }, []);
 

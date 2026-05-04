@@ -117,10 +117,18 @@ const GymBarChart = ({ workouts, accentColor }) => {
 
 // ── GitHub-Style Activity Heatmap ────────────────────────────────────────
 const ActivityHeatmap = ({ workouts, accentColor }) => {
+  const [dateView, setDateView] = useState(new Date());
   const workoutDates = new Set(workouts.map(w => new Date(w.date).toDateString()));
-  const days = [...Array(56)].map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (55 - i));
+  
+  const month = dateView.getMonth();
+  const year = dateView.getFullYear();
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+
+  const days = [...Array(daysInMonth)].map((_, i) => {
+    const d = new Date(year, month, i + 1);
     return {
       date: d.toDateString(),
       active: workoutDates.has(d.toDateString()),
@@ -130,9 +138,20 @@ const ActivityHeatmap = ({ workouts, accentColor }) => {
 
   const themeColor = accentColor || getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
 
+  const changeMonth = (offset) => {
+    setDateView(new Date(year, month + offset, 1));
+  };
+
   return (
     <div className="w-full">
-      <div className="grid gap-[3px]" style={{ gridTemplateColumns: 'repeat(8, minmax(0, 1fr))' }}>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={() => changeMonth(-1)} className="text-white/40 hover:text-white">◀</button>
+        <span className="text-lg font-bold uppercase tracking-widest" style={{ color: themeColor }}>
+          {dateView.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </span>
+        <button onClick={() => changeMonth(1)} disabled={month === new Date().getMonth() && year === new Date().getFullYear()} className="text-white/40 hover:text-white disabled:opacity-20">▶</button>
+      </div>
+      <div className="grid gap-[3px]" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
         {days.map((day, i) => (
           <div key={i} title={day.date}
             className={`aspect-square rounded-[3px] transition-all duration-300 ${
@@ -146,10 +165,6 @@ const ActivityHeatmap = ({ workouts, accentColor }) => {
           />
         ))}
       </div>
-      <div className="flex justify-between mt-2 px-0.5">
-        <span className="text-lg font-bold text-white/20 uppercase tracking-widest">8 wks ago</span>
-        <span className="text-lg font-bold uppercase tracking-widest" style={{ color: themeColor }}>Today</span>
-      </div>
     </div>
   );
 };
@@ -162,10 +177,10 @@ const XPBar = ({ xp = 750, nextLevel = 1000, level = 12, accentColor }) => {
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-black uppercase tracking-widest" style={{ color: themeColor }}>Level {level}</span>
-          <span className="text-lg text-white/30 font-bold">ELITE LIFTER</span>
+          <span className="text-base sm:text-lg font-black uppercase tracking-widest" style={{ color: themeColor }}>Level {level}</span>
+          <span className="text-base sm:text-lg text-white/30 font-bold hidden sm:block">ELITE LIFTER</span>
         </div>
-        <span className="text-lg font-bold text-white/30">{xp} / {nextLevel} XP</span>
+        <span className="text-base sm:text-lg font-bold text-white/30">{xp} / {nextLevel} XP</span>
       </div>
       <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${progress}%`, backgroundColor: themeColor, boxShadow: `0 0 8px ${themeColor}60` }} />
@@ -564,7 +579,7 @@ export default function Profile() {
                   style={{ background: `linear-gradient(135deg, ${accentColor}, transparent 60%)` }}>
                   <div className="w-full h-full rounded-full bg-[#0D0D14] flex items-center justify-center overflow-hidden">
                     <span className="font-black transition-all duration-500" style={{ fontSize: '3.5rem', color: accentColor + '40' }}>
-                      {currentArchetype.glyph}
+                      {/* {currentArchetype.glyph} */}
                     </span>
                     <span className="absolute text-5xl font-black" style={{ color: accentColor }}>
                       {user?.name?.charAt(0)?.toUpperCase()}
@@ -647,15 +662,16 @@ export default function Profile() {
                     <p className="text-xl text-white/20 mt-0.5">What physique are you building?</p>
                   </div>
                   <button onClick={() => handleSave({ ...form, archetype })} disabled={saving}
-                    className="text-l font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 text-white/30 hover:text-white hover:border-white/20 transition-all">
+                    className="text-base font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 text-white/30 hover:text-white hover:border-white/20 transition-all">
                     {saving ? 'Saving...' : 'Save Archetype'}
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {ARCHETYPES.map(a => (
                     <ArchetypeCard key={a.id} archetype={a} selected={archetype} onSelect={handleArchetypeChange} />
                   ))}
                 </div>
+
               </div>
 
               <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6">
@@ -744,7 +760,7 @@ export default function Profile() {
             </div>
 
             <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6">
-              <h2 className="text-xl font-black uppercase tracking-[0.2em] text-white/40 mb-5">Streak Stats</h2>
+              <h2 className="text-l font-black uppercase tracking-[0.2em] text-white/40 mb-5">Streak Stats</h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { label: 'Current Streak', value: user?.currentStreak || 0, unit: 'days', color: '#F59E0B' },
@@ -753,7 +769,7 @@ export default function Profile() {
                   { label: 'This Month', value: thisMonthSessions, unit: '', color: '#10B981' },
                 ].map(s => (
                   <div key={s.label} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                    <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}<span className="text-xs text-white/20 ml-1 font-bold">{s.unit}</span></p>
+                    <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}<span className="text-l text-white/20 ml-1 font-bold">{s.unit}</span></p>
                     <p className="text-lg text-white/25 font-bold uppercase tracking-widest mt-1">{s.label}</p>
                   </div>
                 ))}
@@ -867,11 +883,12 @@ export default function Profile() {
             <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-1">
               <div>
                 <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-3 block">Body Archetype</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {ARCHETYPES.map(a => (
-                    <ArchetypeCard key={a.id} archetype={a} selected={archetype} onSelect={(id) => { handleArchetypeChange(id); }} compact />
+                    <ArchetypeCard key={a.id} archetype={a} selected={archetype} onSelect={handleArchetypeChange} />
                   ))}
                 </div>
+
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -988,7 +1005,7 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${user?.isPublic ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'}`}>
                     <FiGlobe className="text-xl" />
                   </div>
                   <div>
@@ -998,14 +1015,14 @@ export default function Profile() {
                 </div>
                 <button 
                   onClick={handleTogglePrivacy}
-                  className={`w-14 h-7 rounded-full transition-all relative ${user?.isPublic ? 'bg-brand' : 'bg-white/10'}`}>
+                  className={`w-14 h-7 rounded-full transition-all relative ${user?.isPublic ? 'bg-green-500' : 'bg-white/10'}`}>
                   <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${user?.isPublic ? 'right-1' : 'left-1'}`} />
                 </button>
               </div>
 
               <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${user?.notifications?.workoutReminder ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
                     <FiBell className="text-xl" />
                   </div>
                   <div>
@@ -1015,7 +1032,7 @@ export default function Profile() {
                 </div>
                 <button 
                   onClick={() => handleUpdateNotifications({ workoutReminder: !user?.notifications?.workoutReminder })}
-                  className={`w-14 h-7 rounded-full transition-all relative ${user?.notifications?.workoutReminder ? 'bg-brand' : 'bg-white/10'}`}>
+                  className={`w-14 h-7 rounded-full transition-all relative ${user?.notifications?.workoutReminder ? 'bg-green-500' : 'bg-white/10'}`}>
                   <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${user?.notifications?.workoutReminder ? 'right-1' : 'left-1'}`} />
                 </button>
               </div>

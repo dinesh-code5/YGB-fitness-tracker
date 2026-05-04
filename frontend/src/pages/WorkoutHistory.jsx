@@ -41,17 +41,17 @@ export default function WorkoutHistory() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display text-4xl tracking-wider text-brand">TRAINING LOG</h1>
-          <p className="text-muted text-xs font-bold uppercase tracking-widest mt-1">Review your past sessions</p>
+          <p className="text-muted text-base font-bold uppercase tracking-widest mt-1">Review your past sessions</p>
         </div>
-        {pagination && <div className="card px-3 py-1.5 rounded-lg border-brand/20 bg-brand/5 text-[10px] font-black text-brand uppercase">{pagination.total} Workouts</div>}
+        {pagination && <div className="card px-3 py-1.5 rounded-lg border-brand/20 bg-brand/5 text-l font-white text-brand uppercase">{pagination.total} Workouts</div>}
       </div>
 
       <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
         <div className="bg-[var(--surface-elevated)] p-1 rounded-xl border border-[var(--surface-border)] flex gap-1">
           {FILTERS.map(f => (
             <button key={f} onClick={() => { setFilter(f); setPage(1); }}
-              className={`flex-shrink-0 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                filter === f ? 'bg-brand text-[#0F0F14] shadow-glow-sm' : 'text-muted hover:text-[var(--text-primary)] hover:bg-[var(--surface-card)]'
+              className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${
+                filter === f ? 'bg-brand text-[#9b9bba] shadow-glow-sm' : 'text-muted hover:text-[var(--text-primary)] hover:bg-[var(--surface-card)]'
               }`}>
               {f.replace('_', ' ')}
             </button>
