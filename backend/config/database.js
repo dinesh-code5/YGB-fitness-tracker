@@ -3,8 +3,8 @@ require('dotenv').config();
 
 let sequelize;
 
+// Force use of DATABASE_URL if available for testing
 if (process.env.DATABASE_URL) {
-  
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
@@ -17,7 +17,7 @@ if (process.env.DATABASE_URL) {
     }
   });
 } else {
-  // Local development
+  // Fallback to local development
   sequelize = new Sequelize(
     process.env.DB_NAME || 'ygb',
     process.env.DB_USER || 'postgres',

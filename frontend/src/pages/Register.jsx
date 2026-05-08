@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GiMuscleUp } from 'react-icons/gi';
 import { 
-  FiMail, FiLock, FiEye, FiEyeOff, FiZap, FiUser, FiHeart,
-  FiArrowRight, FiArrowLeft, FiActivity, FiTarget, FiTrendingUp, FiAward 
+  FiMail, FiLock, FiEye, FiEyeOff, FiZap, FiUser,
+  FiArrowRight, FiArrowLeft, FiTrendingUp, FiAward 
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ARCHETYPES } from '../utils/archetypes';
@@ -27,49 +27,6 @@ const ACTIVITY = [
   { value: 'moderate', label: 'Moderate', desc: '3-4 days/wk' },
   { value: 'active', label: 'Active', desc: '5+ days/wk' },
 ];
-
-const FloatingGymIcons = () => {
-  const icons = [
-    { Icon: GiMuscleUp, size: 120, color: 'text-brand', top: '15%', left: '10%', delay: 0, duration: 6 },
-    { Icon: FiZap, size: 100, color: 'text-purple-500', bottom: '20%', right: '12%', delay: 1, duration: 8 },
-    { Icon: FiHeart, size: 80, color: 'text-brand', top: '60%', left: '85%', delay: 0.5, duration: 7 },
-    { Icon: FiActivity, size: 140, color: 'text-white', top: '25%', right: '15%', delay: 1.5, duration: 9 },
-    { Icon: FiAward, size: 90, color: 'text-brand', bottom: '10%', left: '15%', delay: 2, duration: 7.5 },
-  ];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-      <div className="energy-beam opacity-5" style={{ animationDelay: '1s' }} />
-      <div className="energy-beam opacity-5" style={{ animationDelay: '3s' }} />
-      {icons.map((item, i) => (
-        <motion.div
-          key={i}
-          className={`absolute opacity-[0.07] ${item.color}`}
-          initial={{ y: 0, opacity: 0 }}
-          animate={{ 
-            y: [0, -20, 0],
-            opacity: [0.05, 0.1, 0.05],
-          }}
-          transition={{
-            duration: item.duration,
-            repeat: Infinity,
-            delay: item.delay,
-            ease: "easeInOut"
-          }}
-          style={{
-            top: item.top,
-            left: item.left,
-            right: item.right,
-            bottom: item.bottom,
-            fontSize: item.size
-          }}
-        >
-          <item.Icon />
-        </motion.div>
-      ))}
-    </div>
-  );
-};
 
 export default function Register() {
   const { register } = useAuth();
@@ -170,7 +127,7 @@ export default function Register() {
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-1/3 left-1/4 w-80 h-80 bg-brand/10 rounded-full blur-[100px]" 
           />
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         </div>
 
         <motion.div 
@@ -261,9 +218,17 @@ export default function Register() {
 
       {/* ── Right: Multi-step Form panel ── */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-y-auto overflow-x-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-brand/4 rounded-full blur-[100px] pointer-events-none" />
-
-        <FloatingGymIcons />
+        {/* Background Grid & Gradient */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-tr from-brand/5 via-transparent to-purple-500/5" />
+          <div className="absolute inset-0 opacity-[0.015]"
+            style={{
+              backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
+              backgroundSize: '40px 40px'
+            }}
+          />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-brand/5 rounded-full blur-[120px]" />
+        </div>
 
         <motion.div 
           initial={{ scale: 0.95, opacity: 0 }}

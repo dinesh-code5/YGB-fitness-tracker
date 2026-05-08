@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { dietAPI } from '../utils/api';
-import { FiSearch, FiPlus, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiPlus } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
 
 const FOOD_CATEGORIES = ['All', 'Vegetarian', 'Non-Vegetarian', 'Supplement', 'Egg', 'Dairy', 'Fruits', 'Grains'];
 
-export default function FoodLibrary() {
-  const { refreshGlobalData } = useAuth();
+export default function DietFoodLibrary({ refreshLogs }) {
   const [foods, setFoods] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
@@ -15,7 +13,6 @@ export default function FoodLibrary() {
   const [logging, setLogging] = useState(null);
 
   useEffect(() => {
-    // In a real app, replace this with a backend call: dietAPI.getFoods()
     const mockFoods = [
       { id: 1, name: 'Oats', category: 'Grains', calories: 150, protein: 5, fats: 2, carbs: 27 },
       { id: 2, name: 'Chicken Breast (100g)', category: 'Non-Vegetarian', calories: 165, protein: 31, fats: 3.6, carbs: 0 },
@@ -47,12 +44,10 @@ export default function FoodLibrary() {
         carbs: food.carbs || 0,
         fats: food.fats !== undefined ? food.fats : (food.fat || 0)
       });
-      // Refresh global dashboard data silently
-      refreshGlobalData(true);
-      toast.success(`${food.name} added to today's log! 🍎`);
+      refreshLogs();
+      toast.success(`${food.name} added! 🍎`);
     } catch (err) {
-      console.error('Log error:', err);
-      toast.error(err.response?.data?.message || 'Failed to log food');
+      toast.error('Failed to log food');
     } finally {
       setLogging(null);
     }
@@ -64,17 +59,11 @@ export default function FoodLibrary() {
   );
 
   return (
-    <div className="page-container max-w-4xl">
-      <div className="mb-8 relative overflow-hidden p-8 rounded-3xl bg-brand/5 border border-brand/10">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 rounded-full blur-3xl -mr-10 -mt-10" />
-        <h1 className="font-display text-5xl tracking-widest text-brand mb-2">FOOD LIBRARY</h1>
-        <p className="text-muted text-xs font-black uppercase tracking-[0.3em]">Precision nutrition for peak performance</p>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
-          <input className="input-field pl-12 h-14" placeholder="Search foods (e.g. Chicken, Oats...)" 
+          <input className="input-field pl-12 h-14" placeholder="Search foods..." 
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="input-field md:w-56 h-14 font-black uppercase tracking-widest text-[10px]"
@@ -101,38 +90,15 @@ export default function FoodLibrary() {
                   <span className="text-[10px] text-muted font-bold">{f.calories} kcal</span>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="hidden xs:flex gap-3 text-center border-l border-[var(--surface-border)] pl-4">
-                  {[ {l:'P',v:f.protein}, {l:'F',v:f.fats}, {l:'C',v:f.carbs} ].map(m => (
-                    <div key={m.l} className="min-w-[24px]">
-                      <p className="text-[var(--text-primary)] font-black text-xs">{m.v}g</p>
-                      <p className="text-[8px] text-muted uppercase font-black">{m.l}</p>
-                    </div>
-                  ))}
-                </div>
-                
-                <button 
-                  onClick={() => handleLog(f)}
-                  disabled={logging === f.id}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                    logging === f.id ? 'bg-brand/20 text-brand' : 'bg-brand/10 text-brand hover:bg-brand hover:text-[#0F0F14] shadow-glow-sm'
-                  }`}
-                >
-                  {logging === f.id ? (
-                    <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <FiPlus />
-                  )}
-                </button>
-              </div>
+              <button 
+                onClick={() => handleLog(f)}
+                disabled={logging === f.id}
+                className="w-10 h-10 rounded-xl bg-brand/10 text-brand hover:bg-brand hover:text-[#0F0F14] flex items-center justify-center transition-all"
+              >
+                {logging === f.id ? <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" /> : <FiPlus />}
+              </button>
             </div>
           ))}
-          {filtered.length === 0 && (
-            <div className="col-span-full py-20 text-center card border-dashed">
-              <p className="text-muted text-lg font-medium">No foods found matching your search</p>
-            </div>
-          )}
         </div>
       )}
     </div>

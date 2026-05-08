@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { workoutAPI } from '../utils/api';
-import { FiClock, FiZap, FiFilter, FiChevronRight } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
+import { FiClock, FiZap, FiChevronRight } from 'react-icons/fi';
 import { GiMuscleUp } from 'react-icons/gi';
-import toast from 'react-hot-toast';
 
 const TYPE_COLORS = {
   push: 'badge-accent', pull: 'badge-brand', legs: 'badge-warning',
@@ -12,46 +11,49 @@ const TYPE_COLORS = {
 
 export default function WorkoutHistory() {
   const navigate = useNavigate();
-  const [workouts, setWorkouts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { dashboardData, refreshGlobalData } = useAuth();
+  const { historyWorkouts = [], isRefreshing } = dashboardData;
   const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState(null);
+  const itemsPerPage = 10;
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const params = { limit: 10, page };
-      if (filter !== 'all') params.type = filter;
-      const { data } = await workoutAPI.getAll(params);
-      setWorkouts(data.workouts || []);
-      setPagination(data.pagination);
-    } catch { toast.error('Failed to load workouts'); }
-    setLoading(false);
-  };
+  useEffect(() => {
+    // Background refresh if history is empty
+    if (historyWorkouts.length === 0) {
+      refreshGlobalData();
+    }
+  }, [historyWorkouts.length, refreshGlobalData]);
 
-  useEffect(() => { load(); }, [filter, page]);
+  const filteredWorkouts = historyWorkouts.filter(w => 
+    filter === 'all' || w.workoutType === filter
+  );
+
+  const totalPages = Math.ceil(filteredWorkouts.length / itemsPerPage);
+  const workouts = filteredWorkouts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const loading = historyWorkouts.length === 0 && isRefreshing;
 
   const FILTERS = ['all', 'push', 'pull', 'legs', 'upper', 'lower', 'full_body', 'cardio', 'custom'];
 
   const MOOD_EMOJI = { great: '🔥', good: '💪', okay: '😐', bad: '😞' };
 
   return (
-    <div className="page-container max-w-4xl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="page-container max-w-4xl px-3 md:px-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="font-display text-4xl tracking-wider text-brand">TRAINING LOG</h1>
-          <p className="text-muted text-base font-bold uppercase tracking-widest mt-1">Review your past sessions</p>
+          <p className="text-muted text-sm font-bold uppercase tracking-widest mt-1">Review your past sessions</p>
         </div>
-        {pagination && <div className="card px-3 py-1.5 rounded-lg border-brand/20 bg-brand/5 text-l font-white text-brand uppercase">{pagination.total} Workouts</div>}
+        <div className="inline-flex card px-4 py-2 rounded-xl border-brand/20 bg-brand/5 text-sm font-black text-brand uppercase self-start md:self-center tracking-widest">
+          {filteredWorkouts.length} Workouts
+        </div>
       </div>
 
       <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
         <div className="bg-[var(--surface-elevated)] p-1 rounded-xl border border-[var(--surface-border)] flex gap-1">
           {FILTERS.map(f => (
             <button key={f} onClick={() => { setFilter(f); setPage(1); }}
-              className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-black uppercase tracking-widest transition-all ${
-                filter === f ? 'bg-brand text-[#9b9bba] shadow-glow-sm' : 'text-muted hover:text-[var(--text-primary)] hover:bg-[var(--surface-card)]'
+              className={`flex-shrink-0 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                filter === f ? 'bg-brand text-[#efeff2] shadow-glow-sm' : 'text-muted hover:text-[var(--text-primary)] hover:bg-[var(--surface-card)]'
               }`}>
               {f.replace('_', ' ')}
             </button>
@@ -67,7 +69,7 @@ export default function WorkoutHistory() {
       ) : workouts.length === 0 ? (
         <div className="card p-20 text-center border-dashed border-brand/20 bg-brand/5">
           <GiMuscleUp className="text-brand/20 text-7xl mx-auto mb-4" />
-          <p className="text-muted font-bold">No {filter !== 'all' ? filter : ''} sessions found.</p>
+          <p className="text-muted font-bold uppercase tracking-widest text-xs">No {filter !== 'all' ? filter : ''} sessions found.</p>
         </div>
       ) : (
         <>
@@ -76,20 +78,20 @@ export default function WorkoutHistory() {
               <button key={w.id} onClick={() => navigate(`/workout/${w.id}`)}
                 className="w-full card overflow-hidden hover:border-brand/40 transition-all text-left group animate-fade-in"
                 style={{ animationDelay: `${i * 50}ms` }}>
-                <div className="flex items-stretch h-full">
+                <div className="flex items-stretch h-full min-h-[100px]">
                   {/* Mood side bar */}
-                  <div className={`w-1 ${
+                  <div className={`w-1.5 ${
                     w.mood === 'great' ? 'bg-brand shadow-glow-sm' : 
                     w.mood === 'good' ? 'bg-green-500' : 
                     w.mood === 'okay' ? 'bg-yellow-500' : 'bg-red-500'
                   }`} />
                   
-                  <div className="flex-1 p-5">
-                    <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 p-4 md:p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 md:gap-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-3 mb-1">
                           <span className="text-xl">{MOOD_EMOJI[w.mood] || '💪'}</span>
-                          <h3 className="font-bold text-[var(--text-primary)] group-hover:text-brand transition-colors truncate">{w.name}</h3>
+                          <h3 className="font-bold text-[var(--text-primary)] group-hover:text-brand transition-colors truncate text-sm md:text-base">{w.name}</h3>
                         </div>
                         <p className="text-[10px] text-muted font-black uppercase tracking-wider flex items-center gap-2">
                           <span className="text-brand">{new Date(w.date).toLocaleDateString('en-IN', { day:'2-digit', month:'short' })}</span>
@@ -97,8 +99,8 @@ export default function WorkoutHistory() {
                           <span>{new Date(w.date).toLocaleDateString('en-IN', { weekday: 'long' })}</span>
                         </p>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={`${TYPE_COLORS[w.workoutType] || TYPE_COLORS.custom} !text-[9px] !px-2 !py-0.5`}>
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2">
+                        <span className={`${TYPE_COLORS[w.workoutType] || TYPE_COLORS.custom} !text-[8px] !px-2 !py-0.5 font-black uppercase tracking-widest`}>
                           {w.workoutType?.replace('_', ' ')}
                         </span>
                         <div className="flex items-center gap-3 text-[10px] font-black text-muted uppercase">
@@ -110,9 +112,10 @@ export default function WorkoutHistory() {
 
                     <div className="mt-4 flex flex-wrap gap-1.5">
                       {w.exercises?.slice(0, 5).map((ex, i) => (
-                        <span key={i} className="tag border-brand/5 bg-brand/5 text-[9px] text-brand/70">{ex.name}</span>
+                        <span key={i} className="tag border-brand/10 bg-brand/5 text-[9px] text-brand/80 font-bold px-2 py-1 uppercase">{ex.name}</span>
                       ))}
-                      {w.exercises?.length > 5 && <span className="tag text-[9px]">+{w.exercises.length - 5} MORE</span>}
+                      {w.exercises?.length > 5 && <span className="tag text-[9px] px-2 py-1 font-bold">+{w.exercises.length - 5} MORE</span>}
+                      <FiChevronRight className="ml-auto text-muted group-hover:text-brand transition-all group-hover:translate-x-1" />
                     </div>
                   </div>
                 </div>
@@ -120,13 +123,13 @@ export default function WorkoutHistory() {
             ))}
           </div>
 
-          {pagination && pagination.pages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-6">
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-10">
               <button onClick={() => setPage(p => p - 1)} disabled={page === 1}
-                className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Prev</button>
-              <span className="text-lg text-muted">{page} / {pagination.pages}</span>
-              <button onClick={() => setPage(p => p + 1)} disabled={page === pagination.pages}
-                className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Next</button>
+                className="btn-secondary !text-xs !py-2 !px-4 disabled:opacity-40 font-black uppercase tracking-widest">Prev</button>
+              <span className="text-xs font-black text-muted uppercase tracking-widest">{page} / {totalPages}</span>
+              <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages}
+                className="btn-secondary !text-xs !py-2 !px-4 disabled:opacity-40 font-black uppercase tracking-widest">Next</button>
             </div>
           )}
         </>
@@ -134,123 +137,3 @@ export default function WorkoutHistory() {
     </div>
   );
 }
-
-// export default function WorkoutHistory() {
-//   const [workouts, setWorkouts] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [filter, setFilter] = useState('all');
-//   const [page, setPage] = useState(1);
-//   const [pagination, setPagination] = useState(null);
-
-//   const load = async () => {
-//     setLoading(true);
-//     try {
-//       const params = { limit: 10, page };
-//       if (filter !== 'all') params.type = filter;
-//       const { data } = await workoutAPI.getAll(params);
-//       setWorkouts(data.workouts);
-//       setPagination(data.pagination);
-//     } catch {
-//       toast.error('Failed to load workouts');
-//     }
-//     setLoading(false);
-//   };
-
-//   useEffect(() => { load(); }, [filter, page]);
-
-//   const handleDelete = async (id) => {
-//     if (!window.confirm('Delete this workout?')) return;
-//     try {
-//       await workoutAPI.delete(id);
-//       toast.success('Workout deleted');
-//       load();
-//     } catch {
-//       toast.error('Failed to delete');
-//     }
-//   };
-
-//   const FILTERS = ['all', 'push', 'pull', 'legs', 'upper', 'lower', 'full_body', 'cardio', 'custom'];
-
-//   return (
-//     <div className="page-container">
-//       <div className="flex items-center justify-between mb-6">
-//         <h1 className="font-display text-3xl tracking-wider">WORKOUT HISTORY</h1>
-//         {pagination && (
-//           <span className="text-lg text-muted">{pagination.total} total</span>
-//         )}
-//       </div>
-
-//       {/* Filter */}
-//       <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-2">
-//         <FiFilter className="text-muted flex-shrink-0" />
-//         {FILTERS.map(f => (
-//           <button key={f} onClick={() => { setFilter(f); setPage(1); }}
-//             className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${filter === f ? 'bg-brand text-[#0F0F14]' : 'bg-[#1E1E2A] text-muted hover:text-[#F0F0F5]'}`}>
-//             {f.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
-//           </button>
-//         ))}
-//       </div>
-
-//       {loading ? (
-//         <div className="text-center py-12 text-muted">
-//           <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-//           Loading workouts...
-//         </div>
-//       ) : workouts.length === 0 ? (
-//         <div className="card p-12 text-center">
-//           <GiMuscleUp className="text-brand/20 text-6xl mx-auto mb-3" />
-//           <p className="text-muted">No workouts found.</p>
-//         </div>
-//       ) : (
-//         <>
-//           <div className="space-y-3">
-//             {workouts.map(w => (
-//               <div key={w._id} className="card p-4 hover:border-[#3A3A4A] transition-all">
-//                 <div className="flex items-start justify-between gap-3">
-//                   <div className="flex-1 min-w-0">
-//                     <div className="flex items-center gap-2 flex-wrap mb-1">
-//                       <h3 className="font-semibold text-[#F0F0F5] text-lg">{w.name}</h3>
-//                       <span className={TYPE_COLORS[w.workoutType] || TYPE_COLORS.custom + ' badge text-xs'}>
-//                         {w.workoutType?.replace('_', ' ')}
-//                       </span>
-//                     </div>
-//                     <p className="text-xs text-muted mb-2">
-//                       {new Date(w.date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-//                     </p>
-//                     <div className="flex items-center gap-4 text-xs text-muted mb-2">
-//                       {w.duration > 0 && <span className="flex items-center gap-1"><FiClock />{w.duration} min</span>}
-//                       {w.totalVolume > 0 && <span className="flex items-center gap-1"><FiZap />{w.totalVolume.toLocaleString()} kg total</span>}
-//                       {w.totalSets > 0 && <span>{w.totalSets} sets</span>}
-//                     </div>
-//                     {w.exercises?.length > 0 && (
-//                       <div className="flex flex-wrap gap-1">
-//                         {w.exercises.map((ex, i) => (
-//                           <span key={i} className="tag text-xs">{ex.name}</span>
-//                         ))}
-//                       </div>
-//                     )}
-//                     {w.notes && <p className="text-xs text-muted mt-2 italic">"{w.notes}"</p>}
-//                   </div>
-//                   <button onClick={() => handleDelete(w._id)} className="text-muted hover:text-red-400 p-1 flex-shrink-0">
-//                     <FiTrash2 className="text-lg" />
-//                   </button>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-
-//           {/* Pagination */}
-//           {pagination && pagination.pages > 1 && (
-//             <div className="flex items-center justify-center gap-2 mt-6">
-//               <button onClick={() => setPage(p => p - 1)} disabled={page === 1}
-//                 className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Prev</button>
-//               <span className="text-lg text-muted">{page} / {pagination.pages}</span>
-//               <button onClick={() => setPage(p => p + 1)} disabled={page === pagination.pages}
-//                 className="btn-secondary text-lg py-1.5 px-3 disabled:opacity-40">Next</button>
-//             </div>
-//           )}
-//         </>
-//       )}
-//     </div>
-//   );
-// }

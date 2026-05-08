@@ -19,10 +19,10 @@ export default function Footer() {
 
   const QUOTES = [
     { text: "The secret to getting ahead is getting started.", author: "Mark Twain" },
-    { text: "Pain is temporary. Pride is forever.", author: "Unknown" },
-    { text: "Discipline is doing what needs to be done, even if you don't want to do it.", author: "Unknown" },
+    { text: "Pain is temporary. Pride is forever.", author: "Arnold Schwarzenegger" },
+    { text: "Discipline is doing what needs to be done, even if you don't want to do it.", author: "Ronnie Coleman" },
     { text: "Don't stop when you're tired. Stop when you're done.", author: "David Goggins" },
-    { text: "Your body can stand almost anything. It’s your mind that you have to convince.", author: "Unknown" },
+    { text: "Your body can stand almost anything. It’s your mind that you have to convince.", author: "Jim Rohn" },
   ];
 
   React.useEffect(() => {

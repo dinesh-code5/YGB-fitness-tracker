@@ -52,35 +52,20 @@ const CHART_OPTS = {
 };
 
 export default function Progress() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState(null);
-  const [weightHistory, setWeightHistory] = useState([]);
+  const { user, dashboardData, refreshGlobalData } = useAuth();
+  const { stats, stats90d, weightHistory, isRefreshing } = dashboardData;
   const [selectedExercise, setSelectedExercise] = useState('');
   const [days, setDays] = useState(30);
-  const [loading, setLoading] = useState(true);
   const [weightForm, setWeightForm] = useState('');
   const [logWeightOpen, setLogWeightOpen] = useState(false);
 
+  const activeStats = days === 90 ? stats90d : stats;
+  const loading = !activeStats && isRefreshing;
+
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const [sRes, wRes] = await Promise.all([
-          workoutAPI.getStats(days),
-          userAPI.getWeightHistory()
-        ]);
-        setStats(sRes.data.stats);
-        setWeightHistory(wRes.data.weightHistory || []);
-        const exNames = Object.keys(sRes.data.stats?.strengthProgress || {});
-        if (exNames.length > 0 && !selectedExercise) setSelectedExercise(exNames[0]);
-      } catch (err) {
-        console.error('Progress load error:', err);
-        toast.error('Failed to load progress data');
-      }
-      setLoading(false);
-    };
-    load();
-  }, [days]); // Removed user?.isPremium check as requested by UI needs
+    const exNames = Object.keys(activeStats?.strengthProgress || {});
+    if (exNames.length > 0 && !selectedExercise) setSelectedExercise(exNames[0]);
+  }, [activeStats, selectedExercise]);
 
   const handleLogWeight = async () => {
     if (!weightForm) return;
@@ -89,22 +74,17 @@ export default function Progress() {
       toast.success('Weight logged!');
       setWeightForm('');
       setLogWeightOpen(false);
-      const [sRes, wRes] = await Promise.all([
-        workoutAPI.getStats(days),
-        userAPI.getWeightHistory()
-      ]);
-      setStats(sRes.data.stats);
-      setWeightHistory(wRes.data.weightHistory || []);
+      refreshGlobalData(true);
     } catch { toast.error('Failed to log weight'); }
   };
 
   const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
 
   const volumeChart = {
-    labels: stats?.volumeData?.map(d => d.date) || [],
+    labels: activeStats?.volumeData?.map(d => d.date) || [],
     datasets: [{
       label: 'Volume (kg)',
-      data: stats?.volumeData?.map(d => d.volume) || [],
+      data: activeStats?.volumeData?.map(d => d.volume) || [],
       borderColor: themeColor,
       backgroundColor: `${themeColor}15`,
       borderWidth: 2,
@@ -114,11 +94,11 @@ export default function Progress() {
     }]
   };
 
-  const strengthChart = selectedExercise && stats?.strengthProgress?.[selectedExercise] ? {
-    labels: stats.strengthProgress[selectedExercise].map(d => d.date),
+  const strengthChart = selectedExercise && activeStats?.strengthProgress?.[selectedExercise] ? {
+    labels: activeStats.strengthProgress[selectedExercise].map(d => d.date),
     datasets: [{
       label: 'Max Weight (kg)',
-      data: stats.strengthProgress[selectedExercise].map(d => d.weight),
+      data: activeStats.strengthProgress[selectedExercise].map(d => d.weight),
       borderColor: '#FF6B35',
       backgroundColor: 'rgba(255,107,53,0.08)',
       borderWidth: 2,
@@ -128,7 +108,7 @@ export default function Progress() {
     }]
   } : null;
 
-  const weightChart = weightHistory.length > 0 ? {
+  const weightChart = weightHistory?.length > 0 ? {
     labels: weightHistory.slice(-30).map(w => new Date(w.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })),
     datasets: [{
       label: 'Weight (kg)',
@@ -143,10 +123,10 @@ export default function Progress() {
   } : null;
 
   const durationChart = {
-    labels: stats?.volumeData?.map(d => d.date) || [],
+    labels: activeStats?.volumeData?.map(d => d.date) || [],
     datasets: [{
       label: 'Duration (min)',
-      data: stats?.volumeData?.map(d => d.duration || 0) || [],
+      data: activeStats?.volumeData?.map(d => d.duration || 0) || [],
       borderColor: '#9B59FF',
       backgroundColor: 'rgba(155, 89, 255, 0.1)',
       borderWidth: 2,
@@ -156,10 +136,10 @@ export default function Progress() {
   };
 
   const muscleChart = {
-    labels: stats?.muscleDistribution ? Object.keys(stats.muscleDistribution) : [],
+    labels: activeStats?.muscleDistribution ? Object.keys(activeStats.muscleDistribution) : [],
     datasets: [{
       label: 'Sets',
-      data: stats?.muscleDistribution ? Object.values(stats.muscleDistribution) : [],
+      data: activeStats?.muscleDistribution ? Object.values(activeStats.muscleDistribution) : [],
       backgroundColor: [
         'rgba(0, 212, 255, 0.6)',
         'rgba(245, 158, 11, 0.6)',
@@ -173,8 +153,8 @@ export default function Progress() {
     }]
   };
 
-  const firstWeight = weightHistory[0]?.weight;
-  const lastWeight = weightHistory[weightHistory.length - 1]?.weight;
+  const firstWeight = weightHistory?.[0]?.weight;
+  const lastWeight = weightHistory?.[weightHistory.length - 1]?.weight;
   const weightDiff = (lastWeight && firstWeight) ? (lastWeight - firstWeight).toFixed(1) : null;
   const weightTrendColor = user?.goal === 'cut' 
     ? (Number(weightDiff) <= 0 ? 'text-green-400' : 'text-red-400')
@@ -190,7 +170,7 @@ export default function Progress() {
         <div className="bg-[var(--surface-elevated)] p-1 rounded-xl flex gap-1 border border-[var(--surface-border)]">
           {[7, 30, 90].map(d => (
             <button key={d} onClick={() => setDays(d)}
-              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${days === d ? 'bg-brand text-[#0F0F14] shadow-glow-sm' : 'text-muted hover:text-[var(--text-primary)]'}`}>
+              className={`px-4 py-1.5 rounded-lg text-[12px] font-black uppercase tracking-widest transition-all ${days === d ? 'bg-brand text-[#e6e6f8] shadow-glow-sm' : 'text-muted hover:text-[var(--text-primary)]'}`}>
               {d}D
             </button>
           ))}
@@ -212,7 +192,7 @@ export default function Progress() {
               { l: 'Avg Time', v: stats?.avgDuration ? `${stats.avgDuration}m` : '—', i: '⏱️', c: 'text-purple-400' },
             ].map(s => (
               <div key={s.l} className="card p-5 text-center group hover:border-brand/30 transition-all">
-                <span className="text-2xl mb-2 block bounce-subtle">{s.i}</span>
+                <span className="text-2xl mb-2 block">{s.i}</span>
                 <p className={`text-2xl font-black ${s.c}`}>{s.v}</p>
                 <p className="text-[9px] font-black text-muted uppercase tracking-widest mt-1">{s.l}</p>
               </div>

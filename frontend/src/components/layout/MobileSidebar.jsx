@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { to: '/progress', icon: FiTrendingUp, label: 'Progress' },
   { to: '/plan', icon: FiCalendar, label: 'My Plan' },
   { to: '/diet', icon: FiShoppingBag, label: 'Diet' },
-  { to: '/food-library', icon: FiCoffee, label: 'Food Library' },
   { to: '/social', icon: FiUsers, label: 'Community' },
   { to: '/profile', icon: FiUser, label: 'Profile' },
 ];
@@ -32,12 +31,12 @@ export default function MobileSidebar({ isOpen, onClose }) {
     <>
       {/* Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
       
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 h-full w-72 bg-[#0F0F14] border-r border-[var(--surface-border)] z-[70] transition-transform duration-300 ease-in-out md:hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed left-0 top-0 h-full w-72 bg-[#0F0F14] border-r border-[var(--surface-border)] z-[70] transition-transform duration-300 ease-in-out lg:hidden ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-[var(--surface-border)]">
@@ -83,17 +82,25 @@ export default function MobileSidebar({ isOpen, onClose }) {
                   to={to}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative group ${
                       isActive
-                        ? 'bg-brand text-muted font-black'
+                        ? 'bg-brand text-[#d6d6e7] font-black shadow-glow-sm'
                         : hasActive
-                          ? 'text-brand bg-brand/5'
+                          ? 'text-green-400 bg-green-500/10 border border-green-500/20 shadow-[0_0_15px_rgba(74,222,128,0.1)]'
                           : 'text-muted hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]'
                     }`
                   }
                 >
-                  <Icon className="text-lg" />
-                  <span className="text-xs font-bold uppercase tracking-widest">{label}</span>
+                  <div className="relative">
+                    <Icon className={`text-lg transition-transform duration-300 ${hasActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                    {hasActive && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full active-ping" />
+                    )}
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest">{label}</span>
+                  {hasActive && (
+                    <span className="ml-auto text-[8px] font-black bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">Live</span>
+                  )}
                 </NavLink>
               );
             })}

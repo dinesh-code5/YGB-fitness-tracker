@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { plansAPI, templatesAPI, workoutAPI } from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 import {
   FiChevronDown,
   FiChevronUp,
@@ -11,11 +12,35 @@ import {
   FiEdit2,
   FiSave,
   FiX,
+  FiTrendingUp,
   FiSearch,
   FiClock,
 } from 'react-icons/fi';
 import { GiMuscleUp } from 'react-icons/gi';
 import toast from 'react-hot-toast';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const TYPE_BADGE = {
   push: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -41,75 +66,278 @@ const GOAL_LABEL = {
   general: '⭐ General',
 };
 
-const ExerciseGuide = ({ ex, onClose }) => (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-4">
-    <div className="bg-[#16161E] border border-[#2A2A3A] rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-      <div className="sticky top-0 bg-[#16161E] border-b border-[#2A2A3A] p-4 flex items-center justify-between">
-        <div>
-          <h3 className="font-semibold text-[#F0F0F5]">{ex.name}</h3>
-          <p className="text-xs text-muted">
-            {ex.muscleGroup} · {ex.defaultSets} sets × {ex.defaultReps}
-          </p>
-        </div>
-        <button onClick={onClose} className="text-muted text-2xl leading-none">
-          ×
-        </button>
-      </div>
+const ExerciseGuide = ({ ex, onClose }) => {
+  const [exercise, setExercise] = useState(ex);
+  const [loading, setLoading] = useState(!ex.description);
+  const [activeTab, setActiveTab] = useState('description');
+  const [stats, setStats] = useState(null);
 
-      <div className="p-5 space-y-4">
-        <div className="flex flex-wrap gap-1.5">
-          {ex.muscles?.map((m) => (
-            <span key={m} className="tag">
-              {m}
-            </span>
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const id = ex.exerciseId || ex.id || ex._id;
+        const [exRes, statsRes] = await Promise.all([
+          plansAPI.getExercise(id),
+          workoutAPI.getStats(365)
+        ]);
+        setExercise(prev => ({ ...prev, ...exRes.data.exercise }));
+        if (statsRes.data.success) {
+          setStats(statsRes.data.stats.strengthProgress[ex.name] || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch details/stats', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [ex]);
+
+  // 1RM Calculation (Brzycki Formula)
+  const calculate1RM = (weight, reps) => {
+    if (!weight || !reps || reps === 0) return 0;
+    if (reps === 1) return weight;
+    return weight / (1.0278 - (0.0278 * reps));
+  };
+
+  const chartData = {
+    labels: stats?.map(s => s.date) || [],
+    datasets: [
+      {
+        label: 'Max Weight (kg)',
+        data: stats?.map(s => s.weight) || [],
+        borderColor: '#00D4FF',
+        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#00D4FF',
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: '#16161E',
+        titleColor: '#00D4FF',
+        bodyColor: '#FFFFFF',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        padding: 10,
+      }
+    },
+    scales: {
+      y: {
+        grid: { color: 'rgba(255,255,255,0.05)' },
+        ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 } }
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 } }
+      }
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-start justify-center p-2 sm:p-4 pt-2 sm:pt-4 overflow-y-auto">
+      <div className="bg-[#11111A] border border-white/10 rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col shadow-2xl overflow-hidden animate-scale-in my-2 sm:my-0">
+        {/* Header */}
+        <div className="bg-[#16161E] border-b border-white/5 p-5 sm:p-6 flex items-center justify-between flex-shrink-0">
+          <div>
+            <h3 className="text-2xl font-black text-white uppercase tracking-tight">{exercise.name}</h3>
+            <p className="text-sm font-bold text-brand uppercase tracking-[0.2em] mt-1">
+              {exercise.muscleGroup} · {exercise.defaultSets} sets × {exercise.defaultReps}
+            </p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="w-10 h-10 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all"
+          >
+            <FiX className="text-xl" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex bg-[#16161E] border-b border-white/5 p-1">
+          {[
+            { id: 'description', label: 'Guide', icon: FiPlay },
+            { id: 'history', label: 'History', icon: FiClock },
+            { id: 'graph', label: 'Progress', icon: FiTrendingUp }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === tab.id ? 'bg-brand text-[#0A0A0F] shadow-glow-sm' : 'text-white/30 hover:text-white'
+              }`}
+            >
+              <tab.icon className="text-sm" />
+              {tab.label}
+            </button>
           ))}
         </div>
 
-        {ex.description && <p className="text-lg text-muted">{ex.description}</p>}
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-8 custom-scrollbar">
+          {loading ? (
+            <div className="py-20 text-center">
+              <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm font-black text-white/20 uppercase tracking-widest">Accessing Guide...</p>
+            </div>
+          ) : (
+            <>
+              {activeTab === 'description' && (
+                <div className="space-y-8 animate-fade-in">
+                  <div className="flex flex-wrap gap-2">
+                    {exercise.muscles?.map(m => (
+                      <span key={m} className="px-3 py-1.5 bg-brand/5 border border-brand/10 text-brand text-xs font-black uppercase tracking-widest rounded-lg">
+                        {m}
+                      </span>
+                    ))}
+                  </div>
 
-        {ex.youtubeId && (
-          <div className="rounded-xl overflow-hidden bg-[#0F0F14]" style={{ aspectRatio: '16/9' }}>
-            <iframe
-              src={`https://www.youtube.com/embed/${ex.youtubeId}`}
-              className="w-full h-full"
-              title={ex.name}
-              allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            />
-          </div>
-        )}
+                  {exercise.description && (
+                    <div>
+                      <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-3">Technique Overview</h4>
+                      <p className="text-lg text-white/70 leading-relaxed font-medium">{exercise.description}</p>
+                    </div>
+                  )}
 
-        {ex.cues?.length > 0 && (
-          <div>
-            <p className="text-lg font-semibold text-[#F0F0F5] mb-2">✅ Key Cues</p>
-            <ul className="space-y-1.5">
-              {ex.cues.map((c, i) => (
-                <li key={i} className="flex gap-2 text-lg text-muted">
-                  <span className="text-brand">→</span>
-                  {c}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+                  {exercise.youtubeId && (
+                    <div>
+                      <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                        <FiPlay className="text-brand" /> Visual Execution
+                      </h4>
+                      <div className="rounded-2xl overflow-hidden bg-black border border-white/5 shadow-2xl" style={{ aspectRatio: '16/9' }}>
+                        <iframe
+                          src={`https://www.youtube.com/embed/${exercise.youtubeId}`}
+                          className="w-full h-full" title={exercise.name} allowFullScreen
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-        {ex.mistakes?.length > 0 && (
-          <div>
-            <p className="text-lg font-semibold text-[#F0F0F5] mb-2">⚠️ Common Mistakes</p>
-            <ul className="space-y-1.5">
-              {ex.mistakes.map((m, i) => (
-                <li key={i} className="flex gap-2 text-lg text-muted">
-                  <span className="text-red-400">✗</span>
-                  {m}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {exercise.cues?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-black text-green-400/50 uppercase tracking-[0.2em] mb-3">Key Cues</h4>
+                        <ul className="space-y-2.5">
+                          {exercise.cues.map((c, i) => (
+                            <li key={i} className="flex items-start gap-3 text-base text-white/60 font-medium">
+                              <span className="text-green-400 mt-0.5 flex-shrink-0">✓</span>
+                              {c}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {exercise.mistakes?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-black text-red-400/50 uppercase tracking-[0.2em] mb-3">Common Pitfalls</h4>
+                        <ul className="space-y-2.5">
+                          {exercise.mistakes.map((m, i) => (
+                            <li key={i} className="flex items-start gap-3 text-base text-white/60 font-medium">
+                              <span className="text-red-400 mt-0.5 flex-shrink-0">✗</span>
+                              {m}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'history' && (
+                <div className="space-y-6 animate-fade-in">
+                  <div>
+                    <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-4">Performance History</h4>
+                    
+                    {stats && stats.length > 0 ? (
+                      <div className="space-y-3">
+                        {stats.slice(-5).reverse().map((h, i) => (
+                          <div key={i} className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 hover:border-white/10 transition-all">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-sm font-bold text-white/20 uppercase">
+                                {h.date}
+                              </p>
+                              <div className="text-right">
+                                <p className="text-[10px] font-black text-brand uppercase tracking-tighter">Peak Weight</p>
+                                <p className="text-base font-black text-white">{h.weight}<span className="text-[10px] opacity-40 ml-0.5">kg</span></p>
+                              </div>
+                            </div>
+                            <div className="bg-black/40 border border-white/5 rounded-lg px-2.5 py-1.5 inline-flex items-center gap-2">
+                              <span className="text-[10px] font-black text-white/20 uppercase">Volume</span>
+                              <span className="text-sm font-black text-white">{(h.volume/1000).toFixed(1)}<span className="text-[10px] opacity-40 ml-0.5">t</span></span>
+                            </div>
+                            <p className="text-[10px] text-muted mt-2 italic font-medium">Detailed sets available during active workout session.</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-12 text-center bg-white/[0.01] border border-dashed border-white/5 rounded-2xl">
+                        <GiMuscleUp className="text-white/5 text-4xl mx-auto mb-3" />
+                        <p className="text-sm font-bold text-white/20 uppercase tracking-widest">No previous data found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'graph' && (
+                <div className="space-y-6 animate-fade-in h-full">
+                   <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-4">Strength Trend</h4>
+                   <div className="h-64 w-full bg-white/[0.01] border border-white/5 rounded-2xl p-4">
+                     {stats && stats.length > 1 ? (
+                       <Line data={chartData} options={chartOptions} />
+                     ) : (
+                       <div className="h-full flex flex-col items-center justify-center text-center px-6">
+                         <FiTrendingUp className="text-white/5 text-4xl mb-3" />
+                         <p className="text-xs font-bold text-white/20 uppercase tracking-widest leading-relaxed">
+                           Complete at least 2 sessions of this exercise to visualize your progress.
+                         </p>
+                       </div>
+                     )}
+                   </div>
+                   {stats && stats.length > 0 && (
+                     <div className="grid grid-cols-2 gap-3">
+                       <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4">
+                         <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Max Weight</p>
+                         <p className="text-xl font-black text-brand">{Math.max(...stats.map(s => s.weight))}<span className="text-[10px] opacity-40 ml-1">kg</span></p>
+                       </div>
+                       <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4">
+                         <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Sessions</p>
+                         <p className="text-xl font-black text-white">{stats.length}</p>
+                       </div>
+                     </div>
+                   )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-[#16161E] border-t border-white/5 p-4 flex-shrink-0">
+          <button 
+            onClick={onClose}
+            className="w-full py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white text-xs font-black uppercase tracking-widest transition-all"
+          >
+            Done
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TemplateCard = ({ template, isSystem, onUse, onEdit, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
@@ -149,7 +377,7 @@ const TemplateCard = ({ template, isSystem, onUse, onEdit, onDelete }) => {
                 )}
               </div>
 
-              <h3 className="font-black text-[#F0F0F5] text-xl leading-tight uppercase tracking-tight">{template.name}</h3>
+              <h3 className="font-black text-[#F0F0F5] text-lg sm:text-xl leading-tight uppercase tracking-tight">{template.name}</h3>
 
               {template.description && (
                 <p className="text-xs text-muted mt-1 leading-relaxed">{template.description}</p>
@@ -206,26 +434,26 @@ const TemplateCard = ({ template, isSystem, onUse, onEdit, onDelete }) => {
         </div>
 
         {expanded && (
-          <div className="border-t border-[#2A2A3A] p-3 space-y-1.5">
-            <p className="text-xs text-muted mb-2">Tap an exercise to see how to do it</p>
+          <div className="border-t border-[#2A2A3A] p-2 sm:p-3 space-y-1.5">
+            <p className="text-[10px] sm:text-xs text-muted mb-2">Tap an exercise to see how to do it</p>
             {template.exercises?.map((ex, i) => (
               <button
                 key={i}
                 onClick={() => showGuide(ex)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl card-elevated hover:border-brand/30 hover:bg-brand/5 transition-all text-left group"
+                className="w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 rounded-xl card-elevated hover:border-brand/30 hover:bg-brand/5 transition-all text-left group"
               >
-                <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-brand">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 text-[10px] sm:text-xs font-bold text-brand">
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-lg font-medium text-[#F0F0F5] group-hover:text-brand transition-colors truncate">
+                  <p className="text-base sm:text-lg font-medium text-[#F0F0F5] group-hover:text-brand transition-colors truncate">
                     {ex.name}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-[10px] sm:text-xs text-muted">
                     {ex.defaultSets || ex.sets} sets × {ex.defaultReps || ex.reps}
                   </p>
                 </div>
-                <span className="text-xs text-muted">{ex.muscleGroup}</span>
+                <span className="text-[10px] sm:text-xs text-muted truncate">{ex.muscleGroup}</span>
               </button>
             ))}
           </div>
@@ -321,6 +549,11 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const showActiveGuide = (e, ex) => {
+    e.stopPropagation();
+    setGuideEx(ex);
   };
 
   return (
@@ -424,7 +657,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
               <div className="space-y-3.5">
                 {selectedExercises.map((ex, i) => (
                   <div key={i} className="bg-[var(--surface-elevated)] border-2 border-[#2A2A3A] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex-1 min-w-0 flex items-center gap-3 cursor-help" onClick={(e) => showGuide(e, ex)}>
+                    <div className="flex-1 min-w-0 flex items-center gap-3 cursor-help" onClick={(e) => showActiveGuide(e, ex)}>
                       <div className="w-1.5 h-1.5 rounded-full bg-brand shadow-glow-sm" />
                       <p className="text-lg font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
                     </div>
@@ -501,8 +734,8 @@ const DayCard = ({ day, onUse }) => {
             {day.day}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="font-black text-xl text-[#F0F0F5] tracking-tight">{day.name}</p>
-            <p className="text-xs text-muted">{day.exercises?.length} exercises · tap to expand</p>
+            <p className="font-black text-lg sm:text-xl text-[#F0F0F5] tracking-tight">{day.name}</p>
+            <p className="text-[10px] sm:text-xs text-muted">{day.exercises?.length} exercises · tap to expand</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -512,9 +745,9 @@ const DayCard = ({ day, onUse }) => {
                 e.stopPropagation();
                 onUse(day);
               }}
-              className="btn-primary text-xs py-1.5 px-2.5 flex items-center gap-1"
+              className="btn-primary text-[10px] sm:text-xs py-1 sm:py-1.5 px-2 sm:px-2.5 flex items-center gap-1"
             >
-              <FiPlay className="text-xs" />
+              <FiPlay className="text-[10px] sm:text-xs" />
               Use
             </button>
           )}
@@ -523,20 +756,20 @@ const DayCard = ({ day, onUse }) => {
       </button>
 
       {open && (
-        <div className="border-t border-[#2A2A3A] p-4 space-y-2">
-          <p className="text-xs text-muted mb-3">Tap an exercise to see how to do it</p>
+        <div className="border-t border-[#2A2A3A] p-3 sm:p-4 space-y-2">
+          <p className="text-[10px] sm:text-xs text-muted mb-2 sm:mb-3">Tap an exercise to see how to do it</p>
           {day.exercises?.map((ex, i) => (
             <button
               key={i}
               onClick={() => showGuide(ex)}
-              className="w-full flex items-center gap-3 card-elevated px-4 py-3 rounded-xl hover:border-brand/30 hover:bg-brand/5 transition-all text-left group"
+              className="w-full flex items-center gap-2 sm:gap-3 card-elevated px-3 sm:px-4 py-2 sm:py-3 rounded-xl hover:border-brand/30 hover:bg-brand/5 transition-all text-left group"
             >
-              <div className="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 group-hover:bg-brand/20 transition-colors">
-                <GiMuscleUp className="text-brand text-lg" />
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 group-hover:bg-brand/20 transition-colors">
+                <GiMuscleUp className="text-brand text-base sm:text-lg" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-lg font-medium text-[#F0F0F5] group-hover:text-brand transition-colors">{ex.name}</p>
-                <p className="text-xs text-muted">
+                <p className="text-base sm:text-lg font-medium text-[#F0F0F5] group-hover:text-brand transition-colors truncate">{ex.name}</p>
+                <p className="text-[10px] sm:text-xs text-muted">
                   {ex.sets && `${ex.sets} sets`}
                   {ex.reps && ` × ${ex.reps} reps`}
                   {ex.rest && ` · ${ex.rest} rest`}
@@ -555,31 +788,24 @@ const DayCard = ({ day, onUse }) => {
 
 export default function WorkoutPlan() {
   const navigate = useNavigate();
-  const [systemTemplates, setSystemTemplates] = useState([]);
-  const [userTemplates, setUserTemplates] = useState([]);
-  const [plan, setPlan] = useState(null);
+  const { dashboardData, refreshGlobalData } = useAuth();
+  const { workoutPlan: plan, systemTemplates, userTemplates, isRefreshing } = dashboardData;
   const [exercises, setExercises] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('recommendations');
   const [filterType, setFilterType] = useState('all');
   const [showEditor, setShowEditor] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
 
+  const loading = !plan && isRefreshing;
+
   useEffect(() => {
-    Promise.all([
-      plansAPI.getWorkoutPlan(),
-      plansAPI.getExercises(),
-      templatesAPI.getAll(),
-    ])
-      .then(([pRes, exRes, tRes]) => {
-        setPlan(pRes.data.plan);
-        setSystemTemplates(pRes.data.templates || []);
-        setExercises(exRes.data.exercises || []);
-        setUserTemplates(tRes.data.userTemplates || []);
-      })
-      .catch(() => toast.error('Failed to load data'))
-      .finally(() => setLoading(false));
-  }, []);
+    // Only fetch if we don't have data yet
+    if (!plan && systemTemplates.length === 0) {
+      refreshGlobalData();
+    }
+    // Still need to fetch all exercises for the editor
+    plansAPI.getExercises().then(res => setExercises(res.data.exercises || []));
+  }, [plan, systemTemplates.length, refreshGlobalData]);
 
   const handleUseTemplate = async (template) => {
     try {
@@ -656,14 +882,13 @@ export default function WorkoutPlan() {
   const handleSaveTemplate = async (data) => {
     try {
       if (editingTemplate) {
-        const { data: res } = await templatesAPI.update(editingTemplate._id, data);
-        setUserTemplates((prev) => prev.map((t) => (t._id === editingTemplate._id ? res.template : t)));
+        await templatesAPI.update(editingTemplate.id || editingTemplate._id, data);
         toast.success('Template updated!');
       } else {
-        const { data: res } = await templatesAPI.create(data);
-        setUserTemplates((prev) => [res.template, ...prev]);
+        await templatesAPI.create(data);
         toast.success('Template created!');
       }
+      refreshGlobalData(true);
       setShowEditor(false);
       setEditingTemplate(null);
     } catch (err) {
@@ -676,7 +901,7 @@ export default function WorkoutPlan() {
     if (!window.confirm('Delete this template?')) return;
     try {
       await templatesAPI.delete(id);
-      setUserTemplates((prev) => prev.filter((t) => t._id !== id));
+      refreshGlobalData(true);
       toast.success('Template deleted');
     } catch {
       toast.error('Failed to delete');
@@ -689,18 +914,19 @@ export default function WorkoutPlan() {
     filterType === 'all' ? systemTemplates : systemTemplates.filter((t) => t.workoutType === filterType);
 
   return (
-    <div className="page-container max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-black uppercase tracking-tight">My Plan</h1>
+    <div className="page-container max-w-2xl px-4 sm:px-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">My Plan</h1>
         <button
           onClick={() => {
             setEditingTemplate(null);
             setShowEditor(true);
           }}
-          className="btn-primary flex items-center gap-2 text-lg"
+          className="btn-primary flex items-center gap-2 text-base sm:text-lg px-4 py-2 sm:px-6 sm:py-3"
         >
           <FiPlus />
-          Create Template
+          <span className="hidden xs:inline">Create Template</span>
+          <span className="xs:hidden">Create</span>
         </button>
       </div>
 
@@ -712,7 +938,7 @@ export default function WorkoutPlan() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 rounded-xl text-base font-black uppercase tracking-widest transition-all ${
+            className={`flex-1 py-2 sm:py-3 rounded-xl text-sm sm:text-base font-black uppercase tracking-widest transition-all ${
               activeTab === tab.id 
                 ? 'bg-brand text-white shadow-glow-sm' 
                 : 'bg-[#1E1E2A] text-[var(--text-secondary)] hover:text-white border border-transparent hover:border-white/10'
@@ -740,16 +966,16 @@ export default function WorkoutPlan() {
                     <h2 className="text-xl font-black uppercase tracking-widest text-brand">Recommended Split</h2>
                   </div>
                   
-                  <div className="card p-6 mb-4 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
+                  <div className="card p-4 sm:p-6 mb-4 bg-gradient-to-br from-brand/10 to-transparent border-brand/20">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <h2 className="text-2xl font-black text-brand uppercase tracking-tight">{plan.split}</h2>
-                        <p className="text-muted text-sm font-black uppercase tracking-widest mt-1 opacity-60">
+                        <h2 className="text-xl sm:text-2xl font-black text-brand uppercase tracking-tight">{plan.split}</h2>
+                        <p className="text-muted text-[10px] sm:text-sm font-black uppercase tracking-widest mt-1 opacity-60">
                           {plan.frequency}× per week · Progressive overload
                         </p>
                       </div>
-                      <div className="w-14 h-14 rounded-2xl bg-brand/10 border-2 border-brand/20 flex items-center justify-center">
-                        <GiMuscleUp className="text-brand text-3xl" />
+                      <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-brand/10 border-2 border-brand/20 flex items-center justify-center">
+                        <GiMuscleUp className="text-brand text-xl sm:text-3xl" />
                       </div>
                     </div>
                   </div>

@@ -78,7 +78,7 @@ export const dietAPI = {
   generateAi: (data) => API.post('diet/generate-ai', data),
   get: () => API.get('diet'),
   logMeal: (data) => API.post('diet/log', data),
-  getTodaysLog: () => API.get('diet/logs/today'),
+  getTodaysLog: (date) => API.get('diet/logs/today', { params: { date } }),
   deleteLog: (id) => API.delete(`diet/logs/${id}`),
 };
 

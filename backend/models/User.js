@@ -80,6 +80,8 @@ const User = sequelize.define('User', {
   age: { type: DataTypes.INTEGER, validate: { min: 10, max: 100 } },
   weight: { type: DataTypes.FLOAT },
   height: { type: DataTypes.FLOAT },
+  goalWeight: { type: DataTypes.FLOAT, field: 'goal_weight' },
+  targetDate: { type: DataTypes.DATE, field: 'target_date' },
   gender: { type: DataTypes.ENUM('male', 'female', 'other') },
   // Fitness profile
   goal: {
@@ -168,6 +170,28 @@ User.prototype.comparePassword = async function(candidatePassword) {
 User.prototype.toSafeObject = function() {
   const { password, ...safe } = this.toJSON();
   return safe;
+};
+
+// Check if streak is broken and reset if needed
+User.prototype.checkStreak = async function() {
+  if (!this.lastWorkoutDate) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const lastDate = new Date(this.lastWorkoutDate);
+  lastDate.setHours(0, 0, 0, 0);
+
+  // Difference in days
+  const diffInTime = today.getTime() - lastDate.getTime();
+  const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+
+  if (diffInDays > 1) {
+    this.currentStreak = 0;
+    await this.save();
+    return true;
+  }
+  return false;
 };
 
 module.exports = User;

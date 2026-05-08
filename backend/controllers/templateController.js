@@ -1,4 +1,4 @@
-const WorkoutTemplate = require('../models/WorkoutTemplate');
+const { WorkoutTemplate } = require('../models');
 const { Op } = require('sequelize');
 
 // @desc    Get all templates (system + user)
@@ -25,6 +25,7 @@ const getTemplates = async (req, res) => {
       total: systemTemplates.length + userTemplates.length
     });
   } catch (error) {
+    console.error('Get templates error:', error);
     res.status(500).json({ message: 'Failed to fetch templates', error: error.message });
   }
 };

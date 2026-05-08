@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../models');
+const { Op } = require('sequelize');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -129,6 +130,9 @@ const login = async (req, res) => {
 
     const token = generateToken(user.id);
 
+    // Check and reset streak if needed
+    await user.checkStreak();
+
     res.json({
       success: true,
       token,
@@ -162,7 +166,16 @@ const login = async (req, res) => {
 // @route   GET /api/auth/me
 // @access  Private
 const getMe = async (req, res) => {
-  res.json({ success: true, user: req.user });
+  try {
+    const user = req.user;
+    if (user) {
+      await user.checkStreak();
+    }
+    res.json({ success: true, user: user.toSafeObject ? user.toSafeObject() : user });
+  } catch (error) {
+    console.error('getMe error:', error);
+    res.status(500).json({ message: 'Error fetching user data' });
+  }
 };
 
 module.exports = { register, login, getMe };

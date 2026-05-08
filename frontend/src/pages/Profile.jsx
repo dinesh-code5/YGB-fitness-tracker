@@ -12,13 +12,13 @@ import {
   FiHeart, FiClock, FiBell
 } from 'react-icons/fi';
 import {
-  Chart as ChartJS, CategoryScale, LinearScale, BarElement,
+  Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement,
   Title, Tooltip, Legend,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import toast from 'react-hot-toast';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
 
 // YGB (Your Gym Brand) name generator
 const YGB_PREFIXES = ['Alpha', 'Iron', 'Steel', 'Apex', 'Elite', 'Titan', 'Prime', 'Phantom', 'Viper', 'Ghost', 'Forge', 'Rogue', 'Blaze', 'Storm', 'Cipher'];
@@ -70,8 +70,44 @@ const WeeklyBlocks = ({ workouts }) => {
   );
 };
 
-// ── Gym Attendance Chart ─────────────────────────────────────────────────
-const GymBarChart = ({ workouts, accentColor }) => {
+// ── Weight Progress Chart ──────────────────────────────────────────────
+const WeightProgressChart = ({ history, goalWeight, accentColor }) => {
+  const data = {
+    labels: history.map(h => new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+    datasets: [
+      {
+        label: 'Weight (kg)',
+        data: history.map(h => h.weight),
+        borderColor: accentColor,
+        backgroundColor: accentColor + '20',
+        fill: true,
+        tension: 0.4,
+      },
+      {
+        label: 'Goal',
+        data: history.map(() => goalWeight),
+        borderColor: '#F59E0B',
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false,
+      }
+    ],
+  };
+
+  return (
+    <div className="h-64 w-full">
+      <Line data={data} options={{
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#fff' } } },
+        scales: {
+          y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#fff' } },
+          x: { grid: { display: false }, ticks: { color: '#fff' } }
+        }
+      }} />
+    </div>
+  );
+};
+const GymBarChart = ({ workouts, accentColor, goalWeight }) => {
   const getWeekNumber = (d) => {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -362,17 +398,17 @@ const BodyMetrics = ({ user, accentColor }) => {
     : null;
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-3 sm:gap-4">
       {[
         { label: 'Weight', value: user?.weight || '--', unit: 'kg', max: 150, color: accentColor },
         { label: 'Height', value: user?.height || '--', unit: 'cm', max: 220, color: '#A78BFA' },
         { label: 'BMI', value: bmi || '--', unit: '', max: 40, color: '#F59E0B' },
       ].map(m => (
-        <div key={m.label} className="flex flex-col items-center gap-1 py-4 rounded-2xl bg-white/[0.02] border border-white/5">
-          <p className="text-2xl font-black text-white">{m.value}<span className="text-xs text-white/30 font-bold ml-1">{m.unit}</span></p>
-          <p className="text-lg text-white/30 font-bold uppercase tracking-widest">{m.label}</p>
+        <div key={m.label} className="flex flex-col items-center justify-center aspect-square sm:aspect-auto sm:py-4 rounded-2xl bg-white/[0.02] border border-white/5 p-2 transition-all">
+          <p className="text-xl sm:text-2xl font-black text-white">{m.value}<span className="text-[10px] sm:text-xs text-white/30 font-bold ml-1">{m.unit}</span></p>
+          <p className="text-[10px] sm:text-lg text-white/30 font-bold uppercase tracking-widest text-center leading-tight">{m.label}</p>
           {m.label === 'BMI' && bmiCategory && (
-            <span className="text-[8px] font-black uppercase tracking-widest mt-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="hidden sm:inline-block text-[8px] font-black uppercase tracking-widest mt-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
               {bmiCategory}
             </span>
           )}
@@ -393,6 +429,7 @@ export default function Profile() {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [allWorkouts, setAllWorkouts] = useState([]);
+  const [weightHistory, setWeightHistory] = useState([]);
   const [photos, setPhotos] = useState([]);
   const [archetype, setArchetype] = useState(user?.archetype || 'fit');
   const [activeTab, setActiveTab] = useState('overview');
@@ -404,6 +441,7 @@ export default function Profile() {
   const [form, setForm] = useState({
     name: user?.name || '', username: user?.username || '', bio: user?.bio || '',
     age: user?.age || '', weight: user?.weight || '', height: user?.height || '',
+    goalWeight: user?.goalWeight || '', targetDate: user?.targetDate ? new Date(user.targetDate).toISOString().split('T')[0] : '',
     gender: user?.gender || 'male', goal: user?.goal || 'maintain',
     experience: user?.experience || 'beginner', activityLevel: user?.activityLevel || 'moderate',
     restTimerDuration: user?.restTimerDuration || 90, weightUnit: user?.weightUnit || 'kg',
@@ -438,10 +476,11 @@ export default function Profile() {
   const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
 
   useEffect(() => {
-    Promise.all([workoutAPI.getAll({ limit: 200 }), userAPI.getProgressPhotos()])
-      .then(([wRes, pRes]) => {
+    Promise.all([workoutAPI.getAll({ limit: 200 }), userAPI.getProgressPhotos(), userAPI.getWeightHistory()])
+      .then(([wRes, pRes, whRes]) => {
         setAllWorkouts(wRes.data.workouts?.filter(w => w.isCompleted) || []);
         setPhotos(pRes.data.progressPhotos || []);
+        setWeightHistory(whRes.data.history || []);
       })
       .catch(err => console.error(err));
   }, []);
@@ -462,6 +501,28 @@ export default function Profile() {
   const thisWeekSessions = thisWeekWorkoutDates.size;
   const thisMonthSessions = allWorkouts.filter(w => new Date(w.date) > new Date(Date.now() - 30 * 86400000)).length;
   const totalSessions = allWorkouts.length;
+
+  const lastMonthSessions = allWorkouts.filter(w => {
+    const d = new Date(w.date);
+    return d > new Date(Date.now() - 60 * 86400000) && d <= new Date(Date.now() - 30 * 86400000);
+  }).length;
+
+  const sessionChangePct = lastMonthSessions > 0 
+    ? Math.round(((thisMonthSessions - lastMonthSessions) / lastMonthSessions) * 100)
+    : (thisMonthSessions > 0 ? 100 : 0);
+
+  const calculateProgress = () => {
+    if (!user?.goalWeight || !user?.weight || weightHistory.length === 0) return 0;
+    const startWeight = weightHistory[0].weight;
+    const currentWeight = user.weight;
+    const targetWeight = user.goalWeight;
+    if (startWeight === targetWeight) return 100;
+    const initialDiff = targetWeight - startWeight;
+    const currentDiff = targetWeight - currentWeight;
+    const progress = (initialDiff - currentDiff) / initialDiff;
+    return Math.max(0, Math.min(Math.round(progress * 100), 100));
+  };
+  const progressPct = calculateProgress();
 
   const handleSave = async (overridePayload = null) => {
     setSaving(true);
@@ -615,16 +676,16 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="flex items-end gap-0 pb-2">
+            <div className="grid grid-cols-2 lg:flex lg:items-end gap-4 lg:gap-0 pb-2 mt-6 lg:mt-0">
               {[
                 { label: 'Total Sessions', value: totalSessions, color: accentColor },
                 { label: 'This Month', value: thisMonthSessions, color: '#A78BFA' },
                 { label: 'Best Streak', value: `${user?.longestStreak || 0}d`, color: '#F59E0B' },
                 { label: 'This Week', value: thisWeekSessions, color: '#10B981' },
               ].map((s, i) => (
-                <div key={i} className={`flex flex-col items-center gap-1 px-6 ${i !== 0 ? 'border-l border-white/5' : ''}`}>
-                  <span className="text-3xl font-black" style={{ color: s.color }}>{s.value}</span>
-                  <span className="text-lg font-bold text-white/20 uppercase tracking-widest text-center leading-tight">{s.label}</span>
+                <div key={i} className={`flex flex-col items-center gap-1 px-4 lg:px-6 ${i % 2 !== 0 && i < 2 ? '' : ''} lg:border-l lg:border-white/5 first:border-l-0`}>
+                  <span className="text-2xl lg:text-3xl font-black" style={{ color: s.color }}>{s.value}</span>
+                  <span className="text-sm lg:text-lg font-bold text-white/20 uppercase tracking-widest text-center leading-tight">{s.label}</span>
                 </div>
               ))}
             </div>
@@ -702,12 +763,36 @@ export default function Profile() {
                   <p className="text-lg text-white/30 font-bold uppercase tracking-widest mb-4">{user?.experience || 'Intermediate'} · {user?.activityLevel || 'Moderate'}</p>
                   <div className="mb-2 flex justify-between">
                     <span className="text-xl text-white/20 font-bold uppercase tracking-widest">Progress</span>
-                    <span className="text-lg font-black" style={{ color: accentColor }}>72%</span>
+                    <span className="text-lg font-black" style={{ color: accentColor }}>{progressPct}%</span>
                   </div>
                   <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-1000" style={{ width: '72%', backgroundColor: accentColor }} />
+                    <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${progressPct}%`, backgroundColor: accentColor }} />
                   </div>
                 </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
+                <h2 className="text-xl font-black uppercase tracking-[0.2em] text-white/40">Goals</h2>
+                {user?.goalWeight ? (
+                  <>
+                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+                      <span className="text-xs font-bold text-white/25 uppercase tracking-widest">Target Weight</span>
+                      <span className="text-lg font-black text-white/60">{user.goalWeight} kg</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+                      <span className="text-xs font-bold text-white/25 uppercase tracking-widest">Goal Type</span>
+                      <span className="text-lg font-black text-white/60 capitalize">{(user.goal || 'maintain').replace('_', ' ')}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+                      <span className="text-xs font-bold text-white/25 uppercase tracking-widest">Days Remaining</span>
+                      <span className="text-lg font-black text-white/60">
+                        {user.targetDate ? Math.max(0, Math.ceil((new Date(user.targetDate) - new Date()) / (1000 * 60 * 60 * 24))) : '—'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-white/20 italic">No goal weight or target date set.</p>
+                )}
               </div>
 
               <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 space-y-4">
@@ -751,9 +836,11 @@ export default function Profile() {
                   <h2 className="text-xl font-black uppercase tracking-[0.2em] text-white/40">Gym Attendance</h2>
                   <p className="text-xl text-white/20 mt-0.5">Sessions per week over the last 8 weeks</p>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <FiTrendingUp className="text-green-400 text-xs" />
-                  <span className="text-xl font-black text-green-400">+20% this month</span>
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${sessionChangePct >= 0 ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                  {sessionChangePct >= 0 ? <FiTrendingUp className="text-green-400 text-xs" /> : <FiTrendingUp className="text-red-400 text-xs rotate-180" />}
+                  <span className={`text-xl font-black ${sessionChangePct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {sessionChangePct >= 0 ? '+' : ''}{sessionChangePct}% this month
+                  </span>
                 </div>
               </div>
               <GymBarChart workouts={allWorkouts} accentColor={accentColor} />
@@ -868,65 +955,73 @@ export default function Profile() {
       </div>
 
       {editing && (
-        <div className="fixed inset-0 bg-[#09090E]/95 z-[100] flex items-center justify-center p-4 backdrop-blur-xl overflow-y-auto">
-          <div className="bg-[#11111A] border border-white/10 p-8 rounded-3xl w-full max-w-2xl shadow-2xl my-auto">
-            <div className="flex items-center justify-between mb-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#09090E]/80 backdrop-blur-md" onClick={() => setEditing(false)} />
+          <div className="bg-[#11111A] border border-white/10 p-6 sm:p-8 rounded-3xl w-full max-w-2xl shadow-2xl relative z-10 my-auto overflow-y-auto max-h-[90vh]">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
-                <h3 className="text-2xl font-black tracking-tight text-white">Edit Profile</h3>
-                <p className="text-lg text-white/30 mt-1">Update your athlete configuration</p>
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase tracking-widest">Edit Profile</h3>
+                <p className="text-sm sm:text-lg text-white/30 mt-1 font-medium">Update athlete configuration</p>
               </div>
               <button onClick={() => setEditing(false)} className="p-2.5 rounded-xl border border-white/10 text-white/30 hover:text-white hover:border-white/20 transition-all">
                 <FiX />
               </button>
             </div>
 
-            <div className="space-y-6 max-h-[65vh] overflow-y-auto pr-1">
+            <div className="space-y-6 pr-1">
               <div>
-                <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-3 block">Body Archetype</label>
+                <label className="text-xs sm:text-lg font-black uppercase tracking-[0.2em] text-white/30 mb-3 block">Body Archetype</label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {ARCHETYPES.map(a => (
-                    <ArchetypeCard key={a.id} archetype={a} selected={archetype} onSelect={handleArchetypeChange} />
+                    <ArchetypeCard key={a.id} archetype={a} selected={archetype} onSelect={handleArchetypeChange} compact />
                   ))}
                 </div>
-
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="col-span-2">
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Name</label>
-                  <input className="input-field text-lg font-bold" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" />
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Name</label>
+                  <input className="input-field text-base font-bold h-11 sm:h-12" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" />
                 </div>
                 <div>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Username</label>
-                  <input className="input-field text-lg font-bold" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="@handle" />
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Username</label>
+                  <input className="input-field text-base font-bold h-11 sm:h-12" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="@handle" />
                 </div>
                 <div>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Age</label>
-                  <input type="number" className="input-field text-lg font-bold" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} />
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Age</label>
+                  <input type="number" className="input-field text-base font-bold h-11 sm:h-12" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} />
                 </div>
                 <div>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Weight (kg)</label>
-                  <input type="number" className="input-field text-lg font-bold" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} />
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Weight (kg)</label>
+                  <input type="number" className="input-field text-base font-bold h-11 sm:h-12" value={form.weight} onChange={e => setForm({ ...form, weight: e.target.value })} />
                 </div>
                 <div>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Height (cm)</label>
-                  <input type="number" className="input-field text-lg font-bold" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} />
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Goal Weight (kg)</label>
+                  <input type="number" className="input-field text-base font-bold h-11 sm:h-12" value={form.goalWeight} onChange={e => setForm({ ...form, goalWeight: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Target Date</label>
+                  <input type="date" className="input-field text-base font-bold h-11 sm:h-12" value={form.targetDate} onChange={e => setForm({ ...form, targetDate: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Height (cm)</label>
+                  <input type="number" className="input-field text-base font-bold h-11 sm:h-12" value={form.height} onChange={e => setForm({ ...form, height: e.target.value })} />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Bio</label>
-                  <textarea className="input-field text-lg h-20 pt-3 resize-none" placeholder="Your motto..." value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} />
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Bio</label>
+                  <textarea className="input-field text-base h-20 pt-3 resize-none font-medium" placeholder="Your motto..." value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} />
                 </div>
                 <div>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Goal</label>
-                  <select className="input-field text-lg font-bold" value={form.goal} onChange={e => setForm({ ...form, goal: e.target.value })}>
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Goal</label>
+                  <select className="input-field text-base font-bold h-11 sm:h-12" value={form.goal} onChange={e => setForm({ ...form, goal: e.target.value })}>
                     {['lose_fat', 'maintain', 'build_muscle', 'improve_endurance', 'get_stronger'].map(g => (
                       <option key={g} value={g}>{g.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">Experience</label>
-                  <select className="input-field text-lg font-bold" value={form.experience} onChange={e => setForm({ ...form, experience: e.target.value })}>
+                  <label className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/30 mb-1.5 block">Experience</label>
+                  <select className="input-field text-base font-bold h-11 sm:h-12" value={form.experience} onChange={e => setForm({ ...form, experience: e.target.value })}>
                     {['beginner', 'intermediate', 'advanced'].map(e => (
                       <option key={e} value={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</option>
                     ))}
@@ -936,11 +1031,11 @@ export default function Profile() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setEditing(false)} className="flex-1 py-3.5 rounded-2xl border border-white/10 text-lg font-black uppercase tracking-widest text-white/30 hover:text-white hover:border-white/20 transition-all">
+              <button onClick={() => setEditing(false)} className="flex-1 py-3 rounded-2xl border border-white/10 text-sm sm:text-base font-black uppercase tracking-widest text-white/30 hover:text-white hover:border-white/20 transition-all">
                 Cancel
               </button>
               <button onClick={() => handleSave()} disabled={saving}
-                className="flex-1 py-3.5 rounded-2xl text-lg font-black uppercase tracking-widest text-[#09090E] transition-all"
+                className="flex-1 py-3 rounded-2xl text-sm sm:text-base font-black uppercase tracking-widest text-[#09090E] transition-all shadow-glow-sm"
                 style={{ backgroundColor: accentColor }}>
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -950,27 +1045,28 @@ export default function Profile() {
       )}
 
       {pwOpen && (
-        <div className="fixed inset-0 bg-[#09090E]/95 z-[100] flex items-center justify-center p-4 backdrop-blur-xl">
-          <div className="bg-[#11111A] border border-white/10 p-8 rounded-3xl w-full max-md shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#09090E]/80 backdrop-blur-sm" onClick={() => setPwOpen(false)} />
+          <div className="bg-[#11111A] border border-white/10 p-5 sm:p-7 rounded-3xl w-full max-w-sm shadow-2xl relative z-10">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div>
-                <h3 className="text-2xl font-black text-white">Security</h3>
-                <p className="text-lg text-white/30 mt-1">Update your password</p>
+                <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-widest">Security</h3>
+                <p className="text-sm sm:text-base text-white/30 mt-1 font-medium">Update password</p>
               </div>
-              <button onClick={() => setPwOpen(false)} className="p-2.5 rounded-xl border border-white/10 text-white/30 hover:text-white transition-all"><FiX /></button>
+              <button onClick={() => setPwOpen(false)} className="p-2 rounded-xl border border-white/10 text-white/30 hover:text-white transition-all"><FiX /></button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {[
                 { key: 'currentPassword', label: 'Current Password' },
                 { key: 'newPassword', label: 'New Password' },
                 { key: 'confirm', label: 'Confirm Password' },
               ].map(f => (
                 <div key={f.key}>
-                  <label className="text-lg font-black uppercase tracking-widest text-white/30 mb-2 block">{f.label}</label>
+                  <label className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-white/30 mb-1.5 sm:mb-2 block">{f.label}</label>
                   <div className="relative">
                     <input
                       type={showPw[f.key] ? 'text' : 'password'}
-                      className="input-field text-lg pr-10"
+                      className="input-field text-sm sm:text-base pr-10 h-11 sm:h-12"
                       value={pwForm[f.key]}
                       onChange={e => setPwForm({ ...pwForm, [f.key]: e.target.value })}
                     />
@@ -983,7 +1079,7 @@ export default function Profile() {
               ))}
             </div>
             <button onClick={handlePwChange}
-              className="w-full mt-6 py-3.5 rounded-2xl text-lg font-black uppercase tracking-widest text-[#09090E] transition-all"
+              className="w-full mt-5 sm:mt-6 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-base font-black uppercase tracking-widest text-[#09090E] transition-all shadow-glow-sm"
               style={{ backgroundColor: accentColor }}>
               Update Password
             </button>
@@ -992,54 +1088,55 @@ export default function Profile() {
       )}
 
       {privacyOpen && (
-        <div className="fixed inset-0 bg-[#09090E]/95 z-[100] flex items-center justify-center p-4 backdrop-blur-xl">
-          <div className="bg-[#11111A] border border-white/10 p-8 rounded-3xl w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between mb-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#09090E]/80 backdrop-blur-md" onClick={() => setPrivacyOpen(false)} />
+          <div className="bg-[#11111A] border border-white/10 p-6 sm:p-8 rounded-3xl w-full max-w-md shadow-2xl relative z-10">
+            <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div>
-                <h3 className="text-2xl font-black text-white">Privacy & Preferences</h3>
-                <p className="text-lg text-white/30 mt-1">Manage your social visibility</p>
+                <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">Privacy</h3>
+                <p className="text-base sm:text-lg text-white/30 mt-0.5">Visibility settings</p>
               </div>
               <button onClick={() => setPrivacyOpen(false)} className="p-2.5 rounded-xl border border-white/10 text-white/30 hover:text-white transition-all"><FiX /></button>
             </div>
             
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${user?.isPublic ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                    <FiGlobe className="text-xl" />
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${user?.isPublic ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                    <FiGlobe className="text-lg sm:text-xl" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-white">Public Profile</p>
-                    <p className="text-xs text-white/30 font-bold uppercase">Allow others to see your progress</p>
+                    <p className="text-base sm:text-lg font-black text-white">Public Profile</p>
+                    <p className="text-[10px] sm:text-xs text-white/30 font-bold uppercase tracking-tighter">Allow others to see progress</p>
                   </div>
                 </div>
                 <button 
                   onClick={handleTogglePrivacy}
-                  className={`w-14 h-7 rounded-full transition-all relative ${user?.isPublic ? 'bg-green-500' : 'bg-white/10'}`}>
-                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${user?.isPublic ? 'right-1' : 'left-1'}`} />
+                  className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full transition-all relative flex-shrink-0 ${user?.isPublic ? 'bg-green-500' : 'bg-white/10'}`}>
+                  <div className={`absolute top-0.5 sm:top-1 w-5 h-5 rounded-full bg-white transition-all ${user?.isPublic ? 'right-0.5 sm:right-1' : 'left-0.5 sm:left-1'}`} />
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${user?.notifications?.workoutReminder ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
-                    <FiBell className="text-xl" />
+              <div className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center ${user?.notifications?.workoutReminder ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                    <FiBell className="text-lg sm:text-xl" />
                   </div>
                   <div>
-                    <p className="text-lg font-black text-white">Workout Reminders</p>
-                    <p className="text-xs text-white/30 font-bold uppercase">Daily push notifications</p>
+                    <p className="text-base sm:text-lg font-black text-white">Reminders</p>
+                    <p className="text-[10px] sm:text-xs text-white/30 font-bold uppercase tracking-tighter">Daily push notifications</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => handleUpdateNotifications({ workoutReminder: !user?.notifications?.workoutReminder })}
-                  className={`w-14 h-7 rounded-full transition-all relative ${user?.notifications?.workoutReminder ? 'bg-green-500' : 'bg-white/10'}`}>
-                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${user?.notifications?.workoutReminder ? 'right-1' : 'left-1'}`} />
+                  className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full transition-all relative flex-shrink-0 ${user?.notifications?.workoutReminder ? 'bg-green-500' : 'bg-white/10'}`}>
+                  <div className={`absolute top-0.5 sm:top-1 w-5 h-5 rounded-full bg-white transition-all ${user?.notifications?.workoutReminder ? 'right-0.5 sm:right-1' : 'left-0.5 sm:left-1'}`} />
                 </button>
               </div>
             </div>
 
             <button onClick={() => setPrivacyOpen(false)}
-              className="w-full mt-8 py-3.5 rounded-2xl text-lg font-black uppercase tracking-widest text-[#09090E] transition-all"
+              className="w-full mt-6 sm:mt-8 py-2.5 sm:py-3.5 rounded-2xl text-base sm:text-lg font-black uppercase tracking-widest text-[#09090E] transition-all shadow-glow-sm"
               style={{ backgroundColor: accentColor }}>
               Done
             </button>
