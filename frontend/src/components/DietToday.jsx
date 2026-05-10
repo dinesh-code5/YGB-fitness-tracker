@@ -103,7 +103,7 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
             <div className="flex items-center justify-between mb-3">
                <div className="flex flex-col">
                   <p className="text-2xl font-black text-brand uppercase tracking-tighter">
-                     {entries.length === 0 && selectedDate === new Date().toISOString().split('T')[0] ? 77 : Math.round((currentTotal.calories / result.targetCalories) * 100)}%
+                     {entries.length === 0 && selectedDate === new Date().toISOString().split('T')[0] ? 0 : Math.round((currentTotal.calories / result.targetCalories) * 100)}%
                   </p>
                   <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">Consumed</p>
                </div>
@@ -119,7 +119,7 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
             <div className="w-full h-6 bg-[var(--surface-elevated)] rounded-2xl overflow-hidden border border-brand/20 p-1 relative">
               <div 
                 className="h-full bg-gradient-to-r from-brand to-accent rounded-xl transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(0,212,255,0.4)] relative overflow-hidden" 
-                style={{ width: `${entries.length === 0 && selectedDate === new Date().toISOString().split('T')[0] ? 77 : Math.min(100, (currentTotal.calories / result.targetCalories) * 100)}%` }}
+                style={{ width: `${entries.length === 0 && selectedDate === new Date().toISOString().split('T')[0] ? 0 : Math.min(100, (currentTotal.calories / result.targetCalories) * 100)}%` }}
               >
                 <div className="absolute inset-0 bg-white/20 animate-pulse" />
                 <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10" />

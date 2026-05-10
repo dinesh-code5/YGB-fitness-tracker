@@ -56,8 +56,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    validate: { isEmail: true },
-    set(val) { this.setDataValue('email', val.toLowerCase()); }
+    validate: { isEmail: true }
   },
   password: {
     type: DataTypes.STRING,
@@ -67,8 +66,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(20),
     unique: true,
     allowNull: true,
-    validate: { is: /^[a-z0-9_.]{1,20}$/ },
-    set(val) { if (val) this.setDataValue('username', val.toLowerCase()); }
+    validate: { is: /^[a-z0-9_.]{1,20}$/ }
   },
   avatar: { type: DataTypes.TEXT, defaultValue: '' },
   bio: { type: DataTypes.STRING(200) },
@@ -150,6 +148,10 @@ const User = sequelize.define('User', {
   tableName: 'users',
   underscored: true,
   hooks: {
+    beforeValidate: (user) => {
+      if (user.email) user.email = user.email.toLowerCase().trim();
+      if (user.username) user.username = user.username.toLowerCase().trim();
+    },
     beforeCreate: async (user) => {
       user.password = await bcrypt.hash(user.password, 12);
     },

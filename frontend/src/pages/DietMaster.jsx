@@ -27,7 +27,7 @@ export default function DietMaster() {
   const fetching = dashboardData.isRefreshing && !dashboardData.lastFetched;
 
   const refreshLogs = async () => {
-    refreshGlobalData(true);
+    await refreshGlobalData(true);
   };
 
   if (!user?.isPremium) return <LockedFeature title="Diet Master" feature="diet" />;

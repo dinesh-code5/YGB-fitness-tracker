@@ -1,9 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const DietPlan = require('../models/DietPlan');
 
-// Access your API key as an environment variable
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 /**
  * @desc    Generate personalized Indian diet plan using Gemini AI
  * @route   POST /api/diet/generate-ai
@@ -13,14 +10,17 @@ const generateAiDiet = async (req, res) => {
   try {
     const { weight, height, age, gender, activityLevel, goal, dietType, additionalInfo } = req.body;
 
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
       return res.status(500).json({ 
-        message: "Gemini API Key is missing. Please add GEMINI_API_KEY to your .env file." 
+        message: "Gemini API Key is missing in backend/.env. Please add GEMINI_API_KEY=your_key_here" 
       });
     }
 
-    console.log("Attempting Gemini AI generation with model: gemini-1.5-flash (v1)");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
+    // Initialize AI model inside the request to ensure API key is loaded
+    const genAI = new GoogleGenerativeAI(apiKey);
+    console.log("Attempting Gemini AI generation with model: gemini-flash-latest");
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `You are an expert Indian nutritionist. Generate a highly personalized daily diet plan for:
 Weight: ${weight}kg, Height: ${height}cm, Age: ${age}, Gender: ${gender}
@@ -38,22 +38,22 @@ RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
     "breakfast": {
       "label": "Breakfast",
       "options": ["2 roti + 1 bowl dal + 1 bowl sabzi", "Dosa + sambar + chutney"],
-      "macros": {"cal": 500, "p": 20}
+      "macros": {"calories": 500, "protein": 20, "carbs": 60, "fats": 15}
     },
     "lunch": {
       "label": "Lunch",
       "options": ["2 roti + 150g chicken + dal + sabzi", "Biryani (1 bowl) + raita"],
-      "macros": {"cal": 700, "p": 35}
+      "macros": {"calories": 700, "protein": 35, "carbs": 80, "fats": 20}
     },
     "snack": {
       "label": "Evening Snack",
       "options": ["1 glass milk + 2 biscuits", "Fruit + handful peanuts"],
-      "macros": {"cal": 300, "p": 12}
+      "macros": {"calories": 300, "protein": 12, "carbs": 40, "fats": 10}
     },
     "dinner": {
       "label": "Dinner",
       "options": ["2 roti + paneer curry + salad", "Khichdi + yogurt"],
-      "macros": {"cal": 600, "p": 25}
+      "macros": {"calories": 600, "protein": 25, "carbs": 70, "fats": 15}
     }
   },
   "proteinTips": ["Eat protein at every meal", "Paneer and dal are your friends"]

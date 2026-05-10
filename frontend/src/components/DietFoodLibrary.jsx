@@ -93,7 +93,7 @@ export default function DietFoodLibrary({ refreshLogs }) {
               <button 
                 onClick={() => handleLog(f)}
                 disabled={logging === f.id}
-                className="w-10 h-10 rounded-xl bg-brand/10 text-brand hover:bg-brand hover:text-[#0F0F14] flex items-center justify-center transition-all"
+                className="w-10 h-10 rounded-xl bg-brand/10 text-brand  hover:text-[#ffffff] flex items-center justify-center transition-all"
               >
                 {logging === f.id ? <div className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" /> : <FiPlus />}
               </button>

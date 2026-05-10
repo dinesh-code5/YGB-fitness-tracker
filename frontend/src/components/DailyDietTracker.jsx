@@ -41,7 +41,7 @@ export default function DailyDietTracker() {
           </div>
           <div className="text-right">
             <p className="text-xl font-black text-[var(--text-primary)] leading-none mb-1">
-              {entries.length === 0 ? 77 : calPct}%
+              {entries.length === 0 ? 0: calPct}%
             </p>
             <p className="text-[10px] text-muted font-bold uppercase tracking-widest">Consumed</p>
           </div>
@@ -49,7 +49,7 @@ export default function DailyDietTracker() {
         <div className="w-full h-4 bg-[var(--surface-elevated)] rounded-xl overflow-hidden border border-white/5 p-[2px] relative">
           <div 
             className="h-full bg-gradient-to-r from-brand to-accent rounded-lg transition-all duration-1000 shadow-[0_0_15px_rgba(0,212,255,0.3)] relative overflow-hidden" 
-            style={{ width: `${entries.length === 0 ? 77 : calPct}%` }}
+            style={{ width: `${entries.length === 0 ? 0 : calPct}%` }}
           >
             <div className="absolute inset-0 bg-white/10 animate-pulse" />
           </div>

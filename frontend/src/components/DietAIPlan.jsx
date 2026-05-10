@@ -81,10 +81,26 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
       await dietAPI.calculate({
         ...form, weight: Number(weight), height: Number(height), age: Number(age)
       });
-      refreshLogs();
+      await refreshLogs();
       toast.success('Your plan is ready! 🥗');
     } catch (err) {
       toast.error('Calculation failed. Try again.');
+    }
+    setLoading(false);
+  };
+
+  const handleGenerateAi = async () => {
+    const { weight, height, age } = form;
+    if (!weight || !height || !age) return toast.error('Please fill all profile fields');
+    setLoading(true);
+    try {
+      await dietAPI.generateAi({
+        ...form, weight: Number(weight), height: Number(height), age: Number(age)
+      });
+      await refreshLogs();
+      toast.success('AI Plan Generated! 🤖🥗');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'AI Generation failed');
     }
     setLoading(false);
   };
@@ -96,12 +112,12 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
     try {
       await dietAPI.logMeal({
         name: optionName,
-        calories: meal.macros?.cal || 0,
-        protein: meal.macros?.protein || 0,
-        carbs: Math.round((meal.macros?.cal * 0.45) / 4) || 0,
-        fats: Math.round((meal.macros?.cal * 0.25) / 9) || 0,
+        calories: meal.macros?.calories || meal.macros?.cal || 0,
+        protein: meal.macros?.protein || meal.macros?.p || 0,
+        carbs: meal.macros?.carbs || Math.round((meal.macros?.cal * 0.45) / 4) || 0,
+        fats: meal.macros?.fats || Math.round((meal.macros?.cal * 0.25) / 9) || 0,
       });
-      refreshLogs();
+      await refreshLogs();
       toast.success('Meal logged! 🥗');
     } catch (err) {
       toast.error('Failed to log meal');
@@ -173,21 +189,7 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
               </button>
               
               <button 
-                onClick={async () => {
-                  const { weight, height, age } = form;
-                  if (!weight || !height || !age) return toast.error('Please fill all profile fields');
-                  setLoading(true);
-                  try {
-                    await dietAPI.generateAi({
-                      ...form, weight: Number(weight), height: Number(height), age: Number(age)
-                    });
-                    refreshLogs();
-                    toast.success('AI Plan Generated! 🤖🥗');
-                  } catch (err) {
-                    toast.error(err.response?.data?.message || 'AI Generation failed');
-                  }
-                  setLoading(false);
-                }} 
+                onClick={handleGenerateAi}
                 disabled={loading}
                 className="w-full py-4 rounded-2xl bg-gradient-to-r from-brand/20 to-accent/20 border border-brand/30 hover:border-brand transition-all flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm"
               >
@@ -228,7 +230,7 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
                         </div>
                         <h4 className="font-bold text-xs uppercase tracking-widest">{mealName}</h4>
                       </div>
-                      <span className="text-[10px] font-black text-muted">{meal.macros?.cal} KCAL</span>
+                      <span className="text-[10px] font-black text-muted">{meal.macros?.calories || meal.macros?.cal} KCAL</span>
                     </div>
                     <div className="p-4 space-y-3">
                       {meal.options?.slice(0, 3).map((opt, j) => {

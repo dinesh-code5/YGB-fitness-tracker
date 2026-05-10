@@ -725,9 +725,17 @@ const DayCard = ({ day, onUse }) => {
 
   return (
     <div className="card overflow-hidden">
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-4 hover:bg-[#1E1E2A] transition-colors text-left"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen(!open);
+          }
+        }}
+        className="w-full flex items-center justify-between p-4 hover:bg-[#1E1E2A] transition-colors text-left cursor-pointer outline-none focus-visible:bg-[#1E1E2A]"
       >
         <div className="flex items-center gap-3 flex-1">
           <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border flex-shrink-0 ${TYPE_BADGE[day.type] || TYPE_BADGE.custom}`}>
@@ -753,7 +761,7 @@ const DayCard = ({ day, onUse }) => {
           )}
           {open ? <FiChevronUp className="text-muted" /> : <FiChevronDown className="text-muted" />}
         </div>
-      </button>
+      </div>
 
       {open && (
         <div className="border-t border-[#2A2A3A] p-3 sm:p-4 space-y-2">

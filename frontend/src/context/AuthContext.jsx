@@ -34,15 +34,16 @@ export const AuthProvider = ({ children }) => {
 
     try {
       // Fetch everything in parallel for maximum speed
+      // Use .catch on individual calls to prevent one failure from stopping others
       const [wRes, sRes, dRes, pRes, tRes, userSRes, uWeightRes, dpRes] = await Promise.all([
-        workoutAPI.getAll({ limit: 50 }), // Fetch more for history/heatmap
-        workoutAPI.getStats(30),
-        dietAPI.getTodaysLog(),
-        plansAPI.getWorkoutPlan(),
-        templatesAPI.getAll(),
-        workoutAPI.getStats(90), // Fetch longer stats for progress
-        userAPI.getWeightHistory(),
-        dietAPI.get() // Fetch diet plan
+        workoutAPI.getAll({ limit: 50 }).catch(e => ({ data: { workouts: [] } })),
+        workoutAPI.getStats(30).catch(e => ({ data: { stats: null } })),
+        dietAPI.getTodaysLog().catch(e => ({ data: { logs: [] } })),
+        plansAPI.getWorkoutPlan().catch(e => ({ data: { plan: null, templates: [] } })),
+        templatesAPI.getAll().catch(e => ({ data: { userTemplates: [] } })),
+        workoutAPI.getStats(90).catch(e => ({ data: { stats: null } })),
+        userAPI.getWeightHistory().catch(e => ({ data: { weightHistory: [] } })),
+        dietAPI.get().catch(e => ({ data: { dietPlan: null } }))
       ]);
 
       setDashboardData({
