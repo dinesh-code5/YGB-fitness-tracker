@@ -343,20 +343,25 @@ const logMeal = async (req, res) => {
 };
 
 // @desc    Get diet logs for a specific date (defaults to today)
-// @route   GET /api/diet/logs/today?date=YYYY-MM-DD
+// @route   GET /api/diet/logs/today?date=YYYY-MM-DD&page=1
 const getTodaysLog = async (req, res) => {
   try {
-    const { date } = req.query;
+    const { date, page = 1 } = req.query;
+    const limit = 20;
+    const offset = (page - 1) * limit;
     const targetDate = date || new Date().toISOString().split('T')[0];
     
-    const logs = await DietLog.findAll({
+    const { count, rows } = await DietLog.findAndCountAll({
       where: {
         userId: req.user.id,
         date: targetDate
       },
-      order: [['createdAt', 'ASC']]
+      attributes: ['id', 'name', 'calories', 'protein', 'carbs', 'fats', 'date'],
+      order: [['createdAt', 'ASC']],
+      limit,
+      offset
     });
-    res.json({ success: true, logs, date: targetDate });
+    res.json({ success: true, logs: rows, count, date: targetDate, page: parseInt(page), pages: Math.ceil(count / limit) });
   } catch (error) {
     console.error('[DIET LOG] Fetch error:', error);
     res.status(500).json({ message: 'Error fetching logs', error: error.message });

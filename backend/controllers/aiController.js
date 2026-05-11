@@ -19,8 +19,8 @@ const generateAiDiet = async (req, res) => {
 
     // Initialize AI model inside the request to ensure API key is loaded
     const genAI = new GoogleGenerativeAI(apiKey);
-    console.log("Attempting Gemini AI generation with model: gemini-1.5-flash-latest");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    console.log("Attempting Gemini AI generation with model: gemini-pro");
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `You are an expert Indian nutritionist. Generate a highly personalized daily diet plan for:
 Weight: ${weight}kg, Height: ${height}cm, Age: ${age}, Gender: ${gender}

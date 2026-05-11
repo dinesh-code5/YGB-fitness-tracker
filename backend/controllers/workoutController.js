@@ -39,28 +39,29 @@ const createWorkout = async (req, res) => {
 const getWorkouts = async (req, res) => {
   try {
     const { limit = 20, page = 1, type, includeIncomplete } = req.query;
+    const parsedLimit = Math.min(parseInt(limit), 50); // Hard cap at 50
+    const parsedPage = parseInt(page);
 
     const where = { userId: req.user.id };
     if (type) where.workoutType = type;
     if (!includeIncomplete) where.isCompleted = true;
 
-    const workouts = await Workout.findAll({
+    const { count, rows } = await Workout.findAndCountAll({
       where,
+      attributes: ['id', 'name', 'date', 'duration', 'workoutType', 'isCompleted', 'totalVolume'],
       order: [['date', 'DESC']],
-      limit: parseInt(limit),
-      offset: (parseInt(page) - 1) * parseInt(limit)
+      limit: parsedLimit,
+      offset: (parsedPage - 1) * parsedLimit
     });
-
-    const total = await Workout.count({ where });
 
     res.json({
       success: true,
-      workouts,
+      workouts: rows,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit))
+        page: parsedPage,
+        limit: parsedLimit,
+        total: count,
+        pages: Math.ceil(count / parsedLimit)
       }
     });
   } catch (error) {

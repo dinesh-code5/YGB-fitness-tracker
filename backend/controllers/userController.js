@@ -1,13 +1,24 @@
 const { Op } = require('sequelize');
 const { User } = require('../models');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 300 });
 
 // @desc    Get user profile
 // @route   GET /api/user/profile
 // @access  Private
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    if (user) await user.checkStreak();
+    const cacheKey = `profile_${req.user.id}`;
+    const cached = cache.get(cacheKey);
+    if (cached) return res.json({ success: true, user: cached });
+
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'name', 'username', 'email', 'age', 'weight', 'height', 'goal', 'experience', 'activityLevel', 'currentStreak', 'longestStreak', 'isPremium', 'bio', 'archetype']
+    });
+    if (user) {
+      await user.checkStreak();
+      cache.set(cacheKey, user);
+    }
     res.json({ success: true, user });
   } catch (error) {
     console.error('Get profile error:', error);

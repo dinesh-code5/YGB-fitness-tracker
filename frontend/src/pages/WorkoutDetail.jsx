@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { workoutAPI, plansAPI } from '../utils/api';
 import {
-  FiArrowLeft, FiShare2, FiDownload, FiClock, FiZap,
+  FiArrowLeft, FiShare2, FiDownload, FiClock, FiZap,FiTrendingUp ,
   FiTrash2, FiEdit2, FiSave, FiX, FiPlus, FiCheck
 } from 'react-icons/fi';
 

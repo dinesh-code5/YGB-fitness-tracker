@@ -9,6 +9,8 @@ const { User, Workout, DietPlan, WorkoutTemplate, DietLog } = require('./models'
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const compression = require('compression');
+app.use(compression());
 const PORT = process.env.PORT || 5000;
 
 // =======================
