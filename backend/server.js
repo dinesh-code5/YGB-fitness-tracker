@@ -8,6 +8,8 @@ const { User, Workout, DietPlan, WorkoutTemplate, DietLog } = require('./models'
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
+const posthog = require('./config/posthog');
+
 const app = express();
 const compression = require('compression');
 app.use(compression());
@@ -85,5 +87,10 @@ sequelize.authenticate()
     console.error('❌ PostgreSQL connection error:', err.message);
     process.exit(1);
   });
+
+process.on('SIGTERM', async () => {
+  await posthog.shutdown();
+  process.exit(0);
+});
 
 module.exports = app;

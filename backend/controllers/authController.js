@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const { Op } = require('sequelize');
+const posthog = require('../config/posthog');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -65,6 +66,31 @@ const register = async (req, res) => {
     });
 
     const token = generateToken(user.id);
+
+    posthog.identify({
+      distinctId: String(user.id),
+      properties: {
+        email: user.email,
+        name: user.name,
+        goal: user.goal,
+        experience: user.experience,
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+      },
+    });
+    posthog.capture({
+      distinctId: String(user.id),
+      event: 'user_registered',
+      properties: {
+        goal: user.goal,
+        experience: user.experience,
+        activityLevel: user.activityLevel,
+        gender: user.gender,
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+        hasReferralCode: !!referralCode,
+      },
+    });
 
     res.status(201).json({
       success: true,
@@ -138,6 +164,16 @@ const login = async (req, res) => {
 
     // Check and reset streak if needed
     await user.checkStreak();
+
+    posthog.capture({
+      distinctId: String(user.id),
+      event: 'user_logged_in',
+      properties: {
+        currentStreak: user.currentStreak,
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+      },
+    });
 
     res.json({
       success: true,
