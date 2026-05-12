@@ -63,12 +63,9 @@ RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
     const response = await result.response;
     const text = response.text().trim();
     
-    console.log("Gemini Response:", text.substring(0, 200)); // Log first 200 chars for debugging
+    console.log("Gemini Response:", text.substring(0, 200)); 
     
-    // Extract JSON - handle various formats
     let jsonStr = text;
-    
-    // Remove markdown code blocks if present
     if (text.includes('```json')) {
       const parts = text.split('```json');
       if (parts.length > 1) {
@@ -81,7 +78,6 @@ RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
       }
     }
     
-    // Try to find JSON object
     const jsonStart = jsonStr.indexOf('{');
     const jsonEnd = jsonStr.lastIndexOf('}');
     
@@ -95,26 +91,16 @@ RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
     try {
       dietData = JSON.parse(jsonStr);
     } catch (parseErr) {
-      console.error("JSON Parse Error:", parseErr.message);
-      console.error("Attempted to parse:", jsonStr.substring(0, 300));
       throw new Error(`Invalid JSON from AI: ${parseErr.message}`);
     }
 
-    // Validate required fields
     if (!dietData.targetCalories || !dietData.macros || !dietData.mealPlan) {
-      throw new Error("AI response missing required fields (targetCalories, macros, mealPlan)");
+      throw new Error("AI response missing required fields");
     }
 
-    // Save to database
     await DietPlan.upsert({
       userId: req.user.id,
-      weight, 
-      height, 
-      age, 
-      gender, 
-      activityLevel, 
-      goal, 
-      dietType,
+      weight, height, age, gender, activityLevel, goal, dietType,
       bmr: dietData.bmr || Math.round(10*weight + 6.25*height - 5*age + (gender === 'male' ? 5 : -161)),
       tdee: dietData.tdee || Math.round((dietData.bmr || 1800) * 1.5),
       targetCalories: dietData.targetCalories,
@@ -138,8 +124,7 @@ RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
     console.error("Gemini AI Diet Error:", error);
     res.status(500).json({ 
       message: "AI Generation failed - " + error.message, 
-      error: error.message,
-      hint: "Ensure GEMINI_API_KEY is valid and you have API quota remaining"
+      error: error.message
     });
   }
 };
