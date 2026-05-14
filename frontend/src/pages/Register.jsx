@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GiMuscleUp } from 'react-icons/gi';
 import { 
-  FiMail, FiLock, FiEye, FiEyeOff, FiZap, FiUser, FiHeart,
-  FiArrowRight, FiArrowLeft, FiActivity, FiTarget, FiTrendingUp, FiAward 
+  FiMail, FiLock, FiEye, FiEyeOff, FiZap, FiUser,
+  FiArrowRight, FiArrowLeft, FiTrendingUp, FiAward 
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ARCHETYPES } from '../utils/archetypes';
@@ -27,49 +27,6 @@ const ACTIVITY = [
   { value: 'moderate', label: 'Moderate', desc: '3-4 days/wk' },
   { value: 'active', label: 'Active', desc: '5+ days/wk' },
 ];
-
-const FloatingGymIcons = () => {
-  const icons = [
-    { Icon: GiMuscleUp, size: 120, color: 'text-brand', top: '15%', left: '10%', delay: 0, duration: 6 },
-    { Icon: FiZap, size: 100, color: 'text-purple-500', bottom: '20%', right: '12%', delay: 1, duration: 8 },
-    { Icon: FiHeart, size: 80, color: 'text-brand', top: '60%', left: '85%', delay: 0.5, duration: 7 },
-    { Icon: FiActivity, size: 140, color: 'text-white', top: '25%', right: '15%', delay: 1.5, duration: 9 },
-    { Icon: FiAward, size: 90, color: 'text-brand', bottom: '10%', left: '15%', delay: 2, duration: 7.5 },
-  ];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-      <div className="energy-beam opacity-5" style={{ animationDelay: '1s' }} />
-      <div className="energy-beam opacity-5" style={{ animationDelay: '3s' }} />
-      {icons.map((item, i) => (
-        <motion.div
-          key={i}
-          className={`absolute opacity-[0.07] ${item.color}`}
-          initial={{ y: 0, opacity: 0 }}
-          animate={{ 
-            y: [0, -20, 0],
-            opacity: [0.05, 0.1, 0.05],
-          }}
-          transition={{
-            duration: item.duration,
-            repeat: Infinity,
-            delay: item.delay,
-            ease: "easeInOut"
-          }}
-          style={{
-            top: item.top,
-            left: item.left,
-            right: item.right,
-            bottom: item.bottom,
-            fontSize: item.size
-          }}
-        >
-          <item.Icon />
-        </motion.div>
-      ))}
-    </div>
-  );
-};
 
 export default function Register() {
   const { register } = useAuth();
@@ -170,17 +127,25 @@ export default function Register() {
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-1/3 left-1/4 w-80 h-80 bg-brand/10 rounded-full blur-[100px]" 
           />
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         </div>
 
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="relative"
+          className="relative flex items-center gap-4"
         >
-          <span className="font-display text-5xl tracking-widest text-gradient block leading-none mb-1">YGB</span>
-          <span className="text-xs font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="w-14 h-14 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center shadow-glow-sm"
+          >
+            <GiMuscleUp className="text-brand text-3xl" />
+          </motion.div>
+          <div className="flex flex-col">
+            <span className="font-display text-5xl tracking-widest text-gradient leading-none mb-1">YGB</span>
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+          </div>
         </motion.div>
 
         <div className="relative">
@@ -234,7 +199,7 @@ export default function Register() {
           className="relative flex items-center gap-4"
         >
           <div className="flex -space-x-2">
-            {['A','R','P','K'].map((l, i) => (
+            {['Y','G','B'].map((l, i) => (
               <motion.div 
                 key={i} 
                 whileHover={{ y: -5, scale: 1.1 }}
@@ -253,9 +218,17 @@ export default function Register() {
 
       {/* ── Right: Multi-step Form panel ── */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-y-auto overflow-x-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-brand/4 rounded-full blur-[100px] pointer-events-none" />
-
-        <FloatingGymIcons />
+        {/* Background Grid & Gradient */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-tr from-brand/5 via-transparent to-purple-500/5" />
+          <div className="absolute inset-0 opacity-[0.015]"
+            style={{
+              backgroundImage: 'linear-gradient(rgba(0,212,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,1) 1px, transparent 1px)',
+              backgroundSize: '40px 40px'
+            }}
+          />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-brand/5 rounded-full blur-[120px]" />
+        </div>
 
         <motion.div 
           initial={{ scale: 0.95, opacity: 0 }}
@@ -265,9 +238,14 @@ export default function Register() {
         >
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-10">
-            <Link to="/" className="inline-block">
-              <span className="font-display text-5xl tracking-widest text-gradient block leading-none mb-1">YGB</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+            <Link to="/" className="inline-flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <GiMuscleUp className="text-brand text-2xl" />
+              </div>
+              <div className="text-left">
+                <span className="font-display text-4xl tracking-widest text-gradient block leading-none">YGB</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+              </div>
             </Link>
           </div>
 
@@ -309,21 +287,21 @@ export default function Register() {
                           <label className="label text-lg">Full Name</label>
                           <div className="relative">
                             <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg" />
-                            <input className="input-field pl-10" placeholder="Arjun Sharma" value={form.name} onChange={e => set('name', e.target.value)} />
+                            <input className="input-field pl-10" placeholder="Dinesh Nawani" value={form.name} onChange={e => set('name', e.target.value)} />
                           </div>
                         </motion.div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
                           <label className="label text-lg">Username</label>
                           <div className="relative">
                             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg font-bold">@</span>
-                            <input className="input-field pl-10" placeholder="arjun_lifts" value={form.username} onChange={e => set('username', e.target.value.toLowerCase())} />
+                            <input className="input-field pl-10" placeholder="nawani_lifts" value={form.username} onChange={e => set('username', e.target.value.toLowerCase())} />
                           </div>
                         </motion.div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.3 }}>
                           <label className="label text-lg">Email Address</label>
                           <div className="relative">
                             <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg" />
-                            <input className="input-field pl-10" placeholder="arjun@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
+                            <input className="input-field pl-10" placeholder="nawanidinesh08@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
                           </div>
                         </motion.div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
@@ -369,9 +347,9 @@ export default function Register() {
                     )}
 
                     {step === 3 && (
-                      <div className="space-y-3">
-                        <label className="label text-lg">Choose Your Archetype</label>
-                        <div className="grid grid-cols-1 gap-3">
+                      <div className="space-y-4">
+                        <label className="label text-xl font-black text-brand uppercase tracking-widest">Choose Your Archetype</label>
+                        <div className="grid grid-cols-1 gap-4">
                           {ARCHETYPES.map((arch, idx) => (
                             <motion.button
                               key={arch.id}
@@ -382,20 +360,20 @@ export default function Register() {
                               whileHover={{ scale: 1.02, x: 5 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => handleArchetypeSelect(arch.id)}
-                              className={`p-3.5 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group ${
-                                form.archetype === arch.id ? 'border-brand bg-brand/5 shadow-glow-sm' : 'border-[#222232] hover:border-white/10'
+                              className={`p-4 rounded-2xl border-2 text-left transition-all duration-300 relative group ${
+                                form.archetype === arch.id ? 'border-brand bg-brand/10 shadow-glow-sm' : 'border-[#222232] hover:border-white/20 bg-white/5'
                               }`}
                             >
                               <div className="relative z-10 flex items-center justify-between">
                                 <div>
-                                  <p className={`font-black uppercase tracking-widest text-lg ${form.archetype === arch.id ? 'text-brand' : 'text-white'}`}>
+                                  <p className={`font-black uppercase tracking-widest text-xl ${form.archetype === arch.id ? 'text-brand' : 'text-white'}`}>
                                     {arch.label}
                                   </p>
-                                  <p className="text-xs font-bold text-white/40 uppercase">
+                                  <p className="text-sm font-bold text-white/50 uppercase tracking-wider mt-1">
                                     {arch.id === 'lean' ? 'Cut (Fat Loss)' : arch.id === 'bulk' ? 'Bulk (Gain Mass)' : 'Maintain'}
                                   </p>
                                 </div>
-                                <span className="text-3xl opacity-40 group-hover:opacity-100 transition-opacity">{arch.glyph}</span>
+                                <span className="text-4xl opacity-50 group-hover:opacity-100 transition-all transform group-hover:scale-110">{arch.glyph}</span>
                               </div>
                             </motion.button>
                           ))}
@@ -406,8 +384,8 @@ export default function Register() {
                     {step === 4 && (
                       <div className="space-y-8">
                         <div>
-                          <label className="label text-lg mb-3">Experience</label>
-                          <div className="grid grid-cols-1 gap-2.5">
+                          <label className="label text-xl font-black text-brand uppercase tracking-widest mb-4">Training Experience</label>
+                          <div className="grid grid-cols-1 gap-3">
                             {EXPERIENCE.map((exp, idx) => (
                               <motion.button 
                                 key={exp.value} 
@@ -418,25 +396,25 @@ export default function Register() {
                                 whileHover={{ scale: 1.02, x: 5 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => set('experience', exp.value)}
-                                className={`px-4 py-3 rounded-xl border text-left flex items-center justify-between transition-all ${form.experience === exp.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/10'}`}>
-                                <span className="text-lg font-black uppercase tracking-wider">{exp.label}</span>
-                                <span className="text-[10px] font-bold opacity-40">{exp.desc}</span>
+                                className={`px-5 py-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${form.experience === exp.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/20 bg-white/5'}`}>
+                                <span className="text-xl font-black uppercase tracking-wider">{exp.label}</span>
+                                <span className="text-sm font-black uppercase tracking-widest opacity-60">{exp.desc}</span>
                               </motion.button>
                             ))}
                           </div>
                         </div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-                          <label className="label text-lg mb-3">Activity</label>
-                          <div className="grid grid-cols-3 gap-2">
+                          <label className="label text-xl font-black text-brand uppercase tracking-widest mb-4">Lifestyle Activity</label>
+                          <div className="grid grid-cols-1 gap-3">
                             {ACTIVITY.map(act => (
                               <motion.button 
                                 key={act.value} 
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: 1.02, x: 5 }}
+                                whileTap={{ scale: 0.98 }}
                                 onClick={() => set('activityLevel', act.value)}
-                                className={`p-2.5 rounded-xl border text-center transition-all ${form.activityLevel === act.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/10'}`}>
-                                <p className="text-lg font-black uppercase">{act.label}</p>
-                                <p className="text-[9px] font-bold opacity-30">{act.desc}</p>
+                                className={`px-5 py-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${form.activityLevel === act.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/20 bg-white/5'}`}>
+                                <p className="text-xl font-black uppercase tracking-wider">{act.label}</p>
+                                <p className="text-sm font-black uppercase tracking-widest opacity-60">{act.desc}</p>
                               </motion.button>
                             ))}
                           </div>
@@ -487,13 +465,13 @@ export default function Register() {
             </div>
 
             <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-center text-lg text-[var(--text-secondary)] mt-6"
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 1.1 }}
+              className="text-center mt-6 text-lg text-[var(--text-secondary)]"
             >
               Already a member?{' '}
-              <Link to="/login" className="text-brand hover:underline font-bold">Sign In</Link>
+              <Link to="/login" className="text-brand hover:underline font-bold transition-all">Sign In</Link>
             </motion.p>
           </div>
         </motion.div>

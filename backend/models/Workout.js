@@ -47,6 +47,10 @@ const Workout = sequelize.define('Workout', {
 }, {
   tableName: 'workouts',
   underscored: true,
+  indexes: [
+    { fields: ['user_id', 'date'] },
+    { fields: ['user_id'] }
+  ],
   hooks: {
     beforeSave: (workout) => {
       // Recalculate totals from exercises JSONB

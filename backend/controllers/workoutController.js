@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
-const Workout = require('../models/Workout');
-const User = require('../models/User');
+const { Workout, User } = require('../models');
 
 // @desc    Create new workout
 // @route   POST /api/workouts
@@ -40,33 +39,34 @@ const createWorkout = async (req, res) => {
 const getWorkouts = async (req, res) => {
   try {
     const { limit = 20, page = 1, type, includeIncomplete } = req.query;
+    const parsedLimit = Math.min(parseInt(limit), 50); // Hard cap at 50
+    const parsedPage = parseInt(page);
 
     const where = { userId: req.user.id };
     if (type) where.workoutType = type;
     if (!includeIncomplete) where.isCompleted = true;
 
-    const workouts = await Workout.findAll({
+    const { count, rows } = await Workout.findAndCountAll({
       where,
+      attributes: ['id', 'name', 'date', 'duration', 'workoutType', 'isCompleted', 'totalVolume'],
       order: [['date', 'DESC']],
-      limit: parseInt(limit),
-      offset: (parseInt(page) - 1) * parseInt(limit)
+      limit: parsedLimit,
+      offset: (parsedPage - 1) * parsedLimit
     });
-
-    const total = await Workout.count({ where });
 
     res.json({
       success: true,
-      workouts,
+      workouts: rows,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit))
+        page: parsedPage,
+        limit: parsedLimit,
+        total: count,
+        pages: Math.ceil(count / parsedLimit)
       }
     });
   } catch (error) {
     console.error('Get workouts error:', error);
-    res.status(500).json({ message: 'Error fetching workouts' });
+    res.status(500).json({ message: 'Error fetching workouts', error: error.message });
   }
 };
 
@@ -85,7 +85,8 @@ const getWorkout = async (req, res) => {
 
     res.json({ success: true, workout });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching workout' });
+    console.error('Get workout error:', error);
+    res.status(500).json({ message: 'Error fetching workout', error: error.message });
   }
 };
 
@@ -113,7 +114,7 @@ const updateWorkout = async (req, res) => {
     res.json({ success: true, workout });
   } catch (error) {
     console.error('Update workout error:', error);
-    res.status(500).json({ message: 'Error updating workout' });
+    res.status(500).json({ message: 'Error updating workout', error: error.message });
   }
 };
 
@@ -132,7 +133,8 @@ const deleteWorkout = async (req, res) => {
 
     res.json({ success: true, message: 'Workout deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting workout' });
+    console.error('Delete workout error:', error);
+    res.status(500).json({ message: 'Error deleting workout', error: error.message });
   }
 };
 
@@ -156,15 +158,27 @@ const getStats = async (req, res) => {
 
     // Weekly consistency
     const totalDays = parseInt(days);
-    const workoutDays = new Set(workouts.map(w => w.date.toDateString())).size;
+    const workoutDays = new Set(workouts.map(w => {
+      try {
+        return new Date(w.date).toDateString();
+      } catch (e) {
+        return null;
+      }
+    }).filter(d => d !== null)).size;
     const consistency = Math.round((workoutDays / totalDays) * 100);
 
     // Volume over time
-    const volumeData = workouts.map(w => ({
-      date: w.date.toLocaleDateString('en-IN'),
-      volume: w.totalVolume,
-      duration: w.duration
-    }));
+    const volumeData = workouts.map(w => {
+      try {
+        return {
+          date: new Date(w.date).toLocaleDateString('en-IN'),
+          volume: w.totalVolume || 0,
+          duration: w.duration || 0
+        };
+      } catch (e) {
+        return null;
+      }
+    }).filter(d => d !== null);
 
     // Exercise PRs (personal records)
     const exercisePRs = {};
@@ -181,23 +195,31 @@ const getStats = async (req, res) => {
     // Workout frequency by type
     const typeFrequency = {};
     workouts.forEach(w => {
-      typeFrequency[w.workoutType] = (typeFrequency[w.workoutType] || 0) + 1;
+      if (w.workoutType) {
+        typeFrequency[w.workoutType] = (typeFrequency[w.workoutType] || 0) + 1;
+      }
     });
 
     // Strength progress for specific exercises
     const strengthProgress = {};
     workouts.forEach(workout => {
       (workout.exercises || []).forEach(exercise => {
+        if (!exercise.name) return;
         if (!strengthProgress[exercise.name]) {
           strengthProgress[exercise.name] = [];
         }
         const weights = (exercise.sets || []).map(s => s.weight || 0);
         const maxWeight = weights.length > 0 ? Math.max(...weights) : 0;
-        strengthProgress[exercise.name].push({
-          date: workout.date.toLocaleDateString('en-IN'),
-          weight: maxWeight,
-          volume: (exercise.sets || []).reduce((acc, s) => acc + (s.weight || 0) * (s.reps || 0), 0)
-        });
+        
+        try {
+          strengthProgress[exercise.name].push({
+            date: new Date(workout.date).toLocaleDateString('en-IN'),
+            weight: maxWeight,
+            volume: (exercise.sets || []).reduce((acc, s) => acc + (Number(s.weight) || 0) * (Number(s.reps) || 0), 0)
+          });
+        } catch (e) {
+          // Skip invalid dates
+        }
       });
     });
 
@@ -210,15 +232,15 @@ const getStats = async (req, res) => {
         exercisePRs,
         typeFrequency,
         strengthProgress,
-        totalVolume: workouts.reduce((acc, w) => acc + w.totalVolume, 0),
+        totalVolume: workouts.reduce((acc, w) => acc + (w.totalVolume || 0), 0),
         avgDuration: workouts.length > 0
-          ? Math.round(workouts.reduce((acc, w) => acc + w.duration, 0) / workouts.length)
+          ? Math.round(workouts.reduce((acc, w) => acc + (w.duration || 0), 0) / workouts.length)
           : 0
       }
     });
   } catch (error) {
     console.error('Get stats error:', error);
-    res.status(500).json({ message: 'Error fetching stats' });
+    res.status(500).json({ message: 'Error fetching stats', error: error.message });
   }
 };
 
@@ -227,13 +249,20 @@ const updateStreak = async (userId) => {
   const user = await User.findByPk(userId);
   if (!user) return;
 
-  const today = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  // First, check if the streak should have been reset due to inactivity
+  await user.checkStreak();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   if (user.lastWorkoutDate) {
-    const lastDate = new Date(user.lastWorkoutDate).toDateString();
-    if (lastDate === today) return; // Already worked out today
-    if (lastDate === yesterday) {
+    const lastDate = new Date(user.lastWorkoutDate);
+    lastDate.setHours(0, 0, 0, 0);
+
+    const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
+
+    if (diffInDays === 0) return; // Already worked out today
+    if (diffInDays === 1) {
       user.currentStreak += 1;
     } else {
       user.currentStreak = 1; // Reset streak

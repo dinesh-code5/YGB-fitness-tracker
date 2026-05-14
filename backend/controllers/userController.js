@@ -1,15 +1,28 @@
 const { Op } = require('sequelize');
-const User = require('../models/User');
+const { User } = require('../models');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 300 });
 
 // @desc    Get user profile
 // @route   GET /api/user/profile
 // @access  Private
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
+    const cacheKey = `profile_${req.user.id}`;
+    const cached = cache.get(cacheKey);
+    if (cached) return res.json({ success: true, user: cached });
+
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'name', 'username', 'email', 'age', 'weight', 'height', 'goal', 'experience', 'activityLevel', 'currentStreak', 'longestStreak', 'isPremium', 'bio', 'archetype']
+    });
+    if (user) {
+      await user.checkStreak();
+      cache.set(cacheKey, user);
+    }
     res.json({ success: true, user });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching profile' });
+    console.error('Get profile error:', error);
+    res.status(500).json({ message: 'Error fetching profile', error: error.message });
   }
 };
 
@@ -17,12 +30,13 @@ const getProfile = async (req, res) => {
 // @route   PUT /api/user/profile
 // @access  Private
 const updateProfile = async (req, res) => {
+  console.log('[DEBUG] Update Profile Request Body:', req.body);
   try {
     const { 
       name, age, weight, height, gender, goal, 
       experience, activityLevel, notifications,
       weightUnit, heightUnit, restTimerDuration, bio,
-      archetype
+      archetype, goalWeight, targetDate
     } = req.body;
 
     const user = await User.findByPk(req.user.id);
@@ -40,6 +54,8 @@ const updateProfile = async (req, res) => {
     if (restTimerDuration) user.restTimerDuration = restTimerDuration;
     if (notifications) user.notifications = { ...user.notifications, ...notifications };
     if (archetype) user.archetype = archetype;
+    if (goalWeight) user.goalWeight = goalWeight;
+    if (targetDate) user.targetDate = targetDate;
 
     // Track weight history if weight changed
     if (weight && weight !== user.weight) {
@@ -173,13 +189,16 @@ const getPublicProfile = async (req, res) => {
     const Workout = require('../models/Workout');
     const user = await User.findOne({
       where: { username: req.params.username },
-      attributes: ['id', 'name', 'username', 'avatar', 'bio', 'goal', 'experience', 'currentStreak', 'longestStreak', 'weightHistory', 'progressPhotos', 'isPublic', 'createdAt']
+      attributes: ['id', 'name', 'username', 'avatar', 'bio', 'goal', 'experience', 'currentStreak', 'longestStreak', 'weightHistory', 'progressPhotos', 'isPublic', 'createdAt', 'lastWorkoutDate']
     });
     
     if (!user) return res.status(404).json({ message: 'User not found' });
     if (!user.isPublic && (!req.user || user.id !== req.user.id)) {
       return res.status(403).json({ message: 'This profile is private' });
     }
+
+    // Check if streak is broken
+    await user.checkStreak();
 
     // Get recent workouts
     const workouts = await Workout.findAll({
@@ -200,6 +219,7 @@ const getPublicProfile = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('getPublicProfile error:', error);
     res.status(500).json({ message: 'Error fetching profile' });
   }
 };
@@ -298,7 +318,7 @@ const deleteProgressPhoto = async (req, res) => {
 const verifyPromo = async (req, res) => {
   try {
     const { code } = req.body;
-    const VALID_CODES = ['YGBFREE', 'PROMO100', 'FITNESS2024'];
+    const VALID_CODES = ['YGBFREE', 'PROMO100', 'FITNESS2024', 'YGBLINKEDIN'];
     
     if (VALID_CODES.includes(code.toUpperCase())) {
       const user = await User.findByPk(req.user.id);

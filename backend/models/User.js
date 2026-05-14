@@ -56,8 +56,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    validate: { isEmail: true },
-    set(val) { this.setDataValue('email', val.toLowerCase()); }
+    validate: { isEmail: true }
   },
   password: {
     type: DataTypes.STRING,
@@ -67,8 +66,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(20),
     unique: true,
     allowNull: true,
-    validate: { is: /^[a-z0-9_.]{1,20}$/ },
-    set(val) { if (val) this.setDataValue('username', val.toLowerCase()); }
+    validate: { is: /^[a-z0-9_.]{1,20}$/ }
   },
   avatar: { type: DataTypes.TEXT, defaultValue: '' },
   bio: { type: DataTypes.STRING(200) },
@@ -80,6 +78,8 @@ const User = sequelize.define('User', {
   age: { type: DataTypes.INTEGER, validate: { min: 10, max: 100 } },
   weight: { type: DataTypes.FLOAT },
   height: { type: DataTypes.FLOAT },
+  goalWeight: { type: DataTypes.FLOAT, field: 'goal_weight' },
+  targetDate: { type: DataTypes.DATE, field: 'target_date' },
   gender: { type: DataTypes.ENUM('male', 'female', 'other') },
   // Fitness profile
   goal: {
@@ -148,6 +148,10 @@ const User = sequelize.define('User', {
   tableName: 'users',
   underscored: true,
   hooks: {
+    beforeValidate: (user) => {
+      if (user.email) user.email = user.email.toLowerCase().trim();
+      if (user.username) user.username = user.username.toLowerCase().trim();
+    },
     beforeCreate: async (user) => {
       user.password = await bcrypt.hash(user.password, 12);
     },
@@ -168,6 +172,28 @@ User.prototype.comparePassword = async function(candidatePassword) {
 User.prototype.toSafeObject = function() {
   const { password, ...safe } = this.toJSON();
   return safe;
+};
+
+// Check if streak is broken and reset if needed
+User.prototype.checkStreak = async function() {
+  if (!this.lastWorkoutDate) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const lastDate = new Date(this.lastWorkoutDate);
+  lastDate.setHours(0, 0, 0, 0);
+
+  // Difference in days
+  const diffInTime = today.getTime() - lastDate.getTime();
+  const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+
+  if (diffInDays > 1) {
+    this.currentStreak = 0;
+    await this.save();
+    return true;
+  }
+  return false;
 };
 
 module.exports = User;

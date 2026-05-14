@@ -14,7 +14,7 @@ const MOBILE_NAV = [
 export default function MobileNav() {
   const { activeWorkout } = useAuth();
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#16161E] border-t border-[#2A2A3A] z-50 safe-area-pb">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#16161E] border-t border-[#2A2A3A] z-50 safe-area-pb">
       <div className="flex items-center justify-around px-2 py-2">
         {MOBILE_NAV.map(({ to, icon: Icon, label }) => {
           const isWorkout = to === '/workout/log';

@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || '/api',
+  baseURL: `${process.env.VITE_API_URL || process.env.REACT_APP_API_URL || 'https://ygb-fitness-tracker.onrender.com'}/api`,
   timeout: 15000,
-  withCredentials: true // Required for CSRF cookies
+  withCredentials: true 
 });
 
 // Attach JWT to every request
@@ -16,14 +16,14 @@ API.interceptors.request.use((config) => {
 });
 
 // Helper to fetch and set CSRF token
-export const initCsrf = async () => {
-  try {
-    const { data } = await API.get('csrf-token');
-    API.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
-  } catch (err) {
-    console.error('Failed to initialize CSRF:', err);
-  }
-};
+// export const initCsrf = async () => {
+//   try {
+//     const { data } = await API.get('csrf-token');
+//     API.defaults.headers.common['X-CSRF-Token'] = data.csrfToken;
+//   } catch (err) {
+//     console.error('Failed to initialize CSRF:', err);
+//   }
+// };
 
 // Handle global errors
 API.interceptors.response.use(
@@ -78,7 +78,7 @@ export const dietAPI = {
   generateAi: (data) => API.post('diet/generate-ai', data),
   get: () => API.get('diet'),
   logMeal: (data) => API.post('diet/log', data),
-  getTodaysLog: () => API.get('diet/logs/today'),
+  getTodaysLog: (date) => API.get('diet/logs/today', { params: { date } }),
   deleteLog: (id) => API.delete(`diet/logs/${id}`),
 };
 

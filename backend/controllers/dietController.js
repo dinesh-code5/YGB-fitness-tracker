@@ -1,5 +1,4 @@
-const DietPlan = require('../models/DietPlan');
-const DietLog = require('../models/DietLog');
+const { DietPlan, DietLog } = require('../models');
 const { Op } = require('sequelize');
 
 const ACTIVITY_MULTIPLIERS = {
@@ -343,22 +342,29 @@ const logMeal = async (req, res) => {
   }
 };
 
-// @desc    Get today's diet logs
-// @route   GET /api/diet/logs/today
+// @desc    Get diet logs for a specific date (defaults to today)
+// @route   GET /api/diet/logs/today?date=YYYY-MM-DD&page=1
 const getTodaysLog = async (req, res) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const logs = await DietLog.findAll({
+    const { date, page = 1 } = req.query;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    const { count, rows } = await DietLog.findAndCountAll({
       where: {
         userId: req.user.id,
-        date: today
+        date: targetDate
       },
-      order: [['createdAt', 'ASC']]
+      attributes: ['id', 'name', 'calories', 'protein', 'carbs', 'fats', 'date'],
+      order: [['createdAt', 'ASC']],
+      limit,
+      offset
     });
-    res.json({ success: true, logs });
+    res.json({ success: true, logs: rows, count, date: targetDate, page: parseInt(page), pages: Math.ceil(count / limit) });
   } catch (error) {
     console.error('[DIET LOG] Fetch error:', error);
-    res.status(500).json({ message: 'Error fetching today\'s logs' });
+    res.status(500).json({ message: 'Error fetching logs', error: error.message });
   }
 };
 
@@ -371,7 +377,8 @@ const deleteLog = async (req, res) => {
     await log.destroy();
     res.json({ success: true, message: 'Log deleted' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting log' });
+    console.error('[DIET LOG] Delete error:', error);
+    res.status(500).json({ message: 'Error deleting log', error: error.message });
   }
 };
 

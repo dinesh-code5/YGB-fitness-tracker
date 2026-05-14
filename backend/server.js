@@ -1,79 +1,110 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const cookieParser = require('cookie-parser');
-const csrf = require('csurf');
 const sequelize = require('./config/database');
 const { User, Workout, DietPlan, WorkoutTemplate, DietLog } = require('./models');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+const posthog = require('./config/posthog');
 
 const app = express();
-
+const compression = require('compression');
+app.use(compression());
 const PORT = process.env.PORT || 5000;
 
+// =======================
 // Middleware
+// =======================
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:3001",
+  "https://ygbdaily.netlify.app",
+  "https://ygbdaily.vercel.app"
+];
+
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || true, // true reflects the request origin
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
-  exposedHeaders: ['X-CSRF-Token']
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
 }));
+
 app.use(express.json({ limit: '10mb' }));
-app.use(cookieParser(process.env.COOKIE_SECRET || 'ygb-gym-buddy-secret'));
+app.use(cookieParser());
 
-// CSRF Protection
-const csrfProtection = csrf({ 
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+// Simple request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  if (req.method !== 'GET') {
+    const safeBody = { ...req.body };
+    if (safeBody.password) safeBody.password = '********';
+    console.log('Body:', safeBody);
   }
-});
-// Routes
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
+  next();
 });
 
-app.use('/api/auth', csrfProtection, require('./routes/auth'));
-app.use('/api/user', csrfProtection, require('./routes/user'));
-app.use('/api/workouts', csrfProtection, require('./routes/workouts'));
-app.use('/api/diet', csrfProtection, require('./routes/diet'));
-app.use('/api/plans', csrfProtection, require('./routes/plans'));
-app.use('/api/templates', csrfProtection, require('./routes/templates'));
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'YGB API Running 💪', timestamp: new Date() });
-});
+// =======================
+// Routes (CSRF logic removed)
+// =======================
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/workouts', require('./routes/workouts'));
+app.use('/api/diet', require('./routes/diet'));
+app.use('/api/plans', require('./routes/plans'));
+app.use('/api/templates', require('./routes/templates'));
 
-// Global error handler
+// Global Error Handler
 app.use((err, req, res, next) => {
-  if (err.code === 'EBADCSRFTOKEN') {
-    console.warn('❌ CSRF Token Error:', req.method, req.url);
-    return res.status(403).json({
-      message: 'Form security expired. Please refresh the page.'
-    });
-  }
-  
-  console.error(err.stack);
+  console.error('❌ Error:', err.message);
   res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    message: err.message || 'Internal Server Error'
   });
 });
 
-// Sync database and start server
+// =======================
+// Database + Server Start
+// =======================
+
+if (!process.env.JWT_SECRET) {
+  console.error('❌ FATAL: JWT_SECRET is not defined in .env');
+  process.exit(1);
+}
+
 sequelize.authenticate()
   .then(async () => {
     console.log('✅ PostgreSQL connected');
-    // Sync all models (use { alter: true } for production-safe changes)
-    await sequelize.sync({ alter: true });
+
+    await sequelize.sync(); 
+
     console.log('✅ Database synced');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT} (0.0.0.0)`);
+    });
   })
   .catch(err => {
     console.error('❌ PostgreSQL connection error:', err.message);
     process.exit(1);
   });
+
+process.on('SIGTERM', async () => {
+  await posthog.shutdown();
+  process.exit(0);
+});
 
 module.exports = app;

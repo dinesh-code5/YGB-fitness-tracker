@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { workoutAPI, plansAPI } from '../utils/api';
 import {
-  FiArrowLeft, FiShare2, FiDownload, FiClock, FiZap,
+  FiArrowLeft, FiShare2, FiDownload, FiClock, FiZap,FiTrendingUp ,
   FiTrash2, FiEdit2, FiSave, FiX, FiPlus, FiCheck
 } from 'react-icons/fi';
 
@@ -97,19 +97,19 @@ const ShareCard = ({ workout, themeColor }) => {
         ].map((s, i) => (
           <div key={i} style={{
             background: 'rgba(0,0,0,0.2)',
-            padding: '10px 8px', textAlign: 'center',
+            padding: '12px 8px', textAlign: 'center',
           }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginBottom: 3 }}>{s.label}</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#F0F0F5' }}>{s.value}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#F0F0F5' }}>{s.value}</div>
           </div>
         ))}
       </div>
 
       {/* Exercises — like reference image */}
-      <div style={{ padding: '14px 16px' }}>
-        <div style={{ display:'flex', alignItems:'center', gap: 6, marginBottom: 12 }}>
-          <span style={{ fontSize: 14 }}>🏋️</span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#F0F0F5' }}>
+      <div style={{ padding: '16px 20px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap: 8, marginBottom: 14 }}>
+          <span style={{ fontSize: 16 }}>🏋️</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#F0F0F5', letterSpacing: '0.5px' }}>
             Exercises ({workout.exercises?.length || 0})
           </span>
         </div>
@@ -119,24 +119,24 @@ const ShareCard = ({ workout, themeColor }) => {
           return (
             <div key={ei} style={{
               background: 'rgba(255,255,255,0.04)',
-              borderRadius: 10,
+              borderRadius: 12,
               overflow: 'hidden',
-              marginBottom: 8,
-              border: '1px solid rgba(255,255,255,0.06)'
+              marginBottom: 10,
+              border: '1px solid rgba(255,255,255,0.08)'
             }}>
               {/* Exercise header */}
               <div style={{
-                display:'flex', alignItems:'center', justifyContent:'space-between',
-                padding: '8px 12px',
-                background: `${themeColor}0D`,
-                borderBottom: doneSets.length > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none'
+                display:'flex', alignItems:'center', justifyBetween:'space-between',
+                padding: '10px 14px',
+                background: `${themeColor}12`,
+                borderBottom: doneSets.length > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none'
               }}>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{ex.name}</span>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>{ex.name}</span>
                 <span style={{
-                  fontSize: 11, fontWeight: 700,
-                  background: `${themeColor}26`,
+                  fontSize: 12, fontWeight: 800,
+                  background: `${themeColor}33`,
                   color: themeColor,
-                  padding: '2px 8px', borderRadius: 99
+                  padding: '3px 10px', borderRadius: 99
                 }}>
                   {doneSets.length}/{(ex.sets||[]).length}
                 </span>
@@ -148,20 +148,20 @@ const ShareCard = ({ workout, themeColor }) => {
                 return (
                   <div key={si} style={{
                     display:'flex', alignItems:'center', justifyContent:'space-between',
-                    padding: '6px 12px',
-                    background: si % 2 === 0 ? `${themeColor}0A` : 'transparent',
-                    borderBottom: si < doneSets.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none'
+                    padding: '8px 14px',
+                    background: si % 2 === 0 ? `${themeColor}0D` : 'transparent',
+                    borderBottom: si < doneSets.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none'
                   }}>
-                    <div style={{ display:'flex', alignItems:'center', gap: 10 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap: 12 }}>
                       {typeInfo.label
-                        ? <span style={{ fontSize: 11, fontWeight: 700, color: typeInfo.color, minWidth: 14 }}>{typeInfo.label}</span>
-                        : <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', minWidth: 14 }}>{si + 1}</span>
+                        ? <span style={{ fontSize: 12, fontWeight: 800, color: typeInfo.color, minWidth: 16 }}>{typeInfo.label}</span>
+                        : <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', minWidth: 16 }}>{si + 1}</span>
                       }
-                      <span style={{ fontSize: 13, color: '#E0E0E8' }}>
-                        {set.weight > 0 ? `${set.weight}kg` : 'BW'} × {set.reps}reps
+                      <span style={{ fontSize: 16, color: '#E0E0E8', fontWeight: 600 }}>
+                        {set.weight > 0 ? `${set.weight}kg` : 'BW'} × {set.reps} reps
                       </span>
                     </div>
-                    <span style={{ fontSize: 13, color: themeColor }}>✓</span>
+                    <span style={{ fontSize: 16, color: themeColor, fontWeight: 800 }}>✓</span>
                   </div>
                 );
               })}
@@ -236,7 +236,7 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
         </button>
       </div>
       <div className="p-3 space-y-1.5">
-        <div className="grid grid-cols-12 gap-1 text-xs text-muted px-1 mb-1">
+        <div className="grid grid-cols-12 gap-1 text-base text-muted px-1 mb-1">
           <span className="col-span-1">#</span>
           <span className="col-span-4 text-center">kg</span>
           <span className="col-span-4 text-center">Reps</span>
@@ -245,7 +245,7 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
         </div>
         {exercise.sets.map((set, si) => (
           <div key={si} className="grid grid-cols-12 gap-1 items-center">
-            <span className="col-span-1 text-xs text-muted text-center">{si + 1}</span>
+            <span className="col-span-1 text-base text-muted text-center">{si + 1}</span>
             <div className="col-span-4">
               <input type="number" min="0" step="2.5"
                 className="input-field text-center text-lg py-1.5 px-1 w-full"

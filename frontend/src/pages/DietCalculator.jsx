@@ -141,10 +141,10 @@ export default function DietCalculator() {
     try {
       await dietAPI.logMeal({
         name: optionName,
-        calories: meal.macros?.cal || 0,
-        protein: meal.macros?.protein || 0,
-        carbs: Math.round((meal.macros?.cal * 0.45) / 4) || 0,
-        fats: Math.round((meal.macros?.cal * 0.25) / 9) || 0,
+        calories: meal.macros?.calories || meal.macros?.cal || 0,
+        protein: meal.macros?.protein || meal.macros?.p || 0,
+        carbs: meal.macros?.carbs || Math.round((meal.macros?.cal * 0.45) / 4) || 0,
+        fats: meal.macros?.fats || Math.round((meal.macros?.cal * 0.25) / 9) || 0,
       });
       window.dispatchEvent(new CustomEvent('dietUpdated'));
       toast.success('Meal logged! 🥗');
@@ -337,7 +337,7 @@ export default function DietCalculator() {
                           <h4 className="font-bold text-l uppercase tracking-widest">{mealName}</h4>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-l font-black text-muted group-hover:text-brand transition-colors">{meal.macros?.cal} KCAL</span>
+                          <span className="text-l font-black text-muted group-hover:text-brand transition-colors">{meal.macros?.calories || meal.macros?.cal} KCAL</span>
                         </div>
                       </div>
                       <div className="p-4 space-y-3">
