@@ -331,7 +331,7 @@ const logMeal = async (req, res) => {
       protein: parseFloat(protein) || 0,
       carbs: parseFloat(carbs) || 0,
       fats: parseFloat(fats) || 0,
-      date: new Date().toISOString().split('T')[0]
+      date: req.body.date || new Date().toISOString().split('T')[0]
     });
     
     console.log('[DIET LOG] Successfully created log:', log.id);
@@ -349,6 +349,8 @@ const getTodaysLog = async (req, res) => {
     const { date, page = 1 } = req.query;
     const limit = 20;
     const offset = (page - 1) * limit;
+    
+    // Consistent fallback for targetDate
     const targetDate = date || new Date().toISOString().split('T')[0];
     
     const { count, rows } = await DietLog.findAndCountAll({

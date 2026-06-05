@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authAPI, workoutAPI, dietAPI, plansAPI, templatesAPI, userAPI } from '../utils/api';
+import { authAPI, workoutAPI, dietAPI, plansAPI, templatesAPI, userAPI, getLocalDate } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -35,10 +35,11 @@ export const AuthProvider = ({ children }) => {
     try {
       // Fetch everything in parallel for maximum speed
       // Use .catch on individual calls to prevent one failure from stopping others
+      const today = getLocalDate();
       const [wRes, sRes, dRes, pRes, tRes, userSRes, uWeightRes, dpRes] = await Promise.all([
         workoutAPI.getAll({ limit: 50 }).catch(e => ({ data: { workouts: [] } })),
         workoutAPI.getStats(30).catch(e => ({ data: { stats: null } })),
-        dietAPI.getTodaysLog().catch(e => ({ data: { logs: [] } })),
+        dietAPI.getTodaysLog(today).catch(e => ({ data: { logs: [] } })),
         plansAPI.getWorkoutPlan().catch(e => ({ data: { plan: null, templates: [] } })),
         templatesAPI.getAll().catch(e => ({ data: { userTemplates: [] } })),
         workoutAPI.getStats(90).catch(e => ({ data: { stats: null } })),

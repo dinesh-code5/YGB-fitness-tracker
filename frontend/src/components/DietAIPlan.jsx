@@ -109,13 +109,22 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
     const logKey = `${mealKey}-${optionName}`;
     setLoggingMeal(logKey);
     setSelectedOptions(prev => ({ ...prev, [mealKey]: optionIndex }));
+    
+    // Extract base macros with fallbacks
+    const baseCal = Number(meal.macros?.calories || meal.macros?.cal || 0);
+    const baseProtein = Number(meal.macros?.protein || meal.macros?.p || 0);
+    
+    // Estimate carbs/fats if missing (standard ratios)
+    const estimatedCarbs = Math.round((baseCal * 0.45) / 4);
+    const estimatedFats = Math.round((baseCal * 0.25) / 9);
+
     try {
       await dietAPI.logMeal({
         name: optionName,
-        calories: meal.macros?.calories || meal.macros?.cal || 0,
-        protein: meal.macros?.protein || meal.macros?.p || 0,
-        carbs: meal.macros?.carbs || Math.round((meal.macros?.cal * 0.45) / 4) || 0,
-        fats: meal.macros?.fats || Math.round((meal.macros?.cal * 0.25) / 9) || 0,
+        calories: baseCal,
+        protein: baseProtein,
+        carbs: Number(meal.macros?.carbs || estimatedCarbs || 0),
+        fats: Number(meal.macros?.fats || estimatedFats || 0),
       });
       await refreshLogs();
       toast.success('Meal logged! 🥗');

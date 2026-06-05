@@ -2,23 +2,23 @@ import React from 'react';
 import { FiTrash2, FiZap, FiPlus, FiDroplet } from 'react-icons/fi';
 import { GiMeal } from 'react-icons/gi';
 import { useAuth } from '../context/AuthContext';
-import { dietAPI } from '../utils/api';
+import { dietAPI, getLocalDate } from '../utils/api';
 import toast from 'react-hot-toast';
 
 export default function DietToday({ todaysTotal, result, onAddMeal }) {
   const { dashboardData, refreshGlobalData } = useAuth();
-  const [selectedDate, setSelectedDate] = React.useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = React.useState(getLocalDate());
   const [historyLogs, setHistoryLogs] = React.useState([]);
   const [fetchingHistory, setFetchingHistory] = React.useState(false);
 
-  const entries = selectedDate === new Date().toISOString().split('T')[0] 
+  const entries = selectedDate === getLocalDate() 
     ? (dashboardData?.todayLogs || []) 
     : historyLogs;
     
   const loading = fetchingHistory || (!dashboardData?.stats && dashboardData?.isRefreshing);
 
   React.useEffect(() => {
-    if (selectedDate !== new Date().toISOString().split('T')[0]) {
+    if (selectedDate !== getLocalDate()) {
       fetchHistory();
     }
   }, [selectedDate]);
@@ -37,13 +37,15 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
   const changeDate = (days) => {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() + days);
-    setSelectedDate(d.toISOString().split('T')[0]);
+    // Use ISO string for the intermediate date object, then split
+    const newDateStr = d.toISOString().split('T')[0];
+    setSelectedDate(newDateStr);
   };
 
   const handleDelete = async (id) => {
     try {
       await dietAPI.deleteLog(id);
-      if (selectedDate === new Date().toISOString().split('T')[0]) {
+      if (selectedDate === getLocalDate()) {
         refreshGlobalData(true);
       } else {
         fetchHistory();
@@ -55,10 +57,10 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
   };
 
   const currentTotal = entries.reduce((acc, curr) => ({
-    calories: acc.calories + Number(curr.calories),
-    protein: acc.protein + Number(curr.protein),
+    calories: acc.calories + Number(curr.calories || 0),
+    protein: acc.protein + Number(curr.protein || 0),
     carbs: acc.carbs + Number(curr.carbs || 0),
-    fats: acc.fats + Number(curr.fats)
+    fats: acc.fats + Number(curr.fats || 0)
   }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 
   const remaining = result ? {
@@ -77,11 +79,11 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
           
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-l font-black text-brand uppercase tracking-[0.2em]">
-              {selectedDate === new Date().toISOString().split('T')[0] ? 'Consumed Today' : `Stats for ${selectedDate}`}
+              {selectedDate === getLocalDate() ? 'Consumed Today' : `Stats for ${selectedDate}`}
             </h3>
             <div className="flex items-center gap-2 bg-[var(--surface-elevated)] p-1 rounded-xl border border-brand/10">
               <button onClick={() => changeDate(-1)} className="p-2 hover:text-brand transition-colors"><FiZap className="rotate-180" /></button>
-              <span className="text-[10px] font-black uppercase tracking-widest px-2">{selectedDate === new Date().toISOString().split('T')[0] ? 'Today' : selectedDate}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest px-2">{selectedDate === getLocalDate() ? 'Today' : selectedDate}</span>
               <button onClick={() => changeDate(1)} className="p-2 hover:text-brand transition-colors"><FiZap /></button>
             </div>
           </div>
@@ -103,7 +105,7 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
             <div className="flex items-center justify-between mb-3">
                <div className="flex flex-col">
                   <p className="text-2xl font-black text-brand uppercase tracking-tighter">
-                     {entries.length === 0 && selectedDate === new Date().toISOString().split('T')[0] ? 0 : Math.round((currentTotal.calories / result.targetCalories) * 100)}%
+                     {entries.length === 0 && selectedDate === getLocalDate() ? 0 : Math.round((currentTotal.calories / result.targetCalories) * 100)}%
                   </p>
                   <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em]">Consumed</p>
                </div>
@@ -119,7 +121,7 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
             <div className="w-full h-6 bg-[var(--surface-elevated)] rounded-2xl overflow-hidden border border-brand/20 p-1 relative">
               <div 
                 className="h-full bg-gradient-to-r from-brand to-accent rounded-xl transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(0,212,255,0.4)] relative overflow-hidden" 
-                style={{ width: `${entries.length === 0 && selectedDate === new Date().toISOString().split('T')[0] ? 0 : Math.min(100, (currentTotal.calories / result.targetCalories) * 100)}%` }}
+                style={{ width: `${entries.length === 0 && selectedDate === getLocalDate() ? 0 : Math.min(100, (currentTotal.calories / result.targetCalories) * 100)}%` }}
               >
                 <div className="absolute inset-0 bg-white/20 animate-pulse" />
                 <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/10" />

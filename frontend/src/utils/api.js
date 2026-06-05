@@ -38,6 +38,13 @@ API.interceptors.response.use(
   }
 );
 
+// Helper for consistent local date string (YYYY-MM-DD)
+export const getLocalDate = () => {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - offset).toISOString().split('T')[0];
+};
+
 // ── Auth ──────────────────────────────────────────────────
 export const authAPI = {
   register: (data) => API.post('auth/register', data),
@@ -77,7 +84,12 @@ export const dietAPI = {
   calculate: (data) => API.post('diet/calculate', data),
   generateAi: (data) => API.post('diet/generate-ai', data),
   get: () => API.get('diet'),
-  logMeal: (data) => API.post('diet/log', data),
+  logMeal: (data) => {
+    if (!data.date) {
+      data.date = getLocalDate();
+    }
+    return API.post('diet/log', data);
+  },
   getTodaysLog: (date) => API.get('diet/logs/today', { params: { date } }),
   deleteLog: (id) => API.delete(`diet/logs/${id}`),
 };
