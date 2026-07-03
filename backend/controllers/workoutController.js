@@ -48,7 +48,7 @@ const getWorkouts = async (req, res) => {
 
     const { count, rows } = await Workout.findAndCountAll({
       where,
-      attributes: ['id', 'name', 'date', 'duration', 'workoutType', 'isCompleted', 'totalVolume'],
+      attributes: ['id', 'name', 'date', 'duration', 'workoutType', 'isCompleted', 'totalVolume', 'exercises'],
       order: [['date', 'DESC']],
       limit: parsedLimit,
       offset: (parsedPage - 1) * parsedLimit

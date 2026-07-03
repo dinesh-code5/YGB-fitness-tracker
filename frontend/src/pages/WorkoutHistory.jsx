@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiClock, FiZap, FiChevronRight } from 'react-icons/fi';
+import { FiClock, FiZap, FiTrendingUp, FiChevronRight } from 'react-icons/fi';
 import { GiMuscleUp } from 'react-icons/gi';
 
 const TYPE_COLORS = {

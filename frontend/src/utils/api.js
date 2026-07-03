@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API = axios.create({
   baseURL: `${process.env.VITE_API_URL || process.env.REACT_APP_API_URL || 'https://ygb-fitness-tracker.onrender.com'}/api`,
-  timeout: 15000,
+  timeout: 30000,
   withCredentials: true 
 });
 
@@ -41,8 +41,10 @@ API.interceptors.response.use(
 // Helper for consistent local date string (YYYY-MM-DD)
 export const getLocalDate = () => {
   const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000;
-  return new Date(now.getTime() - offset).toISOString().split('T')[0];
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 // ── Auth ──────────────────────────────────────────────────

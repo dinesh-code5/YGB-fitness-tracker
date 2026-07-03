@@ -1,6 +1,7 @@
-const { DietPlan, DietLog } = require('../models');
+const { sequelize, DietPlan, DietLog } = require('../models');
 const { Op } = require('sequelize');
 
+// enums
 const ACTIVITY_MULTIPLIERS = {
   sedentary: 1.20, light: 1.30, moderate: 1.45, active: 1.65, very_active: 1.8
 };
@@ -32,25 +33,25 @@ const INDIAN_FOODS = {
   tuna_can:      { name: 'Tuna Can (100g)',           cal: 130, protein: 29, carbs: 0,  fat: 1,  type: 'nonveg' },
   mutton_150g:   { name: 'Mutton (150g cooked)',      cal: 310, protein: 30, carbs: 0,  fat: 20, type: 'nonveg' },
   // PROTEIN POWDERS - Alternative to whey
-  whey_scoop:    { name: 'Whey Protein (1 scoop)',   cal: 120, protein: 25, carbs: 3,  fat: 1,  type: 'supplement' },
+  whey_scoop:    { name: 'Whey Protein (1 scoop)',   cal: 145, protein: 25, carbs: 10,  fat: 1,  type: 'supplement' },
   soya_powder:   { name: 'Soya Protein Powder (1 scoop)', cal: 110, protein: 23, carbs: 4, fat: 1, type: 'supplement' },
   pea_protein:   { name: 'Pea Protein (1 scoop)',    cal: 100, protein: 20, carbs: 2,  fat: 1,  type: 'supplement' },
   // CARBS
-  roti_1:        { name: 'Roti/Chapati (1 medium)',  cal: 105, protein: 3,  carbs: 20, fat: 2,  type: 'carb' },
-  rice_cup:      { name: 'Rice (1 cup cooked)',       cal: 200, protein: 4,  carbs: 44, fat: 0.5,type: 'carb' },
+  roti_1:        { name: 'Roti/Chapati (1 medium)',  cal: 105, protein: 2,  carbs: 20, fat: 2,  type: 'carb' },
+  rice_cup:      { name: 'Rice (1 cup cooked)',       cal: 200, protein: 3,  carbs: 44, fat: 0.5,type: 'carb' },
   brown_rice:    { name: 'Brown Rice (1 cup cooked)', cal: 215, protein: 5,  carbs: 45, fat: 2,  type: 'carb' },
   oats_cup:      { name: 'Oats (1 cup cooked)',       cal: 160, protein: 6,  carbs: 28, fat: 3,  type: 'carb' },
   poha_plate:    { name: 'Poha (1 plate ~150g)',      cal: 250, protein: 5,  carbs: 45, fat: 6,  type: 'carb' },
   upma_bowl:     { name: 'Upma (1 bowl)',             cal: 250, protein: 5,  carbs: 40, fat: 7,  type: 'carb' },
   idli_2:        { name: 'Idli (2 pieces)',           cal: 140, protein: 4,  carbs: 28, fat: 1,  type: 'carb' },
   dosa_1:        { name: 'Dosa (1 plain)',            cal: 180, protein: 4,  carbs: 30, fat: 5,  type: 'carb' },
-  paratha_1:     { name: 'Paratha (1 with ghee)',     cal: 260, protein: 5,  carbs: 36, fat: 11, type: 'carb' },
+  paratha_1:     { name: 'Paratha (1 with ghee)',     cal: 260, protein: 3,  carbs: 36, fat: 11, type: 'carb' },
   bread_2:       { name: 'Whole Wheat Bread (2 slices)', cal: 140, protein: 6, carbs: 26, fat: 2, type: 'carb' },
   banana:        { name: 'Banana (1 medium)',         cal: 90,  protein: 1,  carbs: 23, fat: 0,  type: 'carb' },
   sweet_potato:  { name: 'Sweet Potato (1 medium)',   cal: 130, protein: 2,  carbs: 30, fat: 0,  type: 'carb' },
   // FATS
   ghee_1tsp:     { name: 'Ghee (1 tsp)',              cal: 45,  protein: 0,  carbs: 0,  fat: 5,  type: 'fat' },
-  peanut_butter: { name: 'Peanut Butter (1 tbsp)',    cal: 90,  protein: 4,  carbs: 3,  fat: 8,  type: 'fat' },
+  peanut_butter: { name: 'Peanut Butter (1 tbsp)',    cal: 90,  protein: 3,  carbs: 3,  fat: 8,  type: 'fat' },
   almonds_10:    { name: 'Almonds (10 pieces)',        cal: 70,  protein: 2,  carbs: 2,  fat: 6,  type: 'fat' },
   groundnuts:    { name: 'Groundnuts (1 handful 30g)',cal: 170, protein: 7,  carbs: 5,  fat: 14, type: 'fat' },
   coconut_chutney:{ name: 'Coconut Chutney (2 tbsp)', cal: 60,  protein: 1,  carbs: 2,  fat: 5,  type: 'fat' },
@@ -226,7 +227,7 @@ const calculateDiet = async (req, res) => {
 
     let targetCalories;
     if (goal === 'bulk') targetCalories = tdee + 300;
-    else if (goal === 'cut') targetCalories = Math.max(tdee - 400, 1200);
+    else if (goal === 'cut') targetCalories = Math.max(tdee - 400, 1600);
     else targetCalories = tdee;
 
     // Macro split based on goal
@@ -316,25 +317,30 @@ const getDietPlan = async (req, res) => {
 // @route   POST /api/diet/log
 const logMeal = async (req, res) => {
   try {
-    const { name, calories, protein, carbs, fats } = req.body;
-    console.log('[DIET LOG] Attempting to log:', { userId: req.user.id, name, calories, protein, carbs, fats });
+    const { name, calories, protein, carbs, fats, date } = req.body;
+    const userId = req.user.id;
+    
+    // Fallback to UTC date if none provided
+    const serverDate = new Date().toISOString().split('T')[0];
+    const targetDate = (date || serverDate).trim();
+    
+    console.log(`[DIET LOG] User ${userId} logging meal: "${name}" for date: ${targetDate}`);
     
     if (!name) {
-      console.warn('[DIET LOG] Missing meal name');
       return res.status(400).json({ message: 'Meal name is required' });
     }
     
     const log = await DietLog.create({
-      userId: req.user.id,
+      userId,
       name,
       calories: parseFloat(calories) || 0,
       protein: parseFloat(protein) || 0,
       carbs: parseFloat(carbs) || 0,
       fats: parseFloat(fats) || 0,
-      date: req.body.date || new Date().toISOString().split('T')[0]
+      date: targetDate
     });
     
-    console.log('[DIET LOG] Successfully created log:', log.id);
+    console.log(`[DIET LOG] Created entry ${log.id} successfully`);
     res.status(201).json({ success: true, log });
   } catch (error) {
     console.error('[DIET LOG] Create error:', error);
@@ -347,15 +353,18 @@ const logMeal = async (req, res) => {
 const getTodaysLog = async (req, res) => {
   try {
     const { date, page = 1 } = req.query;
+    const userId = req.user.id;
     const limit = 20;
     const offset = (page - 1) * limit;
     
-    // Consistent fallback for targetDate
-    const targetDate = date || new Date().toISOString().split('T')[0];
+    const serverDate = new Date().toISOString().split('T')[0];
+    const targetDate = (date || serverDate).trim();
+    
+    console.log(`[DIET FETCH] User ${userId} querying for date: ${targetDate}`);
     
     const { count, rows } = await DietLog.findAndCountAll({
       where: {
-        userId: req.user.id,
+        userId: userId,
         date: targetDate
       },
       attributes: ['id', 'name', 'calories', 'protein', 'carbs', 'fats', 'date'],
@@ -363,6 +372,8 @@ const getTodaysLog = async (req, res) => {
       limit,
       offset
     });
+
+    console.log(`[DIET FETCH] Success. Found ${rows.length} logs for user ${userId} on ${targetDate}`);
     res.json({ success: true, logs: rows, count, date: targetDate, page: parseInt(page), pages: Math.ceil(count / limit) });
   } catch (error) {
     console.error('[DIET LOG] Fetch error:', error);

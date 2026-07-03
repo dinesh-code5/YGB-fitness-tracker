@@ -108,6 +108,8 @@ const WeightProgressChart = ({ history, goalWeight, accentColor }) => {
   );
 };
 const GymBarChart = ({ workouts, accentColor, goalWeight }) => {
+  const { themeColor: globalThemeColor } = useTheme();
+  const themeColor = accentColor || globalThemeColor;
   const getWeekNumber = (d) => {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
     d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -128,8 +130,6 @@ const GymBarChart = ({ workouts, accentColor, goalWeight }) => {
     const obj = last8Weeks.find(l => l.week === wn && l.year === yr);
     if (obj) obj.count++;
   });
-
-  const themeColor = accentColor || getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
 
   return (
     <div className="h-44 w-full">
@@ -153,6 +153,7 @@ const GymBarChart = ({ workouts, accentColor, goalWeight }) => {
 
 // ── GitHub-Style Activity Heatmap ────────────────────────────────────────
 const ActivityHeatmap = ({ workouts, accentColor }) => {
+  const { themeColor: globalThemeColor } = useTheme();
   const [dateView, setDateView] = useState(new Date());
   const workoutDates = new Set(workouts.map(w => new Date(w.date).toDateString()));
   
@@ -172,7 +173,7 @@ const ActivityHeatmap = ({ workouts, accentColor }) => {
     };
   });
 
-  const themeColor = accentColor || getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
+  const themeColor = accentColor || globalThemeColor;
 
   const changeMonth = (offset) => {
     setDateView(new Date(year, month + offset, 1));
@@ -207,7 +208,8 @@ const ActivityHeatmap = ({ workouts, accentColor }) => {
 
 // ── XP Bar ───────────────────────────────────────────────────────────────
 const XPBar = ({ xp = 750, nextLevel = 1000, level = 12, accentColor }) => {
-  const themeColor = accentColor || getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
+  const { themeColor: globalThemeColor } = useTheme();
+  const themeColor = accentColor || globalThemeColor;
   const progress = Math.min((xp / nextLevel) * 100, 100);
   return (
     <div className="w-full">
@@ -421,7 +423,7 @@ const BodyMetrics = ({ user, accentColor }) => {
 // ── Main Profile Page ─────────────────────────────────────────────────────
 export default function Profile() {
   const { user, updateUser, logout } = useAuth();
-  const { setThemeColor } = useTheme();
+  const { themeColor, setThemeColor } = useTheme();
   
   const [editing, setEditing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);

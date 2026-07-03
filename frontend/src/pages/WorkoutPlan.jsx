@@ -8,7 +8,7 @@ import {
   FiPlus,
   FiPlay,
   FiTrash2,
-  FiCheck ,
+  FiCheck,
   FiEdit2,
   FiSave,
   FiX,
@@ -145,13 +145,13 @@ const ExerciseGuide = ({ ex, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] flex items-start justify-center p-2 sm:p-4 pt-2 sm:pt-4 overflow-y-auto">
-      <div className="bg-[#11111A] border border-white/10 rounded-3xl w-full max-w-lg max-h-[95vh] flex flex-col shadow-2xl overflow-hidden animate-scale-in my-2 sm:my-0">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-3">
+      <div className="bg-[#11111A] border border-white/10 rounded-3xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-scale-in">
         {/* Header */}
-        <div className="bg-[#16161E] border-b border-white/5 p-5 sm:p-6 flex items-center justify-between flex-shrink-0">
+        <div className="bg-[#16161E] border-b border-white/5 p-4 sm:p-6 flex items-center justify-between flex-shrink-0">
           <div>
-            <h3 className="text-2xl font-black text-white uppercase tracking-tight">{exercise.name}</h3>
-            <p className="text-sm font-bold text-brand uppercase tracking-[0.2em] mt-1">
+            <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">{exercise.name}</h3>
+            <p className="text-[10px] sm:text-sm font-bold text-brand uppercase tracking-[0.2em] mt-1">
               {exercise.muscleGroup} · {exercise.defaultSets} sets × {exercise.defaultReps}
             </p>
           </div>
@@ -164,7 +164,7 @@ const ExerciseGuide = ({ ex, onClose }) => {
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-[#16161E] border-b border-white/5 p-1">
+        <div className="flex bg-[#16161E] border-b border-white/5 p-1 gap-1">
           {[
             { id: 'description', label: 'Guide', icon: FiPlay },
             { id: 'history', label: 'History', icon: FiClock },
@@ -173,30 +173,30 @@ const ExerciseGuide = ({ ex, onClose }) => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === tab.id ? 'bg-brand text-[#0A0A0F] shadow-glow-sm' : 'text-white/30 hover:text-white'
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeTab === tab.id ? 'bg-brand text-black shadow-glow-sm' : 'text-white/30 hover:text-white'
               }`}
             >
               <tab.icon className="text-sm" />
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar">
           {loading ? (
             <div className="py-20 text-center">
-              <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm font-black text-white/20 uppercase tracking-widest">Accessing Guide...</p>
+              <div className="w-8 h-8 border-3 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Accessing Guide...</p>
             </div>
           ) : (
             <>
               {activeTab === 'description' && (
-                <div className="space-y-8 animate-fade-in">
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex flex-wrap gap-1.5">
                     {exercise.muscles?.map(m => (
-                      <span key={m} className="px-3 py-1.5 bg-brand/5 border border-brand/10 text-brand text-xs font-black uppercase tracking-widest rounded-lg">
+                      <span key={m} className="px-2.5 py-1 bg-brand/5 border border-brand/10 text-brand text-[10px] font-black uppercase tracking-widest rounded-lg">
                         {m}
                       </span>
                     ))}
@@ -204,14 +204,14 @@ const ExerciseGuide = ({ ex, onClose }) => {
 
                   {exercise.description && (
                     <div>
-                      <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-3">Technique Overview</h4>
-                      <p className="text-lg text-white/70 leading-relaxed font-medium">{exercise.description}</p>
+                      <h4 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2.5">Technique Overview</h4>
+                      <p className="text-base text-white/70 leading-relaxed font-medium">{exercise.description}</p>
                     </div>
                   )}
 
                   {exercise.youtubeId && (
                     <div>
-                      <h4 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                      <h4 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2.5 flex items-center gap-2">
                         <FiPlay className="text-brand" /> Visual Execution
                       </h4>
                       <div className="rounded-2xl overflow-hidden bg-black border border-white/5 shadow-2xl" style={{ aspectRatio: '16/9' }}>
@@ -224,13 +224,13 @@ const ExerciseGuide = ({ ex, onClose }) => {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {exercise.cues?.length > 0 && (
                       <div>
-                        <h4 className="text-xs font-black text-green-400/50 uppercase tracking-[0.2em] mb-3">Key Cues</h4>
-                        <ul className="space-y-2.5">
+                        <h4 className="text-[10px] font-black text-green-400/50 uppercase tracking-[0.2em] mb-2.5">Key Cues</h4>
+                        <ul className="space-y-2">
                           {exercise.cues.map((c, i) => (
-                            <li key={i} className="flex items-start gap-3 text-base text-white/60 font-medium">
+                            <li key={i} className="flex items-start gap-2.5 text-sm text-white/60 font-medium">
                               <span className="text-green-400 mt-0.5 flex-shrink-0">✓</span>
                               {c}
                             </li>
@@ -241,10 +241,10 @@ const ExerciseGuide = ({ ex, onClose }) => {
 
                     {exercise.mistakes?.length > 0 && (
                       <div>
-                        <h4 className="text-xs font-black text-red-400/50 uppercase tracking-[0.2em] mb-3">Common Pitfalls</h4>
-                        <ul className="space-y-2.5">
+                        <h4 className="text-[10px] font-black text-red-400/50 uppercase tracking-[0.2em] mb-2.5">Common Pitfalls</h4>
+                        <ul className="space-y-2">
                           {exercise.mistakes.map((m, i) => (
-                            <li key={i} className="flex items-start gap-3 text-base text-white/60 font-medium">
+                            <li key={i} className="flex items-start gap-2.5 text-sm text-white/60 font-medium">
                               <span className="text-red-400 mt-0.5 flex-shrink-0">✗</span>
                               {m}
                             </li>
@@ -557,20 +557,20 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex justify-center p-4 overflow-y-auto pt-20 md:pt-12">
-      <div className="bg-[#16161E] border border-[#2A2A3A] rounded-3xl w-full max-w-xl flex flex-col shadow-2xl h-fit mb-20">
-        <div className="flex items-center justify-between p-7 border-b border-[#2A2A3A] flex-shrink-0">
-          <h3 className="text-xl font-black tracking-tight text-[#F0F0F5] uppercase tracking-widest">Template Editor</h3>
-          <button onClick={onClose} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1E1E2A] transition-colors text-muted text-2xl">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[1000] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-[#11111A] border border-white/10 rounded-3xl w-full max-w-xl max-h-[95vh] flex flex-col shadow-2xl overflow-hidden animate-scale-in">
+        <div className="bg-[#16161E] border-b border-white/5 p-4 sm:p-6 flex items-center justify-between flex-shrink-0">
+          <h3 className="text-lg sm:text-xl font-black tracking-tight text-[#F0F0F5] uppercase tracking-widest">Template Editor</h3>
+          <button onClick={onClose} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5 transition-colors text-muted text-xl">
             <FiX />
           </button>
         </div>
 
-        <div className="p-7 space-y-7">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar">
           <div>
-            <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">Template Name</label>
+            <label className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-2 block">Template Name</label>
             <input
-              className="input-field h-14 text-xl font-black"
+              className="input-field h-12 text-lg font-black"
               placeholder="e.g. MONSTER PUSH DAY"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -578,41 +578,41 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           </div>
 
           <div>
-            <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">
-              Description <span className="text-[10px] font-medium normal-case opacity-40 italic ml-2">(How do we crush this?)</span>
+            <label className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-2 block">
+              Description <span className="text-[9px] font-medium normal-case opacity-40 italic ml-2">(How do we crush this?)</span>
             </label>
             <textarea
-              className="input-field text-lg h-24 pt-3.5 resize-none font-medium"
+              className="input-field text-sm h-20 pt-3 resize-none font-medium"
               placeholder="Primary focus, intensity techniques, etc..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">Focus Type</label>
+              <label className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-2 block">Focus Type</label>
               <div className="relative">
                 <select 
-                  className="input-field h-14 text-lg bg-[#1E1E2A] text-white cursor-pointer appearance-none font-black uppercase tracking-widest w-full px-5" 
+                  className="input-field h-12 text-base bg-[#1E1E2A] text-white cursor-pointer appearance-none font-black uppercase tracking-widest w-full px-4" 
                   value={workoutType} 
                   onChange={(e) => setWorkoutType(e.target.value)}
                 >
                   {WORKOUT_TYPES.map((t) => (
-                    <option key={t} value={t} className="bg-[#16161E] text-white py-3 text-base">
+                    <option key={t} value={t} className="bg-[#16161E] text-white py-2 text-sm">
                       {t.replace('_', ' ').toUpperCase()}
                     </option>
                   ))}
                 </select>
-                <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-brand text-xl pointer-events-none" />
+                <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-brand text-lg pointer-events-none" />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-2.5 block">Est. Time (min)</label>
+              <label className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-2 block">Est. Time (min)</label>
               <input
                 type="number"
-                className="input-field text-xl h-14 font-black text-center"
+                className="input-field text-lg h-12 font-black text-center"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
               />
@@ -620,31 +620,31 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           </div>
 
           <div>
-            <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-3 block">Select Exercises</label>
-            <div className="relative mb-3.5">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-brand text-lg" />
+            <label className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-3 block">Select Exercises</label>
+            <div className="relative mb-3">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-brand text-base" />
               <input
-                className="input-field pl-11 text-lg h-12 border-brand/20 focus:border-brand/50 font-medium"
+                className="input-field pl-10 text-base h-11 border-brand/20 focus:border-brand/50 font-medium"
                 placeholder="Search the arsenal..."
                 value={exSearch}
                 onChange={(e) => setExSearch(e.target.value)}
               />
             </div>
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
               {filteredEx.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => toggleEx(ex)}
-                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all border-2 ${
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all border-2 ${
                     isSelected(ex.id) ? 'border-brand bg-brand/10 shadow-glow-sm' : 'border-[#2A2A3A] hover:bg-[#1E1E2A]'
                   }`}
                 >
-                  <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 ${isSelected(ex.id) ? 'bg-brand' : 'bg-[#2A2A3A]'}`}>
-                    {isSelected(ex.id) && <FiCheck className="text-[#0A0A0F] text-xs font-black" />}
+                  <div className={`w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0 ${isSelected(ex.id) ? 'bg-brand' : 'bg-[#2A2A3A]'}`}>
+                    {isSelected(ex.id) && <FiCheck className="text-[#0A0A0F] text-[10px] font-black" />}
                   </div>
                   <div className="flex-1 min-w-0" onClick={(e) => showGuide(e, ex)}>
-                    <p className="text-lg font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
-                    <p className="text-[10px] text-brand font-black uppercase tracking-widest opacity-60">{ex.muscleGroup}</p>
+                    <p className="text-base font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
+                    <p className="text-[9px] text-brand font-black uppercase tracking-widest opacity-60">{ex.muscleGroup}</p>
                   </div>
                 </button>
               ))}
@@ -652,36 +652,36 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           </div>
 
           {selectedExercises.length > 0 && (
-            <div className="pt-6 border-t border-[#2A2A3A]">
-              <label className="text-xs font-black text-brand uppercase tracking-[0.2em] mb-5 block">Workout Flow ({selectedExercises.length})</label>
-              <div className="space-y-3.5">
+            <div className="pt-6 border-t border-white/5">
+              <label className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-4 block">Workout Flow ({selectedExercises.length})</label>
+              <div className="space-y-3">
                 {selectedExercises.map((ex, i) => (
-                  <div key={i} className="bg-[var(--surface-elevated)] border-2 border-[#2A2A3A] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex-1 min-w-0 flex items-center gap-3 cursor-help" onClick={(e) => showActiveGuide(e, ex)}>
+                  <div key={i} className="bg-white/[0.02] border-2 border-white/5 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex-1 min-w-0 flex items-center gap-2.5 cursor-help" onClick={(e) => showActiveGuide(e, ex)}>
                       <div className="w-1.5 h-1.5 rounded-full bg-brand shadow-glow-sm" />
-                      <p className="text-lg font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
+                      <p className="text-base font-black text-[#F0F0F5] truncate uppercase tracking-tight">{ex.name}</p>
                     </div>
-                    <div className="flex items-center gap-4 justify-end">
+                    <div className="flex items-center gap-3 justify-end">
                       <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Sets</span>
+                        <span className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Sets</span>
                         <input
                           type="number" min="1" max="10"
-                          className="w-14 h-10 bg-[#1E1E2A] border-2 border-[#2A2A3A] rounded-lg text-base text-center font-black text-brand focus:border-brand/50 outline-none"
+                          className="w-12 h-9 bg-[#1E1E2A] border-2 border-white/5 rounded-lg text-sm text-center font-black text-brand focus:border-brand/50 outline-none"
                           value={ex.defaultSets}
                           onChange={(e) => updateEx(i, 'defaultSets', Number(e.target.value))}
                         />
                       </div>
                       <div className="flex flex-col items-center">
-                        <span className="text-[9px] font-black text-muted uppercase tracking-widest mb-1">Reps</span>
+                        <span className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Reps</span>
                         <input
-                          className="w-18 h-10 bg-[#1E1E2A] border-2 border-[#2A2A3A] rounded-lg text-base text-center font-black text-brand focus:border-brand/50 outline-none"
+                          className="w-16 h-9 bg-[#1E1E2A] border-2 border-white/5 rounded-lg text-sm text-center font-black text-brand focus:border-brand/50 outline-none"
                           value={ex.defaultReps}
                           onChange={(e) => updateEx(i, 'defaultReps', e.target.value)}
                         />
                       </div>
                       <button
                         onClick={() => setSelectedExercises((prev) => prev.filter((_, j) => j !== i))}
-                        className="w-10 h-10 rounded-lg flex items-center justify-center text-muted hover:text-red-400 hover:bg-red-400/10 transition-all border border-transparent hover:border-red-400/20"
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-muted hover:text-red-400 hover:bg-red-400/10 transition-all border border-transparent hover:border-red-400/20"
                       >
                         <FiTrash2 className="text-lg" />
                       </button>
@@ -693,8 +693,8 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
           )}
         </div>
 
-        <div className="p-7 border-t border-[#2A2A3A] flex-shrink-0 bg-[#16161E] rounded-b-3xl">
-          <button onClick={handleSave} disabled={saving} className="btn-primary w-full h-14 text-lg font-black uppercase tracking-[0.15em] flex items-center justify-center gap-4 shadow-glow">
+        <div className="p-5 sm:p-6 border-t border-white/5 flex-shrink-0 bg-[#16161E]">
+          <button onClick={handleSave} disabled={saving} className="btn-primary w-full h-14 text-lg font-black uppercase tracking-[0.15em] flex items-center justify-center gap-3 shadow-glow">
             {saving ? <div className="w-5 h-5 border-4 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiSave className="text-xl" />}
             {template ? 'Update Plan' : 'Establish Plan'}
           </button>

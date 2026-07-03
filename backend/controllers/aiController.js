@@ -19,78 +19,64 @@ const generateAiDiet = async (req, res) => {
 
     // Initialize AI model inside the request to ensure API key is loaded
     const genAI = new GoogleGenerativeAI(apiKey);
-    console.log("Attempting Gemini AI generation with model: gemini-pro");
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    
+    // Using gemini-1.5-flash for speed and native JSON mode support
+    console.log("Attempting Gemini AI generation with model: gemini-1.5-flash");
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+      }
+    });
 
     const prompt = `You are an expert Indian nutritionist. Generate a highly personalized daily diet plan for:
 Weight: ${weight}kg, Height: ${height}cm, Age: ${age}, Gender: ${gender}
 Activity: ${activityLevel}, Goal: ${goal}, Diet: ${dietType}
 Preferences: ${additionalInfo || "None"}
 
-RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
+Return a JSON object with this exact structure:
 {
-  "targetCalories": 2500,
-  "macros": {"protein": 150, "carbs": 280, "fats": 80},
-  "bmr": 1800,
-  "tdee": 2500,
-  "waterIntake": 3.5,
+  "targetCalories": number,
+  "macros": {"protein": number, "carbs": number, "fats": number},
+  "bmr": number,
+  "tdee": number,
+  "waterIntake": number,
   "mealPlan": {
     "breakfast": {
       "label": "Breakfast",
-      "options": ["2 roti + 1 bowl dal + 1 bowl sabzi", "Dosa + sambar + chutney"],
-      "macros": {"calories": 500, "protein": 20, "carbs": 60, "fats": 15}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     },
     "lunch": {
       "label": "Lunch",
-      "options": ["2 roti + 150g chicken + dal + sabzi", "Biryani (1 bowl) + raita"],
-      "macros": {"calories": 700, "protein": 35, "carbs": 80, "fats": 20}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     },
     "snack": {
       "label": "Evening Snack",
-      "options": ["1 glass milk + 2 biscuits", "Fruit + handful peanuts"],
-      "macros": {"calories": 300, "protein": 12, "carbs": 40, "fats": 10}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     },
     "dinner": {
       "label": "Dinner",
-      "options": ["2 roti + paneer curry + salad", "Khichdi + yogurt"],
-      "macros": {"calories": 600, "protein": 25, "carbs": 70, "fats": 15}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     }
   },
-  "proteinTips": ["Eat protein at every meal", "Paneer and dal are your friends"]
+  "proteinTips": ["tip 1", "tip 2"]
 }`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text().trim();
     
-    console.log("Gemini Response:", text.substring(0, 200)); 
-    
-    let jsonStr = text;
-    if (text.includes('```json')) {
-      const parts = text.split('```json');
-      if (parts.length > 1) {
-        jsonStr = parts[1].split('```')[0].trim();
-      }
-    } else if (text.includes('```')) {
-      const parts = text.split('```');
-      if (parts.length > 1) {
-        jsonStr = parts[1].split('```')[0].trim();
-      }
-    }
-    
-    const jsonStart = jsonStr.indexOf('{');
-    const jsonEnd = jsonStr.lastIndexOf('}');
-    
-    if (jsonStart === -1 || jsonEnd === -1) {
-      throw new Error("No JSON found in response");
-    }
-    
-    jsonStr = jsonStr.substring(jsonStart, jsonEnd + 1);
+    console.log("Gemini Response Received (JSON Mode Active)"); 
     
     let dietData;
     try {
-      dietData = JSON.parse(jsonStr);
+      dietData = JSON.parse(text);
     } catch (parseErr) {
+      console.error("Failed to parse AI response:", text);
       throw new Error(`Invalid JSON from AI: ${parseErr.message}`);
     }
 

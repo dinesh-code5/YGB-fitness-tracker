@@ -12,6 +12,7 @@ import LoadingBar from './components/LoadingBar';
 // Layout
 import Navbar from './components/layout/Navbar';
 import MobileSidebar from './components/layout/MobileSidebar';
+import MobileNav from './components/layout/MobileNav';
 import Footer from './components/layout/Footer';
 
 // Pages
@@ -66,12 +67,13 @@ const AppShell = ({ children }) => {
       <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
       <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <main className="flex-1 transition-all duration-300 pt-24 pb-10 lg:pb-0 overflow-x-hidden flex flex-col">
+      <main className="flex-1 transition-all duration-300 pt-16 lg:pt-20 pb-20 lg:pb-0 overflow-x-hidden flex flex-col">
         <div className="flex-1">
           {children}
         </div>
         <Footer />
       </main>
+      <MobileNav />
     </div>
   );
 };

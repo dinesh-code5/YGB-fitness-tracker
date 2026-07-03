@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { dietAPI } from '../utils/api';
+import { dietAPI, getLocalDate } from '../utils/api';
 import { FiPlus, FiCoffee, FiSun, FiMoon, FiPieChart, FiZap } from 'react-icons/fi';
 import { GiMeal, GiBowlOfRice, GiWeightScale } from 'react-icons/gi';
 import { FiActivity, FiUser, FiDroplet } from 'react-icons/fi';
@@ -125,6 +125,7 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
         protein: baseProtein,
         carbs: Number(meal.macros?.carbs || estimatedCarbs || 0),
         fats: Number(meal.macros?.fats || estimatedFats || 0),
+        date: getLocalDate()
       });
       await refreshLogs();
       toast.success('Meal logged! 🥗');
@@ -136,33 +137,33 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
   };
 
   return (
-    <div className="grid xl:grid-cols-3 gap-8 animate-fade-in">
+    <div className="grid xl:grid-cols-3 gap-6 animate-fade-in">
       {/* Configuration */}
-      <div className="xl:col-span-1 space-y-6">
-        <div className="card p-6 border-brand/10 relative overflow-hidden">
+      <div className="xl:col-span-1 space-y-4">
+        <div className="card p-4 sm:p-5 border-brand/10 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand to-accent" />
-          <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
+          <h2 className="text-base font-bold mb-4 flex items-center gap-2 uppercase tracking-widest">
             <FiUser className="text-brand"/> CONFIGURATION
           </h2>
 
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { l: 'Weight (kg)', k: 'weight', i: <GiWeightScale /> },
                 { l: 'Height (cm)', k: 'height', i: <FiActivity /> },
                 { l: 'Age', k: 'age', i: null },
               ].map(f => (
                 <div key={f.k}>
-                  <label className="text-xs font-black uppercase tracking-widest text-brand mb-2 block">{f.l}</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-brand mb-1.5 block">{f.l}</label>
                   <div className="relative">
-                    {f.i && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">{f.i}</span>}
-                    <input type="number" className={`input-field text-2xl font-black ${f.i ? 'pl-10' : ''}`} value={form[f.k]} onChange={e => set(f.k, e.target.value)} />
+                    {f.i && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs">{f.i}</span>}
+                    <input type="number" className={`input-field h-11 text-lg font-black ${f.i ? 'pl-9' : ''}`} value={form[f.k]} onChange={e => set(f.k, e.target.value)} />
                   </div>
                 </div>
               ))}
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-brand mb-2 block">Gender</label>
-                <select className="input-field text-2xl font-black" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                <label className="text-[10px] font-black uppercase tracking-widest text-brand mb-1.5 block">Gender</label>
+                <select className="input-field h-11 text-lg font-black" value={form.gender} onChange={e => set('gender', e.target.value)}>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                 </select>
@@ -170,39 +171,39 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
             </div>
 
             <div>
-              <label className="text-xs font-black uppercase tracking-widest text-brand mb-2 block">Lifestyle</label>
-              <select className="input-field text-2xl font-black" value={form.activityLevel} onChange={e => set('activityLevel', e.target.value)}>
+              <label className="text-[10px] font-black uppercase tracking-widest text-brand mb-1.5 block">Lifestyle</label>
+              <select className="input-field h-11 text-lg font-black" value={form.activityLevel} onChange={e => set('activityLevel', e.target.value)}>
                 {ACTIVITY_OPTS.map(a => <option key={a.v} value={a.v}>{a.l}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="text-xs font-black uppercase tracking-widest text-brand mb-3 block">Dietary Preference</label>
-              <div className="grid grid-cols-2 gap-3">
+              <label className="text-[10px] font-black uppercase tracking-widest text-brand mb-2.5 block">Dietary Preference</label>
+              <div className="grid grid-cols-2 gap-2">
                 {DIET_TYPES.map(d => (
                   <button key={d.v} onClick={() => set('dietType', d.v)}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
                       form.dietType === d.v ? 'border-brand bg-brand/10 shadow-glow-sm' : 'border-[var(--surface-border)] bg-[var(--surface-card)]'
                     }`}>
-                    <span className="text-2xl block mb-1">{d.e}</span>
-                    <p className="text-xs font-black uppercase truncate">{d.l}</p>
+                    <span className="text-xl block mb-0.5">{d.e}</span>
+                    <p className="text-[10px] font-black uppercase truncate">{d.l}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2 pt-2">
               <button onClick={handleCalculate} disabled={loading}
-                className="btn-primary w-full py-4 flex items-center justify-center gap-3">
-                {loading ? <span className="w-5 h-5 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <><FiZap /> RECALCULATE</>}
+                className="btn-primary w-full py-3 flex items-center justify-center gap-2 text-sm font-black tracking-widest">
+                {loading ? <span className="w-4 h-4 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <><FiZap /> RECALCULATE</>}
               </button>
               
               <button 
                 onClick={handleGenerateAi}
                 disabled={loading}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-brand/20 to-accent/20 border border-brand/30 hover:border-brand transition-all flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-brand/20 to-accent/20 border border-brand/30 hover:border-brand transition-all flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs"
               >
-                {loading ? <span className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin" /> : <><FiZap className="text-brand" /> Generate with AI</>}
+                {loading ? <span className="w-4 h-4 border-2 border-brand border-t-transparent rounded-full animate-spin" /> : <><FiZap className="text-brand" /> Generate with AI</>}
               </button>
             </div>
           </div>
@@ -210,52 +211,52 @@ export default function DietAIPlan({ user, result, refreshLogs }) {
       </div>
 
       {/* Results Area */}
-      <div className="xl:col-span-2 space-y-8">
+      <div className="xl:col-span-2 space-y-6">
         {!result ? (
-          <div className="card p-20 text-center flex flex-col items-center">
-            <GiBowlOfRice className="text-6xl text-brand/20 mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Build Your Nutrition Base</h3>
-            <p className="text-muted max-w-sm">Complete your profile to generate a detailed meal plan aligned with your fitness goals.</p>
+          <div className="card p-12 sm:p-16 text-center flex flex-col items-center">
+            <GiBowlOfRice className="text-5xl text-brand/20 mb-3" />
+            <h3 className="text-xl font-bold mb-1.5">Build Your Nutrition Base</h3>
+            <p className="text-sm text-muted max-w-sm">Complete your profile to generate a detailed meal plan aligned with your fitness goals.</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Macros Ring Stats */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               <MacroRing label="Protein" grams={result.macros.protein} pct={(result.macros.protein * 4 / result.targetCalories) * 100} color="var(--brand)" icon={FiZap} />
               <MacroRing label="Carbs" grams={result.macros.carbs} pct={(result.macros.carbs * 4 / result.targetCalories) * 100} color="var(--brand)" icon={GiBowlOfRice} />
               <MacroRing label="Fats" grams={result.macros.fats} pct={(result.macros.fats * 9 / result.targetCalories) * 100} color="var(--accent)" icon={FiDroplet} />
             </div>
 
             {/* Meal Plan Grid */}
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-3.5">
               {Object.entries(result.mealPlan).map(([key, meal], i) => {
                 const mealName = meal.label?.split('(')?.[0]?.trim() || key;
                 return (
                   <div key={key} className="card overflow-hidden hover:border-brand/30 transition-all group">
-                    <div className="p-4 bg-[var(--surface-elevated)] border-b border-[var(--surface-border)] flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center text-brand">
+                    <div className="p-3 bg-[var(--surface-elevated)] border-b border-[var(--surface-border)] flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-brand/10 flex items-center justify-center text-brand text-sm">
                           {MEAL_ICONS[mealName] || <GiMeal />}
                         </div>
-                        <h4 className="font-bold text-xs uppercase tracking-widest">{mealName}</h4>
+                        <h4 className="font-bold text-[11px] uppercase tracking-widest">{mealName}</h4>
                       </div>
-                      <span className="text-[10px] font-black text-muted">{meal.macros?.calories || meal.macros?.cal} KCAL</span>
+                      <span className="text-[9px] font-black text-muted">{meal.macros?.calories || meal.macros?.cal} KCAL</span>
                     </div>
-                    <div className="p-4 space-y-3">
+                    <div className="p-3 space-y-2.5">
                       {meal.options?.slice(0, 3).map((opt, j) => {
                         const logKey = `${key}-${opt}`;
                         const isLogging = loggingMeal === logKey;
                         const isSelected = selectedOptions[key] === j;
                         
                         return (
-                          <div key={j} className={`flex items-start justify-between gap-3 p-3 rounded-xl border transition-all ${isSelected ? 'bg-brand/5 border-brand/20' : 'border-transparent hover:border-brand/10'}`}>
-                            <p className={`text-xs leading-relaxed ${isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-muted'}`}>{opt}</p>
+                          <div key={j} className={`flex items-start justify-between gap-2 p-2.5 rounded-xl border transition-all ${isSelected ? 'bg-brand/5 border-brand/20' : 'border-transparent hover:border-brand/10'}`}>
+                            <p className={`text-[11px] leading-relaxed ${isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-muted'}`}>{opt}</p>
                             <button 
                               onClick={() => handleLogOption(key, meal, opt, j)}
                               disabled={!!loggingMeal}
-                              className="flex-shrink-0 w-7 h-7 rounded-lg bg-[var(--surface-elevated)] text-muted hover:bg-brand hover:text-[#0F0F14] flex items-center justify-center transition-all"
+                              className="flex-shrink-0 w-6 h-6 rounded-lg bg-[var(--surface-elevated)] text-muted hover:bg-brand hover:text-[#0F0F14] flex items-center justify-center transition-all"
                             >
-                              {isLogging ? <div className="w-3 h-3 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiPlus />}
+                              {isLogging ? <div className="w-2.5 h-2.5 border-2 border-[#0F0F14] border-t-transparent rounded-full animate-spin" /> : <FiPlus className="text-xs" />}
                             </button>
                           </div>
                         );

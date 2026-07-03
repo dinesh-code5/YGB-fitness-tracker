@@ -18,6 +18,13 @@ export default function DietToday({ todaysTotal, result, onAddMeal }) {
   const loading = fetchingHistory || (!dashboardData?.stats && dashboardData?.isRefreshing);
 
   React.useEffect(() => {
+    // If we're on "Today" and logs are empty, do a silent refresh to be sure
+    if (selectedDate === getLocalDate() && (!dashboardData.todayLogs || dashboardData.todayLogs.length === 0)) {
+      refreshGlobalData(true);
+    }
+  }, []);
+
+  React.useEffect(() => {
     if (selectedDate !== getLocalDate()) {
       fetchHistory();
     }

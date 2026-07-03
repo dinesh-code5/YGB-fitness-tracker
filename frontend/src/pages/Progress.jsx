@@ -9,6 +9,7 @@ import { Line } from 'react-chartjs-2';
 import { FiTrendingUp, FiZap } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
@@ -53,6 +54,7 @@ const CHART_OPTS = {
 
 export default function Progress() {
   const { user, dashboardData, refreshGlobalData } = useAuth();
+  const { themeColor } = useTheme();
   const { stats, stats90d, weightHistory, isRefreshing } = dashboardData;
   const [selectedExercise, setSelectedExercise] = useState('');
   const [days, setDays] = useState(30);
@@ -77,8 +79,6 @@ export default function Progress() {
       refreshGlobalData(true);
     } catch { toast.error('Failed to log weight'); }
   };
-
-  const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-color').trim() || '#F59E0B';
 
   const volumeChart = {
     labels: activeStats?.volumeData?.map(d => d.date) || [],

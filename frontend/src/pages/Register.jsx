@@ -44,6 +44,19 @@ export default function Register() {
     experience: 'beginner', activityLevel: 'moderate'
   });
 
+  const [usernameError, setUsernameError] = useState('');
+
+  const handleUsernameChange = (value) => {
+    const username = value.toLowerCase();
+    set('username', username);
+    
+    if (username && !/^[a-z0-9_.]*$/.test(username)) {
+      setUsernameError('Only letters, numbers, underscores, and periods allowed');
+    } else {
+      setUsernameError('');
+    }
+  };
+
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   const nextStep = () => {
@@ -217,7 +230,7 @@ export default function Register() {
       </motion.div>
 
       {/* ── Right: Multi-step Form panel ── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 flex items-center justify-center px-4 py-4 relative overflow-y-auto overflow-x-hidden">
         {/* Background Grid & Gradient */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-tr from-brand/5 via-transparent to-purple-500/5" />
@@ -234,25 +247,25 @@ export default function Register() {
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-[400px]"
+          className="relative w-full max-w-[380px]"
         >
           {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-10">
-            <Link to="/" className="inline-flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
-                <GiMuscleUp className="text-brand text-2xl" />
+          <div className="lg:hidden text-center mb-6">
+            <Link to="/" className="inline-flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+                <GiMuscleUp className="text-brand text-xl" />
               </div>
               <div className="text-left">
-                <span className="font-display text-4xl tracking-widest text-gradient block leading-none">YGB</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
+                <span className="font-display text-3xl tracking-widest text-gradient block leading-none">YGB</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80">Your Gym Buddy</span>
               </div>
             </Link>
           </div>
 
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-2xl font-black text-[var(--text-primary)]">Join the Forge</h1>
-              <span className="text-lg font-bold text-brand uppercase tracking-widest">Step {step}/4</span>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-1.5">
+              <h1 className="text-xl font-black text-[var(--text-primary)]">Join the Forge</h1>
+              <span className="text-sm font-bold text-brand uppercase tracking-widest font-black">Step {step}/4</span>
             </div>
             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
               <motion.div 
@@ -264,8 +277,8 @@ export default function Register() {
             </div>
           </div>
 
-          <div className="card p-7 border-[#222232] hover:border-brand/20 transition-all duration-300 shadow-[0_8px_40px_-8px_rgba(0,0,0,0.6)]">
-            <div className="min-h-[420px] flex flex-col">
+          <div className="card p-5 sm:p-6 border-[#222232] hover:border-brand/20 transition-all duration-300 shadow-[0_8px_40px_-8px_rgba(0,0,0,0.6)]">
+            <div className="min-h-[360px] flex flex-col">
               <div className="flex-1 relative overflow-hidden">
                 <AnimatePresence initial={false} custom={direction} mode="wait">
                   <motion.div
@@ -282,33 +295,39 @@ export default function Register() {
                     className="w-full"
                   >
                     {step === 1 && (
-                      <div className="space-y-5">
+                      <div className="space-y-4">
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.1 }}>
-                          <label className="label text-lg">Full Name</label>
+                          <label className="label text-xs">Full Name</label>
                           <div className="relative">
-                            <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg" />
-                            <input className="input-field pl-10" placeholder="Dinesh Nawani" value={form.name} onChange={e => set('name', e.target.value)} />
+                            <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-base" />
+                            <input className="input-field pl-10 h-11 text-sm" placeholder="Dinesh Nawani" value={form.name} onChange={e => set('name', e.target.value)} />
                           </div>
                         </motion.div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
-                          <label className="label text-lg">Username</label>
+                          <label className="label text-xs">Username</label>
                           <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg font-bold">@</span>
-                            <input className="input-field pl-10" placeholder="nawani_lifts" value={form.username} onChange={e => set('username', e.target.value.toLowerCase())} />
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-base font-bold">@</span>
+                            <input 
+                              className={`input-field pl-10 h-11 text-sm ${usernameError ? 'border-red-500' : ''}`} 
+                              placeholder="nawani_lifts" 
+                              value={form.username} 
+                              onChange={e => handleUsernameChange(e.target.value)} 
+                            />
                           </div>
+                          {usernameError && <p className="text-red-500 text-xs mt-1">{usernameError}</p>}
                         </motion.div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.3 }}>
-                          <label className="label text-lg">Email Address</label>
+                          <label className="label text-xs">Email Address</label>
                           <div className="relative">
-                            <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg" />
-                            <input className="input-field pl-10" placeholder="nawanidinesh08@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
+                            <FiMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-base" />
+                            <input className="input-field pl-10 h-11 text-sm" placeholder="nawanidinesh08@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
                           </div>
                         </motion.div>
                         <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-                          <label className="label text-lg">Password</label>
+                          <label className="label text-xs">Password</label>
                           <div className="relative">
-                            <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg" />
-                            <input type={showPw ? 'text' : 'password'} className="input-field pl-10 pr-11" placeholder="••••••••" value={form.password} onChange={e => set('password', e.target.value)} />
+                            <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-base" />
+                            <input type={showPw ? 'text' : 'password'} className="input-field pl-10 pr-11 h-11 text-sm" placeholder="••••••••" value={form.password} onChange={e => set('password', e.target.value)} />
                             <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
                               {showPw ? <FiEyeOff /> : <FiEye />}
                             </button>
@@ -318,38 +337,38 @@ export default function Register() {
                     )}
 
                     {step === 2 && (
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-3">
                           <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.1 }}>
-                            <label className="label text-lg">Age</label>
-                            <input type="number" className="input-field" placeholder="24" value={form.age} onChange={e => set('age', e.target.value)} />
+                            <label className="label text-xs">Age</label>
+                            <input type="number" className="input-field h-11 text-sm" placeholder="0" value={form.age} onChange={e => set('age', e.target.value)} />
                           </motion.div>
                           <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.2 }}>
-                            <label className="label text-lg">Gender</label>
-                            <select className="input-field" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                            <label className="label text-xs">Gender</label>
+                            <select className="input-field h-15 text-sm" value={form.gender} onChange={e => set('gender', e.target.value)}>
                               <option value="male">Male</option>
                               <option value="female">Female</option>
                               <option value="other">Other</option>
                             </select>
                           </motion.div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 pt-2">
+                        <div className="grid grid-cols-2 gap-3">
                           <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.3 }}>
-                            <label className="label text-lg">Weight (kg)</label>
-                            <input type="number" className="input-field" placeholder="75" value={form.weight} onChange={e => set('weight', e.target.value)} />
+                            <label className="label text-xs">Weight (kg)</label>
+                            <input type="number" className="input-field h-11 text-sm" placeholder="0" value={form.weight} onChange={e => set('weight', e.target.value)} />
                           </motion.div>
                           <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-                            <label className="label text-lg">Height (cm)</label>
-                            <input type="number" className="input-field" placeholder="175" value={form.height} onChange={e => set('height', e.target.value)} />
+                            <label className="label text-xs">Height (cm)</label>
+                            <input type="number" className="input-field h-11 text-sm" placeholder="175" value={form.height} onChange={e => set('height', e.target.value)} />
                           </motion.div>
                         </div>
                       </div>
                     )}
 
                     {step === 3 && (
-                      <div className="space-y-4">
-                        <label className="label text-xl font-black text-brand uppercase tracking-widest">Choose Your Archetype</label>
-                        <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-3">
+                        <label className="label text-sm font-black text-brand uppercase tracking-widest">Choose Your Archetype</label>
+                        <div className="grid grid-cols-1 gap-2.5">
                           {ARCHETYPES.map((arch, idx) => (
                             <motion.button
                               key={arch.id}
@@ -357,23 +376,23 @@ export default function Register() {
                               initial="hidden"
                               animate="visible"
                               transition={{ delay: idx * 0.1 }}
-                              whileHover={{ scale: 1.02, x: 5 }}
-                              whileTap={{ scale: 0.98 }}
+                              whileHover={{ scale: 1.01, x: 4 }}
+                              whileTap={{ scale: 0.99 }}
                               onClick={() => handleArchetypeSelect(arch.id)}
-                              className={`p-4 rounded-2xl border-2 text-left transition-all duration-300 relative group ${
+                              className={`p-3 rounded-xl border-2 text-left transition-all duration-300 relative group ${
                                 form.archetype === arch.id ? 'border-brand bg-brand/10 shadow-glow-sm' : 'border-[#222232] hover:border-white/20 bg-white/5'
                               }`}
                             >
                               <div className="relative z-10 flex items-center justify-between">
                                 <div>
-                                  <p className={`font-black uppercase tracking-widest text-xl ${form.archetype === arch.id ? 'text-brand' : 'text-white'}`}>
+                                  <p className={`font-black uppercase tracking-widest text-base ${form.archetype === arch.id ? 'text-brand' : 'text-white'}`}>
                                     {arch.label}
                                   </p>
-                                  <p className="text-sm font-bold text-white/50 uppercase tracking-wider mt-1">
+                                  <p className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">
                                     {arch.id === 'lean' ? 'Cut (Fat Loss)' : arch.id === 'bulk' ? 'Bulk (Gain Mass)' : 'Maintain'}
                                   </p>
                                 </div>
-                                <span className="text-4xl opacity-50 group-hover:opacity-100 transition-all transform group-hover:scale-110">{arch.glyph}</span>
+                                <span className="text-3xl opacity-50 group-hover:opacity-100 transition-all transform group-hover:scale-110">{arch.glyph}</span>
                               </div>
                             </motion.button>
                           ))}
@@ -382,10 +401,10 @@ export default function Register() {
                     )}
 
                     {step === 4 && (
-                      <div className="space-y-8">
+                      <div className="space-y-5">
                         <div>
-                          <label className="label text-xl font-black text-brand uppercase tracking-widest mb-4">Training Experience</label>
-                          <div className="grid grid-cols-1 gap-3">
+                          <label className="label text-xs font-black text-brand uppercase tracking-widest mb-2.5">Training Experience</label>
+                          <div className="grid grid-cols-1 gap-2">
                             {EXPERIENCE.map((exp, idx) => (
                               <motion.button 
                                 key={exp.value} 
@@ -393,35 +412,35 @@ export default function Register() {
                                 initial="hidden"
                                 animate="visible"
                                 transition={{ delay: idx * 0.1 }}
-                                whileHover={{ scale: 1.02, x: 5 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.01, x: 4 }}
+                                whileTap={{ scale: 0.99 }}
                                 onClick={() => set('experience', exp.value)}
-                                className={`px-5 py-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${form.experience === exp.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/20 bg-white/5'}`}>
-                                <span className="text-xl font-black uppercase tracking-wider">{exp.label}</span>
-                                <span className="text-sm font-black uppercase tracking-widest opacity-60">{exp.desc}</span>
+                                className={`px-4 py-2.5 rounded-xl border-2 text-left flex items-center justify-between transition-all ${form.experience === exp.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/20 bg-white/5'}`}>
+                                <span className="text-sm font-black uppercase tracking-wider">{exp.label}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{exp.desc}</span>
                               </motion.button>
                             ))}
                           </div>
                         </div>
-                        <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }}>
-                          <label className="label text-xl font-black text-brand uppercase tracking-widest mb-4">Lifestyle Activity</label>
-                          <div className="grid grid-cols-1 gap-3">
+                        <div>
+                          <label className="label text-xs font-black text-brand uppercase tracking-widest mb-2.5">Lifestyle Activity</label>
+                          <div className="grid grid-cols-1 gap-2">
                             {ACTIVITY.map(act => (
                               <motion.button 
                                 key={act.value} 
-                                whileHover={{ scale: 1.02, x: 5 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: 1.01, x: 4 }}
+                                whileTap={{ scale: 0.99 }}
                                 onClick={() => set('activityLevel', act.value)}
-                                className={`px-5 py-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${form.activityLevel === act.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/20 bg-white/5'}`}>
-                                <p className="text-xl font-black uppercase tracking-wider">{act.label}</p>
-                                <p className="text-sm font-black uppercase tracking-widest opacity-60">{act.desc}</p>
+                                className={`px-4 py-2.5 rounded-xl border-2 text-left flex items-center justify-between transition-all ${form.activityLevel === act.value ? 'border-brand bg-brand/10 text-brand' : 'border-[#222232] text-white/40 hover:border-white/20 bg-white/5'}`}>
+                                <p className="text-sm font-black uppercase tracking-wider">{act.label}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{act.desc}</p>
                               </motion.button>
                             ))}
                           </div>
-                        </motion.div>
-                        <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.5 }} className="pt-2">
-                          <label className="label text-lg">Referral Code (Optional)</label>
-                          <input className="input-field uppercase font-mono tracking-widest" placeholder="YGB-XXXX" value={form.referralCode} onChange={e => set('referralCode', e.target.value.toUpperCase())} />
+                        </div>
+                        <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.5 }}>
+                          <label className="label text-xs">Referral Code (Optional)</label>
+                          <input className="input-field h-11 text-sm uppercase font-mono tracking-widest" placeholder="YGB-XXXX" value={form.referralCode} onChange={e => set('referralCode', e.target.value.toUpperCase())} />
                         </motion.div>
                       </div>
                     )}
@@ -429,13 +448,13 @@ export default function Register() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex gap-3 mt-auto pt-10">
+              <div className="flex gap-2.5 mt-auto pt-6">
                 {step > 1 && (
                   <motion.button 
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={prevStep} 
-                    className="btn-secondary flex-1 py-3.5 flex items-center justify-center gap-2"
+                    className="btn-secondary flex-1 py-3 flex items-center justify-center gap-2 text-xs"
                   >
                     <FiArrowLeft /> Back
                   </motion.button>
@@ -445,7 +464,7 @@ export default function Register() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={nextStep} 
-                    className="btn-primary flex-1 py-3.5 flex items-center justify-center gap-2"
+                    className="btn-primary flex-1 py-3 flex items-center justify-center gap-2 text-xs"
                   >
                     Next <FiArrowRight />
                   </motion.button>
@@ -455,9 +474,9 @@ export default function Register() {
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSubmit} 
                     disabled={loading} 
-                    className="btn-primary flex-1 py-3.5 flex items-center justify-center gap-2 shimmer"
+                    className="btn-primary flex-1 py-3 flex items-center justify-center gap-2 shimmer text-xs font-black"
                   >
-                    {loading ? <span className="w-4 h-4 border-2 border-[#0A0A0F] border-t-transparent rounded-full animate-spin" /> : <FiZap />}
+                    {loading ? <span className="w-3.5 h-3.5 border-2 border-[#0A0A0F] border-t-transparent rounded-full animate-spin" /> : <FiZap />}
                     {loading ? 'Creating...' : 'Forge Account'}
                   </motion.button>
                 )}
@@ -468,7 +487,7 @@ export default function Register() {
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 1.1 }}
-              className="text-center mt-6 text-lg text-[var(--text-secondary)]"
+              className="text-center mt-5 text-sm text-[var(--text-secondary)]"
             >
               Already a member?{' '}
               <Link to="/login" className="text-brand hover:underline font-bold transition-all">Sign In</Link>

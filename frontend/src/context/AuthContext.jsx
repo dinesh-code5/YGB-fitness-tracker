@@ -33,13 +33,16 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // Fetch everything in parallel for maximum speed
-      // Use .catch on individual calls to prevent one failure from stopping others
       const today = getLocalDate();
+      console.log(`[AUTH CONTEXT] Refreshing global data for date: ${today}`);
+      
       const [wRes, sRes, dRes, pRes, tRes, userSRes, uWeightRes, dpRes] = await Promise.all([
         workoutAPI.getAll({ limit: 50 }).catch(e => ({ data: { workouts: [] } })),
         workoutAPI.getStats(30).catch(e => ({ data: { stats: null } })),
-        dietAPI.getTodaysLog(today).catch(e => ({ data: { logs: [] } })),
+        dietAPI.getTodaysLog(today).catch(e => {
+          console.error('[AUTH CONTEXT] Diet fetch failed:', e);
+          return { data: { logs: [] } };
+        }),
         plansAPI.getWorkoutPlan().catch(e => ({ data: { plan: null, templates: [] } })),
         templatesAPI.getAll().catch(e => ({ data: { userTemplates: [] } })),
         workoutAPI.getStats(90).catch(e => ({ data: { stats: null } })),
@@ -47,13 +50,16 @@ export const AuthProvider = ({ children }) => {
         dietAPI.get().catch(e => ({ data: { dietPlan: null } }))
       ]);
 
+      const logs = dRes.data.logs || [];
+      console.log(`[AUTH CONTEXT] Fetched ${logs.length} diet logs for ${today}`);
+
       setDashboardData({
         recentWorkouts: wRes.data.workouts?.slice(0, 5) || [],
         historyWorkouts: wRes.data.workouts || [],
-        allWorkouts30d: wRes.data.workouts || [], // Used for heatmap
+        allWorkouts30d: wRes.data.workouts || [],
         stats: sRes.data.stats || null,
         stats90d: userSRes.data.stats || null,
-        todayLogs: dRes.data.logs || [],
+        todayLogs: logs,
         dietPlan: dpRes.data.dietPlan || null,
         workoutPlan: pRes.data.plan || null,
         systemTemplates: pRes.data.templates || [],

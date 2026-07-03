@@ -41,38 +41,38 @@ export default function DietMaster() {
   return (
     <div className="page-container">
       {/* Dynamic Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
         <div>
-          <h1 className="font-display text-5xl md:text-6xl tracking-widest text-brand">DIET MASTER</h1>
-          <p className="text-muted text-xl font-medium mt-1 uppercase tracking-tighter">Peak Performance Nutrition</p>
+          <h1 className="font-display text-4xl md:text-5xl tracking-widest text-brand">DIET MASTER</h1>
+          <p className="text-muted text-sm font-medium mt-0.5 uppercase tracking-tighter">Peak Performance Nutrition</p>
         </div>
         {result && (
-          <div className="flex items-center gap-4">
-            <div className="bg-brand/10 border border-brand/20 p-4 px-8 rounded-2xl text-center backdrop-blur-sm">
-              <p className="text-[10px] font-black text-brand uppercase tracking-widest">Daily Goal</p>
-              <p className="text-3xl font-display text-[var(--text-primary)]">{result.targetCalories} <span className="text-xs font-body text-muted uppercase">kcal</span></p>
+          <div className="flex items-center gap-3">
+            <div className="bg-brand/10 border border-brand/20 p-2.5 px-5 rounded-2xl text-center backdrop-blur-sm">
+              <p className="text-[9px] font-black text-brand uppercase tracking-widest">Daily Goal</p>
+              <p className="text-2xl font-display text-[var(--text-primary)]">{result.targetCalories} <span className="text-[10px] font-body text-muted uppercase">kcal</span></p>
             </div>
-            <div className="bg-brand/10 border border-brand/20 p-4 px-8 rounded-2xl text-center backdrop-blur-sm">
-              <p className="text-[10px] font-black text-brand uppercase tracking-widest">Hydration</p>
-              <p className="text-3xl font-display text-[var(--text-primary)]">{result.waterIntake}<span className="text-xs font-body text-muted uppercase ml-1">L</span></p>
+            <div className="bg-brand/10 border border-brand/20 p-2.5 px-5 rounded-2xl text-center backdrop-blur-sm">
+              <p className="text-[9px] font-black text-brand uppercase tracking-widest">Hydration</p>
+              <p className="text-2xl font-display text-[var(--text-primary)]">{result.waterIntake}<span className="text-[10px] font-body text-muted uppercase ml-1">L</span></p>
             </div>
           </div>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-[var(--surface-border)] pb-1">
+      <div className="flex flex-wrap gap-1 mb-6 border-b border-[var(--surface-border)] pb-1">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative
+            className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative
               ${activeTab === tab.id 
                 ? 'text-brand' 
                 : 'text-muted hover:text-[var(--text-primary)]'
               }`}
           >
-            <tab.icon className="text-base" />
+            <tab.icon className="text-sm" />
             {tab.label}
             {activeTab === tab.id && (
               <div className="absolute bottom-0 left-0 w-full h-1 bg-brand rounded-full shadow-glow-sm" />

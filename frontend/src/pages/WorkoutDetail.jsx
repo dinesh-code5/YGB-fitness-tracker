@@ -221,6 +221,7 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
 
   const removeSet = (si) => {
     if (exercise.sets.length <= 1) return;
+    if (!window.confirm('Remove this set?')) return;
     onChange({ ...exercise, sets: exercise.sets.filter((_, i) => i !== si).map((s,i) => ({...s, setNumber:i+1})) });
   };
 
@@ -231,7 +232,14 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
           {idx + 1}
         </div>
         <p className="flex-1 font-semibold text-[#F0F0F5] text-lg truncate">{exercise.name}</p>
-        <button onClick={() => onRemove(idx)} className="text-muted hover:text-red-400 p-1">
+        <button 
+          onClick={() => {
+            if (window.confirm(`Remove ${exercise.name}?`)) {
+              onRemove(idx);
+            }
+          }} 
+          className="text-muted hover:text-red-400 p-1"
+        >
           <FiTrash2 className="text-xs" />
         </button>
       </div>
@@ -299,7 +307,7 @@ const QuickExercisePicker = ({ onSelect, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
-      <div className="bg-[#16161E] border border-[#2A2A3A] rounded-2xl w-full max-w-md flex flex-col" style={{maxHeight:'70vh'}}>
+      <div className="bg-[#16161E] border border-[#2A2A3A] rounded-2xl w-full max-w-md flex flex-col shadow-2xl animate-slide-up h-[80vh] sm:h-[600px] max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-[#2A2A3A] flex-shrink-0">
           <h3 className="font-semibold text-[#F0F0F5]">Add Exercise</h3>
           <button onClick={onClose} className="text-muted"><FiX /></button>

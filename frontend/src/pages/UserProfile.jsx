@@ -4,7 +4,7 @@ import { userAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { 
   FiArrowLeft, FiActivity, FiGlobe, 
-  FiChevronRight, FiCheck, FiCamera, FiZap
+  FiChevronRight, FiCheck, FiCamera, FiZap, FiX, FiUser, FiClock, FiPlay
 } from 'react-icons/fi';
 import { GiMuscleUp } from 'react-icons/gi';
 import {
@@ -282,6 +282,52 @@ export default function UserProfile() {
           </h3>
           <div className="card p-6">
             <GymBarChart workouts={profile.workoutHistory || []} />
+          </div>
+        </div>
+
+        {/* Recent Sessions */}
+        <div className="mb-10">
+          <h3 className="section-title mb-5 flex items-center gap-2">
+            <div className="heading-accent" />
+            Recent Sessions
+          </h3>
+          <div className="space-y-3">
+            {profile.workoutHistory && profile.workoutHistory.length > 0 ? (
+              profile.workoutHistory.map((workout, idx) => (
+                <div key={idx} className="card p-4 hover:border-brand/30 transition-all group">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center text-brand flex-shrink-0">
+                        <GiMuscleUp className="text-xl" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-lg font-black text-[var(--text-primary)] group-hover:text-brand transition-colors truncate uppercase tracking-tight">
+                          {workout.name}
+                        </p>
+                        <div className="flex items-center gap-2 text-[10px] text-muted font-bold uppercase tracking-widest mt-0.5">
+                          <FiClock className="text-[10px]" />
+                          {workout.duration || 0}m · {new Date(workout.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short' })}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      <span className="px-2 py-0.5 rounded bg-[var(--surface-elevated)] border border-[var(--surface-border)] text-[8px] font-black uppercase text-muted tracking-tighter">
+                        {workout.workoutType?.replace('_', ' ')}
+                      </span>
+                      {workout.mood && (
+                        <span className="text-sm">
+                          {workout.mood === 'great' ? '🔥' : workout.mood === 'good' ? '💪' : workout.mood === 'okay' ? '😐' : '😞'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="card p-10 text-center border-dashed border-2">
+                <p className="text-muted text-lg font-medium">No workout history found for this athlete.</p>
+              </div>
+            )}
           </div>
         </div>
 

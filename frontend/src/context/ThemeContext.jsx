@@ -4,21 +4,12 @@ const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(localStorage.getItem('ygb_theme') || 'dark');
+  const [themeColor, setThemeColorState] = useState(localStorage.getItem('ygb_theme_color') || '#00D4FF');
 
-  useEffect(() => {
-    localStorage.setItem('ygb_theme', 'dark');
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = 'dark';
-    
-    // Set initial theme color
-    const storedColor = localStorage.getItem('ygb_theme_color') || '#00D4FF';
-    setThemeColor(storedColor);
-  }, []);
-
-  const setThemeColor = (color) => {
+  const setThemeColor = React.useCallback((color) => {
     if (!color) return;
     localStorage.setItem('ygb_theme_color', color);
+    setThemeColorState(color);
     document.documentElement.style.setProperty('--theme-color', color);
 
     // Update favicon
@@ -31,10 +22,21 @@ export const ThemeProvider = ({ children }) => {
     if (favicon) {
       favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('ygb_theme', 'dark');
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add('dark');
+    document.documentElement.style.colorScheme = 'dark';
+    
+    // Set initial theme color
+    const storedColor = localStorage.getItem('ygb_theme_color') || '#00D4FF';
+    setThemeColor(storedColor);
+  }, [setThemeColor]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, setThemeColor }}>
+    <ThemeContext.Provider value={{ theme, setTheme, themeColor, setThemeColor }}>
       {children}
     </ThemeContext.Provider>
   );

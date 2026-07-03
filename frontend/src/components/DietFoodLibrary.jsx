@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { dietAPI } from '../utils/api';
+import { dietAPI, getLocalDate } from '../utils/api';
 import { FiSearch, FiPlus } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -42,7 +42,8 @@ export default function DietFoodLibrary({ refreshLogs }) {
         calories: food.calories || 0,
         protein: food.protein || 0,
         carbs: food.carbs || 0,
-        fats: food.fats !== undefined ? food.fats : (food.fat || 0)
+        fats: food.fats !== undefined ? food.fats : (food.fat || 0),
+        date: getLocalDate()
       });
       refreshLogs();
       toast.success(`${food.name} added! 🍎`);
