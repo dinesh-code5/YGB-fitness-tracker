@@ -66,7 +66,7 @@ export default function DietMaster() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative
+            className={`flex items-center gap-2 px-4 py-3 text-[12px] font-black uppercase tracking-[0.2em] transition-all relative
               ${activeTab === tab.id 
                 ? 'text-brand' 
                 : 'text-muted hover:text-[var(--text-primary)]'

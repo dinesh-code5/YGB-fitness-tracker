@@ -668,7 +668,7 @@ const TemplateEditor = ({ template, exercises, onSave, onClose }) => {
                           type="number" min="1" max="10"
                           className="w-12 h-9 bg-[#1E1E2A] border-2 border-white/5 rounded-lg text-sm text-center font-black text-brand focus:border-brand/50 outline-none"
                           value={ex.defaultSets}
-                          onChange={(e) => updateEx(i, 'defaultSets', Number(e.target.value))}
+                          onChange={(e) => updateEx(i, 'defaultSets', e.target.value === '' ? '' : Number(e.target.value))}
                         />
                       </div>
                       <div className="flex flex-col items-center">

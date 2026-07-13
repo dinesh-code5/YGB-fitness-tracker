@@ -259,14 +259,14 @@ const EditExerciseCard = ({ exercise, idx, onChange, onRemove }) => {
                 className="input-field text-center text-lg py-1.5 px-1 w-full"
                 value={set.weight}
                 onFocus={e => e.target.select()}
-                onChange={e => updateSet(si, 'weight', Number(e.target.value))} />
+                onChange={e => updateSet(si, 'weight', e.target.value === '' ? '' : Number(e.target.value))} />
             </div>
             <div className="col-span-4">
-              <input type="number" min="1"
+              <input type="number" min="0"
                 className="input-field text-center text-lg py-1.5 px-1 w-full"
                 value={set.reps}
                 onFocus={e => e.target.select()}
-                onChange={e => updateSet(si, 'reps', Number(e.target.value))} />
+                onChange={e => updateSet(si, 'reps', e.target.value === '' ? '' : Number(e.target.value))} />
             </div>
             <div className="col-span-2 flex justify-center">
               <button onClick={() => updateSet(si, 'completed', !set.completed)}

@@ -182,12 +182,12 @@ export default function DietCalculator() {
           <div className="flex flex-col gap-2">
             <div className="bg-brand/10 border border-brand/20 p-4 rounded-2xl flex items-center gap-6 px-8 backdrop-blur-sm shadow-glow-sm">
               <div className="text-center">
-                <p className="text-l font-black text-brand uppercase tracking-widest">Daily Goal</p>
+                <p className="text-xl font-black  uppercase tracking-widest">Daily Goal</p>
                 <p className="text-3xl font-display text-[var(--text-primary)]">{result.targetCalories} <span className="text-lg font-body text-muted uppercase">kcal</span></p>
               </div>
               <div className="w-px h-10 bg-brand/20" />
               <div className="text-center">
-                <p className="text-l font-black text-brand uppercase tracking-widest">Water</p>
+                <p className="text-xl font-black text-brand uppercase tracking-widest">Water</p>
                 <p className="text-3xl font-display text-[var(--text-primary)]">{result.waterIntake}<span className="text-lg font-body text-muted uppercase ml-1">L</span></p>
               </div>
             </div>

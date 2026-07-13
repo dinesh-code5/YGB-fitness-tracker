@@ -630,6 +630,10 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
     onChange({ ...exercise, sets });
   };
 
+  const updateRestTime = (seconds) => {
+    onChange({ ...exercise, restTime: seconds });
+  };
+
   const addSet = () => {
     const prev = exercise.sets[exercise.sets.length - 1];
     onChange({
@@ -701,6 +705,25 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
         {/* Sets */}
         {!collapsed && (
           <div className="p-2.5 space-y-1.5">
+            {/* Rest Timer Selector */}
+            <div className="flex items-center gap-2 px-2  mb-2">
+              <FiClock className="text-muted text-[11px]" />
+              <span className="text-[11px] font-black text-muted uppercase tracking-widest mr-1">Rest:</span>
+              {[60, 120, 180, 300].map(s => (
+                <button
+                  key={s}
+                  onClick={() => updateRestTime(s)}
+                  className={`px-4 py-1 rounded text-[11px] font-black transition-all ${
+                    (exercise.restTime || 120) === s 
+                      ? 'bg-brand text-muted shadow-glow-sm' 
+                      : 'bg-[#2A2A3A] text-muted hover:bg-white/10'
+                  }`}
+                >
+                  {s/60}m
+                </button>
+              ))}
+            </div>
+
             {/* Column headers */}
             <div className="grid grid-cols-12 gap-1 text-[8px] font-black text-muted uppercase tracking-widest px-2 mb-0.5">
               <span className="col-span-1 text-center">#</span>
@@ -713,14 +736,36 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
 
             {exercise.sets.map((set, si) => {
               let prevStr = '—';
-              for (const w of pastWorkouts) {
-                const found = w.exercises?.find(e => 
-                  e.name === exercise.name || (exercise.exerciseId && e.exerciseId === exercise.exerciseId)
-                );
-                if (found?.sets?.[si]) {
-                  const ps = found.sets[si];
+              
+              // Find the most recent workout that contains this exercise
+              const recentWorkout = pastWorkouts.find(w => 
+                w.exercises?.some(e => {
+                  const normalize = (str) => str?.trim().toLowerCase().replace(/\s+/g, ' ');
+                  const pastExName = normalize(e.name);
+                  const currentExName = normalize(exercise.name);
+                  const pastExId = e.exerciseId || e.id;
+                  const currentExId = exercise.exerciseId;
+                  
+                  return (currentExId && pastExId && String(currentExId) === String(pastExId)) || 
+                         (currentExName && pastExName && currentExName === pastExName);
+                })
+              );
+
+              if (recentWorkout) {
+                const foundEx = recentWorkout.exercises.find(e => {
+                  const normalize = (str) => str?.trim().toLowerCase().replace(/\s+/g, ' ');
+                  const pastExName = normalize(e.name);
+                  const currentExName = normalize(exercise.name);
+                  const pastExId = e.exerciseId || e.id;
+                  const currentExId = exercise.exerciseId;
+                  
+                  return (currentExId && pastExId && String(currentExId) === String(pastExId)) || 
+                         (currentExName && pastExName && currentExName === pastExName);
+                });
+
+                if (foundEx?.sets && foundEx.sets.length > 0) {
+                  const ps = foundEx.sets[si] || foundEx.sets[foundEx.sets.length - 1];
                   prevStr = `${ps.weight}×${ps.reps}`;
-                  break;
                 }
               }
 
@@ -746,17 +791,17 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
                       className="w-full bg-[#2A2A3A] border border-brand/30 rounded text-center text-xs py-1.5 font-black text-[var(--text-primary)] focus:border-brand/50 focus:bg-[#1A1A26] outline-none transition-colors"
                       value={set.weight}
                       onFocus={e => e.target.select()}
-                      onChange={e => updateSet(si, 'weight', Number(e.target.value))}
+                      onChange={e => updateSet(si, 'weight', e.target.value === '' ? '' : Number(e.target.value))}
                     />
                   </div>
 
                   <div className="col-span-2">
                     <input
-                      type="number" min="1"
+                      type="number" min="0"
                       className="w-full bg-[#2A2A3A] border border-brand/30 rounded text-center text-xs py-1.5 font-black text-[var(--text-primary)] focus:border-brand/50 focus:bg-[#1A1A26] outline-none transition-colors"
                       value={set.reps}
                       onFocus={e => e.target.select()}
-                      onChange={e => updateSet(si, 'reps', Number(e.target.value))}
+                      onChange={e => updateSet(si, 'reps', e.target.value === '' ? '' : Number(e.target.value))}
                     />
                   </div>
 
@@ -844,7 +889,12 @@ export default function WorkoutLogger() {
     const init = async () => {
       try {
         const historyRes = await workoutAPI.getAll({ limit: 10 }).catch(() => ({ data: { workouts: [] } }));
-        setPastWorkouts(historyRes.data.workouts?.filter(w => w.isCompleted) || []);
+        const workouts = historyRes.data.workouts?.filter(w => w.isCompleted) || [];
+        console.log('DEBUG: Loaded pastWorkouts:', workouts);
+        if (workouts.length > 0) {
+          console.log('DEBUG: Sample workout exercise structure:', workouts[0].exercises?.[0]);
+        }
+        setPastWorkouts(workouts);
 
         if (id) {
           if (location.state?.workout) {
@@ -1101,16 +1151,16 @@ export default function WorkoutLogger() {
             <div className="min-w-0">
               <h1 className="font-display text-lg tracking-wider leading-none font-black uppercase">In Progress</h1>
               <span className="text-brand font-black animate-pulse bg-brand/10 px-1.5 py-0.5 rounded text-[8px] flex items-center gap-1 w-fit mt-1">
-                <FiZap className="text-[8px]" />
+                <FiZap className="text-[9px]" />
                 {formatTime(elapsed)}
               </span>
             </div>
           </div>
           <div className="flex gap-1 flex-shrink-0">
-            <button onClick={handleDiscard} className="btn-secondary !text-red-400 !border-red-500/20 hover:!bg-red-500/10 text-[8px] py-2 px-2.5 font-black uppercase tracking-widest">
+            <button onClick={handleDiscard} className="btn-secondary !text-red-400 !border-red-500/20 hover:!bg-red-500/10 text-[9px] py-2 px-2.5 font-black uppercase tracking-widest">
               Discard
             </button>
-            <button onClick={handleFinish} className="btn-primary !bg-brand/10 !text-brand !border-brand/20 hover:!bg-brand/20 text-[8px] py-2 px-2.5 font-black uppercase tracking-widest">
+            <button onClick={handleFinish} className="btn-primary !bg-brand/10 !text-black-500 !border-brand/20 hover:!bg-brand/20 text-[9px] py-2 px-2.5 font-black uppercase tracking-widest">
               Finish
             </button>
           </div>
