@@ -834,7 +834,7 @@ const ExerciseCard = ({ exercise, idx, onChange, onRemove, pastWorkouts, startTi
                 <FiPlus className="text-sm" /> Add Set
               </button>
               <textarea
-                className="col-span-1 sm:col-span-2 bg-[#1A1A26] border border-[#2A2A3A] rounded-lg px-3 py-2 text-[9px] text-[var(--text-primary)] placeholder-muted outline-none focus:border-brand/50 transition-colors resize-none h-[50px] focus:bg-[#0F0F14]"
+                className="col-span-1 sm:col-span-2 bg-[#1A1A26] border border-[#2A2A3A] rounded-lg px-3 py-2 text-[12px] text-[var(--text-primary)] placeholder-muted outline-none focus:border-brand/50 transition-colors resize-none h-[50px] focus:bg-[#0F0F14]"
                 placeholder="Notes..."
                 value={exercise.notes || ''}
                 onChange={e => onChange({ ...exercise, notes: e.target.value })}
@@ -1256,7 +1256,7 @@ export default function WorkoutLogger() {
 
         {/* Notes */}
         <div className="mt-4">
-          <label className="text-[9px] font-black uppercase tracking-widest text-muted mb-1.5 block">Notes (optional)</label>
+          <label className="text-[12px] font-black uppercase tracking-widest text-muted mb-1.5 block">Notes (optional)</label>
           <textarea
             className="w-full bg-[#1A1A26] border border-[#2A2A3A] rounded-lg px-3 py-2 text-xs h-16 resize-none outline-none focus:border-brand/50 focus:bg-[#0F0F14] text-[var(--text-primary)] transition-colors"
             placeholder="PRs? Notes for next session?"

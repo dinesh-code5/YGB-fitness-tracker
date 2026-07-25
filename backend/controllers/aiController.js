@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 const DietPlan = require('../models/DietPlan');
 
 /**
@@ -9,24 +9,10 @@ const DietPlan = require('../models/DietPlan');
 const generateAiDiet = async (req, res) => {
   try {
     const { weight, height, age, gender, activityLevel, goal, dietType, additionalInfo } = req.body;
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ 
-        message: "Gemini API Key is missing in backend/.env. Please add GEMINI_API_KEY=your_key_here" 
-      });
-    }
-
-    // Initialize AI model inside the request to ensure API key is loaded
-    const genAI = new GoogleGenerativeAI(apiKey);
     
-    // Using gemini-1.5-flash for speed and native JSON mode support
-    console.log("Attempting Gemini AI generation with model: gemini-1.5-flash");
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-      }
+    // Initialize AI model inside the request to ensure API key is loaded
+    const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
     });
 
     const prompt = `You are an expert Indian nutritionist. Generate a highly personalized daily diet plan for:
@@ -67,8 +53,12 @@ Return a JSON object with this exact structure:
 }`;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().trim();
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    const text = response.text.trim();
     
     console.log("Gemini Response Received (JSON Mode Active)"); 
     
