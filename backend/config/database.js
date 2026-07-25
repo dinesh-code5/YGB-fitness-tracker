@@ -1,6 +1,12 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
+const dns = require('dns');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
+// Force IPv4 preference to avoid ENETUNREACH on IPv6 in some environments
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const dbUrl = process.env.DATABASE_URL || process.env.DATABASE_POOLER_URL;
 
