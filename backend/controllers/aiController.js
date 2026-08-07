@@ -1,8 +1,5 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 const DietPlan = require('../models/DietPlan');
-
-// Access your API key as an environment variable
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 /**
  * @desc    Generate personalized Indian diet plan using Gemini AI
@@ -12,109 +9,74 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const generateAiDiet = async (req, res) => {
   try {
     const { weight, height, age, gender, activityLevel, goal, dietType, additionalInfo } = req.body;
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ 
-        message: "Gemini API Key is missing. Please add GEMINI_API_KEY to your .env file." 
-      });
-    }
-
-    console.log("Attempting Gemini AI generation with model: gemini-1.5-flash (v1)");
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
+    
+    // Initialize AI model inside the request to ensure API key is loaded
+    const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    });
 
     const prompt = `You are an expert Indian nutritionist. Generate a highly personalized daily diet plan for:
 Weight: ${weight}kg, Height: ${height}cm, Age: ${age}, Gender: ${gender}
 Activity: ${activityLevel}, Goal: ${goal}, Diet: ${dietType}
 Preferences: ${additionalInfo || "None"}
 
-RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
+Return a JSON object with this exact structure:
 {
-  "targetCalories": 2500,
-  "macros": {"protein": 150, "carbs": 280, "fats": 80},
-  "bmr": 1800,
-  "tdee": 2500,
-  "waterIntake": 3.5,
+  "targetCalories": number,
+  "macros": {"protein": number, "carbs": number, "fats": number},
+  "bmr": number,
+  "tdee": number,
+  "waterIntake": number,
   "mealPlan": {
     "breakfast": {
       "label": "Breakfast",
-      "options": ["2 roti + 1 bowl dal + 1 bowl sabzi", "Dosa + sambar + chutney"],
-      "macros": {"cal": 500, "p": 20}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     },
     "lunch": {
       "label": "Lunch",
-      "options": ["2 roti + 150g chicken + dal + sabzi", "Biryani (1 bowl) + raita"],
-      "macros": {"cal": 700, "p": 35}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     },
     "snack": {
       "label": "Evening Snack",
-      "options": ["1 glass milk + 2 biscuits", "Fruit + handful peanuts"],
-      "macros": {"cal": 300, "p": 12}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     },
     "dinner": {
       "label": "Dinner",
-      "options": ["2 roti + paneer curry + salad", "Khichdi + yogurt"],
-      "macros": {"cal": 600, "p": 25}
+      "options": ["option 1", "option 2"],
+      "macros": {"calories": number, "protein": number, "carbs": number, "fats": number}
     }
   },
-  "proteinTips": ["Eat protein at every meal", "Paneer and dal are your friends"]
+  "proteinTips": ["tip 1", "tip 2"]
 }`;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text().trim();
     
-    console.log("Gemini Response:", text.substring(0, 200)); // Log first 200 chars for debugging
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    const text = response.text.trim();
     
-    // Extract JSON - handle various formats
-    let jsonStr = text;
-    
-    // Remove markdown code blocks if present
-    if (text.includes('```json')) {
-      const parts = text.split('```json');
-      if (parts.length > 1) {
-        jsonStr = parts[1].split('```')[0].trim();
-      }
-    } else if (text.includes('```')) {
-      const parts = text.split('```');
-      if (parts.length > 1) {
-        jsonStr = parts[1].split('```')[0].trim();
-      }
-    }
-    
-    // Try to find JSON object
-    const jsonStart = jsonStr.indexOf('{');
-    const jsonEnd = jsonStr.lastIndexOf('}');
-    
-    if (jsonStart === -1 || jsonEnd === -1) {
-      throw new Error("No JSON found in response");
-    }
-    
-    jsonStr = jsonStr.substring(jsonStart, jsonEnd + 1);
+    console.log("Gemini Response Received (JSON Mode Active)"); 
     
     let dietData;
     try {
-      dietData = JSON.parse(jsonStr);
+      dietData = JSON.parse(text);
     } catch (parseErr) {
-      console.error("JSON Parse Error:", parseErr.message);
-      console.error("Attempted to parse:", jsonStr.substring(0, 300));
+      console.error("Failed to parse AI response:", text);
       throw new Error(`Invalid JSON from AI: ${parseErr.message}`);
     }
 
-    // Validate required fields
     if (!dietData.targetCalories || !dietData.macros || !dietData.mealPlan) {
-      throw new Error("AI response missing required fields (targetCalories, macros, mealPlan)");
+      throw new Error("AI response missing required fields");
     }
 
-    // Save to database
     await DietPlan.upsert({
       userId: req.user.id,
-      weight, 
-      height, 
-      age, 
-      gender, 
-      activityLevel, 
-      goal, 
-      dietType,
+      weight, height, age, gender, activityLevel, goal, dietType,
       bmr: dietData.bmr || Math.round(10*weight + 6.25*height - 5*age + (gender === 'male' ? 5 : -161)),
       tdee: dietData.tdee || Math.round((dietData.bmr || 1800) * 1.5),
       targetCalories: dietData.targetCalories,
@@ -138,8 +100,7 @@ RESPOND WITH ONLY VALID JSON (no markdown, no backticks):
     console.error("Gemini AI Diet Error:", error);
     res.status(500).json({ 
       message: "AI Generation failed - " + error.message, 
-      error: error.message,
-      hint: "Ensure GEMINI_API_KEY is valid and you have API quota remaining"
+      error: error.message
     });
   }
 };

@@ -10,7 +10,9 @@ const DietLog = sequelize.define('DietLog', {
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
-    field: 'user_id'
+    field: 'user_id',
+    references: { model: 'users', key: 'id' },
+    onDelete: 'CASCADE'
   },
   name: {
     type: DataTypes.STRING,

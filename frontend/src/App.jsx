@@ -3,13 +3,16 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { initCsrf } from './utils/api';
+// import { initCsrf } from './utils/api';
 import { ARCHETYPES } from './utils/archetypes';
 import { motion, AnimatePresence } from 'framer-motion';
+import ScrollToTop from './components/ScrollToTop';
+import LoadingBar from './components/LoadingBar';
 
 // Layout
 import Navbar from './components/layout/Navbar';
 import MobileSidebar from './components/layout/MobileSidebar';
+import MobileNav from './components/layout/MobileNav';
 import Footer from './components/layout/Footer';
 
 // Pages
@@ -21,13 +24,12 @@ import WorkoutLogger from './pages/WorkoutLogger';
 import WorkoutHistory from './pages/WorkoutHistory';
 import WorkoutDetail from './pages/WorkoutDetail';
 import Progress from './pages/Progress';
-import DietCalculator from './pages/DietCalculator';
+import DietMaster from './pages/DietMaster';
 import WorkoutPlan from './pages/WorkoutPlan';
 import Profile from './pages/Profile';
 import Social from './pages/Social';
 import UserProfile from './pages/UserProfile';
 import ProgressPhotos from './pages/ProgressPhotos';
-import FoodLibrary from './pages/FoodLibrary';
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -65,12 +67,13 @@ const AppShell = ({ children }) => {
       <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
       <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <main className="flex-1 transition-all duration-300 pt-24 pb-10 md:pb-0 overflow-x-hidden flex flex-col">
+      <main className="flex-1 transition-all duration-300 pt-16 lg:pt-20 pb-20 lg:pb-0 overflow-x-hidden flex flex-col">
         <div className="flex-1">
           {children}
         </div>
         <Footer />
       </main>
+      <MobileNav />
     </div>
   );
 };
@@ -151,14 +154,7 @@ const AppRoutes = () => {
         <Route path="/diet" element={
           <ProtectedRoute>
             <AppShell>
-              <PageWrapper><DietCalculator /></PageWrapper>
-            </AppShell>
-          </ProtectedRoute>
-        } />
-        <Route path="/food-library" element={
-          <ProtectedRoute>
-            <AppShell>
-              <PageWrapper><FoodLibrary /></PageWrapper>
+              <PageWrapper><DietMaster /></PageWrapper>
             </AppShell>
           </ProtectedRoute>
         } />
@@ -198,16 +194,15 @@ const AppRoutes = () => {
 };
 
 export default function App() {
-  useEffect(() => {
-    initCsrf();
-  }, []);
-
+  
   return (
     <ThemeProvider>
       <AuthProvider>
         <ThemeSynchronizer />
+        <LoadingBar />
         <div className="bg-glow" />
         <BrowserRouter>
+          <ScrollToTop />
           <AppRoutes />
           <Toaster
             position="top-right"

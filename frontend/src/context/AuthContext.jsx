@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authAPI, initCsrf } from '../utils/api';
+import { authAPI, workoutAPI, dietAPI, plansAPI, templatesAPI, userAPI, getLocalDate } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -7,6 +7,72 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Global Data Cache
+  const [dashboardData, setDashboardData] = useState({
+    stats: null,
+    recentWorkouts: [],
+    historyWorkouts: [],
+    allWorkouts30d: [], // For Heatmap and local filtering
+    todayLogs: [],
+    dietPlan: null,
+    workoutPlan: null,
+    systemTemplates: [],
+    userTemplates: [],
+    weightHistory: [],
+    isRefreshing: false,
+    lastFetched: null
+  });
+
+  const refreshGlobalData = useCallback(async (silent = false) => {
+    const token = localStorage.getItem('ygb_token');
+    if (!token) return;
+
+    if (!silent) {
+      setDashboardData(prev => ({ ...prev, isRefreshing: true }));
+    }
+
+    try {
+      const today = getLocalDate();
+      console.log(`[AUTH CONTEXT] Refreshing global data for date: ${today}`);
+      
+      const [wRes, sRes, dRes, pRes, tRes, userSRes, uWeightRes, dpRes] = await Promise.all([
+        workoutAPI.getAll({ limit: 50 }).catch(e => ({ data: { workouts: [] } })),
+        workoutAPI.getStats(30).catch(e => ({ data: { stats: null } })),
+        dietAPI.getTodaysLog(today).catch(e => {
+          console.error('[AUTH CONTEXT] Diet fetch failed:', e);
+          return { data: { logs: [] } };
+        }),
+        plansAPI.getWorkoutPlan().catch(e => ({ data: { plan: null, templates: [] } })),
+        templatesAPI.getAll().catch(e => ({ data: { userTemplates: [] } })),
+        workoutAPI.getStats(90).catch(e => ({ data: { stats: null } })),
+        userAPI.getWeightHistory().catch(e => ({ data: { weightHistory: [] } })),
+        dietAPI.get().catch(e => ({ data: { dietPlan: null } }))
+      ]);
+
+      const logs = dRes.data.logs || [];
+      console.log(`[AUTH CONTEXT] Fetched ${logs.length} diet logs for ${today}`);
+
+      setDashboardData({
+        recentWorkouts: wRes.data.workouts?.slice(0, 5) || [],
+        historyWorkouts: wRes.data.workouts || [],
+        allWorkouts30d: wRes.data.workouts || [],
+        stats: sRes.data.stats || null,
+        stats90d: userSRes.data.stats || null,
+        todayLogs: logs,
+        dietPlan: dpRes.data.dietPlan || null,
+        workoutPlan: pRes.data.plan || null,
+        systemTemplates: pRes.data.templates || [],
+        userTemplates: tRes.data.userTemplates || [],
+        weightHistory: uWeightRes.data.weightHistory || [],
+        isRefreshing: false,
+        lastFetched: Date.now()
+      });
+    } catch (err) {
+      console.error('Failed to pre-fetch global data:', err);
+      setDashboardData(prev => ({ ...prev, isRefreshing: false }));
+    }
+  }, []);
 
   // Rehydrate from localStorage on mount
   useEffect(() => {
@@ -17,6 +83,8 @@ export const AuthProvider = ({ children }) => {
     if (token && stored) {
       try {
         setUser(JSON.parse(stored));
+        // Pre-fetch data immediately if we have a token
+        refreshGlobalData();
       } catch {
         localStorage.clear();
       }
@@ -29,25 +97,27 @@ export const AuthProvider = ({ children }) => {
     }
 
     setLoading(false);
-  }, []);
+  }, [refreshGlobalData]);
 
   const login = useCallback(async (email, password) => {
-    await initCsrf();
     const { data } = await authAPI.login({ email, password });
     localStorage.setItem('ygb_token', data.token);
     localStorage.setItem('ygb_user', JSON.stringify(data.user));
     setUser(data.user);
+    // Fetch data immediately after login
+    refreshGlobalData();
     return data;
-  }, []);
+  }, [refreshGlobalData]);
 
   const register = useCallback(async (formData) => {
-    await initCsrf();
     const { data } = await authAPI.register(formData);
     localStorage.setItem('ygb_token', data.token);
     localStorage.setItem('ygb_user', JSON.stringify(data.user));
     setUser(data.user);
+    // Fetch data immediately after registration
+    refreshGlobalData();
     return data;
-  }, []);
+  }, [refreshGlobalData]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('ygb_token');
@@ -55,6 +125,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('ygb_active_workout');
     setUser(null);
     setActiveWorkout(null);
+    setDashboardData({
+      stats: null,
+      recentWorkouts: [],
+      todayLogs: [],
+      isRefreshing: false
+    });
+    window.location.href = '/';
   }, []);
 
   const updateUser = useCallback((updates) => {
@@ -77,7 +154,8 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ 
       user, loading, login, register, logout, updateUser, 
-      activeWorkout, updateActiveWorkout 
+      activeWorkout, updateActiveWorkout,
+      dashboardData, refreshGlobalData
     }}>
       {children}
     </AuthContext.Provider>

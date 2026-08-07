@@ -86,6 +86,11 @@ export default function LiquidRestTimer({ duration, isActive, startTime, onCompl
     setTimeLeft(prev => Math.max(0, prev + s));
   };
 
+  const setPreset = (s) => {
+    getAudioContext().resume().catch(() => {});
+    setTimeLeft(s);
+  };
+
   const progress = ((duration - timeLeft) / duration) * 100;
 
   const getColor = () => {
@@ -120,6 +125,8 @@ export default function LiquidRestTimer({ duration, isActive, startTime, onCompl
           </div>
 
           <div className="flex items-center gap-2">
+            <button onClick={() => setPreset(180)} className="hidden sm:block px-3 py-2 text-[10px] font-black uppercase bg-[var(--surface-elevated)] hover:bg-[var(--surface-border)] text-[var(--text-primary)] rounded-xl border border-[var(--surface-border)] transition-all">3m</button>
+            <button onClick={() => setPreset(300)} className="hidden sm:block px-3 py-2 text-[10px] font-black uppercase bg-[var(--surface-elevated)] hover:bg-[var(--surface-border)] text-[var(--text-primary)] rounded-xl border border-[var(--surface-border)] transition-all">5m</button>
             <button onClick={() => adjustTime(-15)} className="px-3 py-2 text-[10px] font-black uppercase bg-[var(--surface-elevated)] hover:bg-[var(--surface-border)] text-[var(--text-primary)] rounded-xl border border-[var(--surface-border)] transition-all">-15s</button>
             <button onClick={() => adjustTime(15)} className="px-3 py-2 text-[10px] font-black uppercase bg-[var(--surface-elevated)] hover:bg-[var(--surface-border)] text-[var(--text-primary)] rounded-xl border border-[var(--surface-border)] transition-all">+15s</button>
             <button onClick={togglePause} className="p-3 bg-[var(--surface-elevated)] rounded-xl hover:bg-[var(--surface-border)]">

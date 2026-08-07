@@ -4,6 +4,25 @@ const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(localStorage.getItem('ygb_theme') || 'dark');
+  const [themeColor, setThemeColorState] = useState(localStorage.getItem('ygb_theme_color') || '#00D4FF');
+
+  const setThemeColor = React.useCallback((color) => {
+    if (!color) return;
+    localStorage.setItem('ygb_theme_color', color);
+    setThemeColorState(color);
+    document.documentElement.style.setProperty('--theme-color', color);
+
+    // Update favicon
+    const brandDark = '#0F0F14';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="20" fill="${color}" />
+      <path d="M30 20 L50 50 L70 20 M50 50 L50 80" stroke="${brandDark}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    </svg>`;
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) {
+      favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('ygb_theme', 'dark');
@@ -11,21 +30,13 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.classList.add('dark');
     document.documentElement.style.colorScheme = 'dark';
     
-    // Set initial theme color if stored
-    const storedColor = localStorage.getItem('ygb_theme_color');
-    if (storedColor) {
-      document.documentElement.style.setProperty('--theme-color', storedColor);
-    }
-  }, []);
-
-  const setThemeColor = (color) => {
-    if (!color) return;
-    localStorage.setItem('ygb_theme_color', color);
-    document.documentElement.style.setProperty('--theme-color', color);
-  };
+    // Set initial theme color
+    const storedColor = localStorage.getItem('ygb_theme_color') || '#00D4FF';
+    setThemeColor(storedColor);
+  }, [setThemeColor]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, setThemeColor }}>
+    <ThemeContext.Provider value={{ theme, setTheme, themeColor, setThemeColor }}>
       {children}
     </ThemeContext.Provider>
   );

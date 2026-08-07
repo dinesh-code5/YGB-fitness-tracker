@@ -141,10 +141,10 @@ export default function DietCalculator() {
     try {
       await dietAPI.logMeal({
         name: optionName,
-        calories: meal.macros?.cal || 0,
-        protein: meal.macros?.protein || 0,
-        carbs: Math.round((meal.macros?.cal * 0.45) / 4) || 0,
-        fats: Math.round((meal.macros?.cal * 0.25) / 9) || 0,
+        calories: meal.macros?.calories || meal.macros?.cal || 0,
+        protein: meal.macros?.protein || meal.macros?.p || 0,
+        carbs: meal.macros?.carbs || Math.round((meal.macros?.cal * 0.45) / 4) || 0,
+        fats: meal.macros?.fats || Math.round((meal.macros?.cal * 0.25) / 9) || 0,
       });
       window.dispatchEvent(new CustomEvent('dietUpdated'));
       toast.success('Meal logged! 🥗');
@@ -182,12 +182,12 @@ export default function DietCalculator() {
           <div className="flex flex-col gap-2">
             <div className="bg-brand/10 border border-brand/20 p-4 rounded-2xl flex items-center gap-6 px-8 backdrop-blur-sm shadow-glow-sm">
               <div className="text-center">
-                <p className="text-l font-black text-brand uppercase tracking-widest">Daily Goal</p>
+                <p className="text-xl font-black  uppercase tracking-widest">Daily Goal</p>
                 <p className="text-3xl font-display text-[var(--text-primary)]">{result.targetCalories} <span className="text-lg font-body text-muted uppercase">kcal</span></p>
               </div>
               <div className="w-px h-10 bg-brand/20" />
               <div className="text-center">
-                <p className="text-l font-black text-brand uppercase tracking-widest">Water</p>
+                <p className="text-xl font-black text-brand uppercase tracking-widest">Water</p>
                 <p className="text-3xl font-display text-[var(--text-primary)]">{result.waterIntake}<span className="text-lg font-body text-muted uppercase ml-1">L</span></p>
               </div>
             </div>
@@ -337,7 +337,7 @@ export default function DietCalculator() {
                           <h4 className="font-bold text-l uppercase tracking-widest">{mealName}</h4>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-l font-black text-muted group-hover:text-brand transition-colors">{meal.macros?.cal} KCAL</span>
+                          <span className="text-l font-black text-muted group-hover:text-brand transition-colors">{meal.macros?.calories || meal.macros?.cal} KCAL</span>
                         </div>
                       </div>
                       <div className="p-4 space-y-3">

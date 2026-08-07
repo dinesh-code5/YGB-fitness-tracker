@@ -61,9 +61,9 @@ const STATS = [
 ];
 
 const TESTIMONIALS = [
-  { name: 'Arjun M.', goal: 'Muscle Gain', text: 'Lost 6kg and gained strength in 3 months. The PPL split is 🔥', avatar: 'A' },
-  { name: 'Priya S.', goal: 'Fat Loss',    text: 'Finally a diet tracker with actual Indian food. Total game changer!', avatar: 'P' },
-  { name: 'Rahul K.', goal: 'Recomp',      text: 'The streak system keeps me consistent. 45 days straight 💪', avatar: 'R' },
+  { name: 'Dinesh Nawani.', goal: 'Muscle Gain', text: 'Lost 6kg and gained strength in 3 months. The PPL split is 🔥', avatar: 'D' },
+  { name: 'Harshit Gupta', goal: 'Fat Loss',    text: 'Finally a diet tracker with actual Indian food. Total game changer!', avatar: 'H' },
+  { name: 'Rahul Chandak', goal: 'Recomp',      text: 'The streak system keeps me consistent. 45 days straight 💪', avatar: 'R' },
 ];
 
 export default function Landing() {
@@ -74,11 +74,16 @@ export default function Landing() {
       <div className="bg-glow-extra" />
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header className="relative flex items-center justify-between px-6 py-4 border-b border-[#222232]/80 backdrop-blur-md bg-[#0A0A0F]/60 sticky top-0 z-50">
+      <header className="relative flex items-center justify-between px-6 py-4 border-b border-[#222232]/80 backdrop-blur-md bg-[#0A0A0F]/60  top-0 z-50">
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand/50 to-transparent" />
-        <Link to="/" className="flex flex-col group">
-          <span className="font-display text-4xl leading-none tracking-widest text-gradient group-hover:brightness-110 transition-all duration-300">YGB</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 leading-none mt-1">Your Gym Buddy</span>
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
+            <GiMuscleUp className="text-brand text-2xl" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-display text-3xl leading-none tracking-widest text-gradient group-hover:brightness-110 transition-all duration-300">YGB</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-gradient opacity-80 leading-none mt-1">Your Gym Buddy</span>
+          </div>
         </Link>
         <div className="flex items-center gap-3">
           <Link to="/login" className="btn-secondary text-lg py-2 px-4">Login</Link>
@@ -231,7 +236,7 @@ export default function Landing() {
               READY TO <span className="text-gradient">GRIND?</span>
             </h2>
             <p className="text-[var(--text-secondary)] mb-8 text-lg max-w-sm mx-auto leading-relaxed">
-              Set up your profile in 2 minutes and get your personalized PPL workout plan instantly.
+              Set up your profile in 2 minutes and get your personalized workout plan instantly.
             </p>
             <Link to="/register" className="btn-primary inline-flex items-center gap-2 text-base py-4 px-10 shimmer">
               Create Free Account <FiArrowRight />

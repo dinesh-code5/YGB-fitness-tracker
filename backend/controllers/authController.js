@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../models');
+const { Op } = require('sequelize');
+const posthog = require('../config/posthog');
 
 // Generate JWT
 const generateToken = (id) => {
@@ -13,11 +15,15 @@ const generateToken = (id) => {
 // @access  Public
 const register = async (req, res) => {
   try {
-    const { 
+    let { 
       name, email, password, age, weight, height, gender, 
       goal, experience, activityLevel, username,
       weightUnit, heightUnit, referralCode, archetype
     } = req.body;
+
+    // Clean inputs
+    if (email) email = email.toLowerCase().trim();
+    if (username) username = username.toLowerCase().trim();
 
     // Check if user exists
     const existingUser = await User.findOne({ where: { email } });
@@ -27,7 +33,7 @@ const register = async (req, res) => {
 
     // Check username uniqueness
     if (username) {
-      const existingUsername = await User.findOne({ where: { username: username.toLowerCase() } });
+      const existingUsername = await User.findOne({ where: { username } });
       if (existingUsername) {
         return res.status(400).json({ message: 'Username already taken' });
       }
@@ -35,14 +41,14 @@ const register = async (req, res) => {
 
     // Promo code / Referral code logic
     const VALID_PROMOS = ['YGBFREE', 'PROMO100', 'FITNESS2024'];
-    const isPremium = referralCode && VALID_PROMOS.includes(referralCode.toUpperCase());
+    const isPremium = referralCode && referralCode.trim() && VALID_PROMOS.includes(referralCode.trim().toUpperCase());
 
     // Create user
     const user = await User.create({
       name, 
       email, 
       password,
-      username: username ? username.toLowerCase() : null,
+      username: username || null,
       age, 
       weight, 
       height, 
@@ -54,12 +60,37 @@ const register = async (req, res) => {
       heightUnit: heightUnit || 'cm',
       weightHistory: weight ? [{ weight, date: new Date().toISOString() }] : [],
       referralCode: referralCode || null,
-      promoCode: isPremium ? referralCode.toUpperCase() : null,
+      promoCode: isPremium ? referralCode.trim().toUpperCase() : null,
       isPremium: !!isPremium,
       archetype: archetype || 'fit'
     });
 
     const token = generateToken(user.id);
+
+    posthog.identify({
+      distinctId: String(user.id),
+      properties: {
+        email: user.email,
+        name: user.name,
+        goal: user.goal,
+        experience: user.experience,
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+      },
+    });
+    posthog.capture({
+      distinctId: String(user.id),
+      event: 'user_registered',
+      properties: {
+        goal: user.goal,
+        experience: user.experience,
+        activityLevel: user.activityLevel,
+        gender: user.gender,
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+        hasReferralCode: !!referralCode,
+      },
+    });
 
     res.status(201).json({
       success: true,
@@ -87,7 +118,7 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    if (error.name === 'SequelizeValidationError') {
+    if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
       const messages = error.errors.map(e => e.message);
       return res.status(400).json({ message: messages.join(', ') });
     }
@@ -110,24 +141,39 @@ const login = async (req, res) => {
     // Find user by email or username
     const user = await User.findOne({ 
       where: {
-        [require('sequelize').Op.or]: [
-          { email: loginId.toLowerCase() },
-          { username: loginId.toLowerCase() }
+        [Op.or]: [
+          { email: loginId.toLowerCase().trim() },
+          { username: loginId.toLowerCase().trim() }
         ]
       },
       attributes: { include: ['password'] }
     });
     
     if (!user) {
+      console.warn(`[AUTH] Login failed: User not found for ${loginId}`);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.warn(`[AUTH] Login failed: Incorrect password for ${user.email}`);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const token = generateToken(user.id);
+
+    // Check and reset streak if needed
+    await user.checkStreak();
+
+    posthog.capture({
+      distinctId: String(user.id),
+      event: 'user_logged_in',
+      properties: {
+        currentStreak: user.currentStreak,
+        isPremium: user.isPremium,
+        archetype: user.archetype,
+      },
+    });
 
     res.json({
       success: true,
@@ -162,7 +208,16 @@ const login = async (req, res) => {
 // @route   GET /api/auth/me
 // @access  Private
 const getMe = async (req, res) => {
-  res.json({ success: true, user: req.user });
+  try {
+    const user = req.user;
+    if (user) {
+      await user.checkStreak();
+    }
+    res.json({ success: true, user: user.toSafeObject ? user.toSafeObject() : user });
+  } catch (error) {
+    console.error('getMe error:', error);
+    res.status(500).json({ message: 'Error fetching user data' });
+  }
 };
 
 module.exports = { register, login, getMe };
